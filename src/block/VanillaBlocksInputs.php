@@ -264,6 +264,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("hardened_glass", fn(BID $id) => new HardenedGlass($id, "Hardened Glass", $hardenedGlassBreakInfo));
 		self::register("hardened_glass_pane", fn(BID $id) => new HardenedGlassPane($id, "Hardened Glass Pane", $hardenedGlassBreakInfo));
 		self::register("hay_bale", fn(BID $id) => new HayBale($id, "Hay Bale", new Info(new BreakInfo(0.5))));
+		self::register("heavy_core", fn(BID $id) => new HeavyCore($id, "Heavy Core", new Info(BreakInfo::pickaxe(10.0, null, 1200.0))));
 		self::register("hopper", fn(BID $id) => new Hopper($id, "Hopper", new Info(BreakInfo::pickaxe(3.0, ToolTier::WOOD, 24.0))), TileHopper::class);
 		self::register("ice", fn(BID $id) => new Ice($id, "Ice", new Info(BreakInfo::pickaxe(0.5))));
 

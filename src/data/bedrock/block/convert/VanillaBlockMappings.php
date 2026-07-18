@@ -360,6 +360,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::HARDENED_CLAY(), Ids::HARDENED_CLAY);
 		$reg->mapSimple(Blocks::HARDENED_GLASS(), Ids::HARD_GLASS);
 		$reg->mapSimple(Blocks::HARDENED_GLASS_PANE(), Ids::HARD_GLASS_PANE);
+		$reg->mapSimple(Blocks::HEAVY_CORE(), Ids::HEAVY_CORE);
 		$reg->mapSimple(Blocks::HONEYCOMB(), Ids::HONEYCOMB_BLOCK);
 		$reg->mapSimple(Blocks::ICE(), Ids::ICE);
 		$reg->mapSimple(Blocks::INFESTED_CHISELED_STONE_BRICK(), Ids::INFESTED_CHISELED_STONE_BRICKS);
