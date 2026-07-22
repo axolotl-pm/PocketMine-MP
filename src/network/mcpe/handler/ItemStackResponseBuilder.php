@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\handler;
 use pocketmine\inventory\Inventory;
 use pocketmine\item\Durable;
 use pocketmine\network\mcpe\InventoryManager;
+use pocketmine\network\mcpe\protocol\types\cereal\RedactableString;
 use pocketmine\network\mcpe\protocol\types\inventory\ContainerUIIds;
 use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
 use pocketmine\network\mcpe\protocol\types\inventory\stackresponse\ItemStackResponse;
@@ -92,8 +93,7 @@ final class ItemStackResponseBuilder{
 					$slotId,
 					$item->getCount(),
 					$itemStackInfo->getStackId(),
-					$item->getCustomName(),
-					$item->getCustomName(),
+					new RedactableString($item->getCustomName(), $item->getCustomName()),
 					$item instanceof Durable ? $item->getDamage() : 0,
 				);
 			}
