@@ -1,45 +1,23 @@
-# End of support announcement
-
-Hello all,
-
-As some of you may know, @driesboy recently decided to leave Minecraft behind as he pursues other interests. While I wish him the best, unfortunately, this now means that no one is left on the team willing to do updates for new Minecraft versions.
-
-We've assembled some [documentation](https://doc.pmmp.io/en/rtfd/developers/internals-docs/updating-minecraft-protocol.html) on the update process to help anyone who wants to make a fork to continue updating PM themselves. However, no further updates will be provided by the PMMP team.
-
-I want to say a huge thank you for the outstanding support of the Lifeboat Network for supporting the development of the project financially these last few years.
-While they could've hired us to go closed-source and kept everything for themselves, they instead agreed to let us share the work we were doing with the public community with no strings attached, and didn't even ask for any recognition in return. Their generosity has allowed many servers to flourish over the last few years.
-
-A huge thank you is also owed to the members of the PMMP team, past and present, including developers, community moderators, and code reviewers. It has taken a huge amount of unpaid voluntary work by many people to keep this project going for so long, work that has often been taken for granted by the community.
-
-I would also like to thank those who have supported me on Patreon, however small the amount. You guys have been truly generous, by paying to support a project that you didn't have to, for almost nothing in return except a fancy Discord role.
-
-Finally, thank you to you, the community, for using PocketMine-MP and making cool things with it, reporting bugs, making pull requests, and trying to make the world a better place.
-
-Peace out,
-Dylan / dktapps / the black cat
-
----
-
 <p align="center">
 	<a href="https://pmmp.io">
 		<!--[if IE]>
-			<img src="https://github.com/pmmp/PocketMine-MP/blob/stable/.github/readme/pocketmine.png" alt="The PocketMine-MP logo" title="PocketMine" loading="eager" />
+			<img src="https://github.com/axolotl-pm/PocketMine-MP/blob/stable/.github/readme/pocketmine.png" alt="The PocketMine-MP logo" title="PocketMine" loading="eager" />
 		<![endif]-->
 		<picture>
-			<source srcset="https://raw.githubusercontent.com/pmmp/PocketMine-MP/stable/.github/readme/pocketmine-dark-rgb.gif" media="(prefers-color-scheme: dark)">
-			<img src="https://raw.githubusercontent.com/pmmp/PocketMine-MP/stable/.github/readme/pocketmine-rgb.gif" loading="eager" />
+			<source srcset="https://raw.githubusercontent.com/axolotl-pm/PocketMine-MP/stable/.github/readme/pocketmine-dark-rgb.gif" media="(prefers-color-scheme: dark)">
+			<img src="https://raw.githubusercontent.com/axolotl-pm/PocketMine-MP/stable/.github/readme/pocketmine-rgb.gif" loading="eager" />
 		</picture>
 	</a><br>
 	<b>A highly customisable, open source server software for Minecraft: Bedrock Edition written in PHP</b>
 </p>
 
 <p align="center">
-	<a href="https://github.com/pmmp/PocketMine-MP/actions/workflows/main.yml"><img src="https://github.com/pmmp/PocketMine-MP/actions/workflows/main.yml/badge.svg" alt="CI" /></a>
-	<a href="https://github.com/pmmp/PocketMine-MP/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/pmmp/PocketMine-MP?label=release&sort=semver"></a>
-	<a href="https://discord.gg/bmSAZBG"><img src="https://img.shields.io/discord/373199722573201408?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+	<a href="https://github.com/axolotl-pm/PocketMine-MP/actions/workflows/main.yml"><img src="https://github.com/axolotl-pm/PocketMine-MP/actions/workflows/main.yml/badge.svg" alt="CI" /></a>
+	<a href="https://github.com/axolotl-pm/PocketMine-MP/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/axolotl-pm/PocketMine-MP?label=release&sort=semver"></a>
+	<a href="https://discord.gg/vrPugybpJF"><img src="https://img.shields.io/discord/1526008653482692768?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
 	<br>
-	<a href="https://github.com/pmmp/PocketMine-MP/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/pmmp/PocketMine-MP/total?label=downloads%40total"></a>
-	<a href="https://github.com/pmmp/PocketMine-MP/releases/latest"><img alt="GitHub release (latest by SemVer)" src="https://img.shields.io/github/downloads/pmmp/PocketMine-MP/latest/total?sort=semver"></a>
+	<a href="https://github.com/axolotl-pm/PocketMine-MP/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/axolotl-pm/PocketMine-MP/total?label=downloads%40total"></a>
+	<a href="https://github.com/axolotl-pm/PocketMine-MP/releases/latest"><img alt="GitHub release (latest by SemVer)" src="https://img.shields.io/github/downloads/axolotl-pm/PocketMine-MP/latest/total?sort=semver"></a>
 </p>
 
 ## What is this?
@@ -68,7 +46,7 @@ If that's not an option for you, you may be able to add some of PocketMine-MP's 
 - [Plugin repository](https://poggit.pmmp.io/plugins)
 
 ## Community & Support
-Join our [Discord](https://discord.gg/bmSAZBG) server to chat with other users and developers.
+Join our [Discord](https://discord.gg/vrPugybpJF) server to chat with other users and developers.
 
 You can also post questions on [StackOverflow](https://stackoverflow.com/tags/pocketmine) under the tag `pocketmine`.
 
@@ -87,18 +65,7 @@ PocketMine-MP accepts community contributions! The following resources will be u
  * [Building and running PocketMine-MP from source](BUILDING.md)
  * [Contributing Guidelines](CONTRIBUTING.md)
 
-New here? Check out [issues with the "Easy task" label](https://github.com/pmmp/PocketMine-MP/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Easy%20task%22) for things you could work to familiarise yourself with the codebase.
-
-## Donate
-PocketMine-MP is free, but it requires a lot of time and effort from unpaid volunteers to develop. Donations enable us to keep delivering support for new versions and adding features your players love.
-
-You can support development using the following methods:
-
-- [Patreon](https://www.patreon.com/pocketminemp)
-- Bitcoin (BTC): `bc1q2v5ngyf8ugyd55kqa9ep35g2rv342ueqm6ks33`
-- Stellar Lumens (XLM): `GAAC5WZ33HCTE3BFJFZJXONMEIBNHFLBXM2HJVAZHXXPYA3HP5XPPS7T`
-
-Thanks for your support!
+New here? Check out [issues with the "Easy task" label](https://github.com/axolotl-pm/PocketMine-MP/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Easy%20task%22) for things you could work to familiarise yourself with the codebase.
 
 ## Licensing information
 This project is licensed under LGPL-3.0. Please see the [LICENSE](/LICENSE) file for details.
