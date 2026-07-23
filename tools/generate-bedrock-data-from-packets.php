@@ -324,9 +324,8 @@ class ParserPacketHandler extends PacketHandler{
 		$data = new RecipeIngredientData();
 
 		if($descriptor instanceof NameItemDescriptor){
-			if($descriptor instanceof NameItemDescriptor){
-				$data->name = $descriptor->getName();
-			}
+			$data->name = $descriptor->getName();
+
 			$meta = $descriptor->getMeta();
 			if($meta !== 32767){
 				$blockStateId = $this->blockTranslator->getBlockStateDictionary()->lookupStateIdFromIdMeta($data->name, $meta);
@@ -384,7 +383,7 @@ class ParserPacketHandler extends PacketHandler{
 				}
 			}
 		}
-		$unlockingIngredients = $entry->getUnlockingRequirement()->getUnlockingIngredients();
+		$unlockingIngredients = $entry->getUnlockingRequirement()?->getUnlockingIngredients();
 		return new ShapedRecipeData(
 			array_map(fn(array $array) => implode('', array_values($array)), array_values($shape)),
 			$outputsByKey,
@@ -396,7 +395,7 @@ class ParserPacketHandler extends PacketHandler{
 	}
 
 	private function shapelessRecipeToJson(ShapelessRecipe $recipe) : ShapelessRecipeData{
-		$unlockingIngredients = $recipe->getUnlockingRequirement()->getUnlockingIngredients();
+		$unlockingIngredients = $recipe->getUnlockingRequirement()?->getUnlockingIngredients();
 		return new ShapelessRecipeData(
 			array_map(fn(RecipeIngredient $input) => $this->recipeIngredientToJson($input), $recipe->getInputs()),
 			array_map(fn(ItemStack $output) => $this->itemStackToJson($output), $recipe->getOutputs()),
