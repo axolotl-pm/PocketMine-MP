@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1b0130c1ab69ef31b3be06b1433f21c2",
+    "content-hash": "7ebca7053c7c5d8170c018f7f035a552",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -119,16 +119,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-item-upgrade-schema",
-            "version": "dev-feature/1.26.30",
+            "version": "dev-feature/1.26.40",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema.git",
-                "reference": "60e702f6ab0381a80d1e628cc15a05e69d62e36d"
+                "reference": "c0a66e9458cc3de6d9505effc647deb252a6a691"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockItemUpgradeSchema/zipball/60e702f6ab0381a80d1e628cc15a05e69d62e36d",
-                "reference": "60e702f6ab0381a80d1e628cc15a05e69d62e36d",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockItemUpgradeSchema/zipball/c0a66e9458cc3de6d9505effc647deb252a6a691",
+                "reference": "c0a66e9458cc3de6d9505effc647deb252a6a691",
                 "shasum": ""
             },
             "type": "library",
@@ -139,9 +139,9 @@
             "description": "JSON schemas for upgrading items found in older Minecraft: Bedrock world saves",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/issues",
-                "source": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/tree/feature/1.26.30"
+                "source": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/tree/feature/1.26.40"
             },
-            "time": "2026-07-20T14:07:43+00:00"
+            "time": "2026-07-26T23:29:43+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-protocol",
