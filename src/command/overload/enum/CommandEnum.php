@@ -32,8 +32,7 @@ use function mb_strtolower;
 /**
  * A named set of string keys, each of which maps to a value of some type.
  *
- * The keys are advertised to the client, which uses them for completion and to reject invalid input
- * before anything is sent to the server.
+ * The keys are sent to the client, which uses them for client-side completion.
  *
  * Instances are shared. An enum used by several commands is only transmitted once, so names must be
  * unique across the server; this is checked when a command is registered.
@@ -67,11 +66,7 @@ abstract class CommandEnum{
 	abstract public function getKeys() : array;
 
 	/**
-	 * Extra keys which are sent to the client but flagged so that it doesn't offer them for completion.
-	 *
-	 * Use this for spellings that are redundant with one already in {@link CommandEnum::getKeys()}, such
-	 * as the numeric form of an otherwise named value. The client still accepts them, so typing one isn't
-	 * rejected, but the completion list only shows one name per thing.
+	 * Extra keys which are sent to the client but flagged so that it doesn't offer them for client-side completion.
 	 *
 	 * @return string[]
 	 * @phpstan-return list<string>
@@ -82,9 +77,6 @@ abstract class CommandEnum{
 
 	/**
 	 * Resolves a lowercase key to its value, or null if the key isn't accepted.
-	 *
-	 * This may accept keys which {@link CommandEnum::getKeys()} doesn't advertise. That's used for
-	 * input which is valid but not worth offering completion for, such as legacy numeric item IDs.
 	 *
 	 * @phpstan-return TValue|null
 	 */
@@ -112,7 +104,7 @@ abstract class CommandEnum{
 	 * Creates an enum from an explicit key to value map. Keys are matched case-insensitively.
 	 *
 	 * Aliases are expressed by mapping several keys to the same value. Keys listed in $aliasKeys are
-	 * still accepted, but the client won't offer them for completion. Use this for the numeric forms of
+	 * still accepted, but the client won't offer them for client-side completion. Use this for the numeric forms of
 	 * an otherwise named value, and other redundant spellings.
 	 *
 	 * @param mixed[]  $entries
@@ -154,7 +146,7 @@ abstract class CommandEnum{
 	}
 
 	/**
-	 * Creates an enum backed by a {@link StringToTParser}. The advertised keys and the lookup both
+	 * Creates an enum backed by a {@link StringToTParser}. The keys and the lookup both
 	 * read the parser's alias map, so they can't disagree with each other.
 	 *
 	 * The parser is resolved lazily, so this may be called before the parser's registry is ready.

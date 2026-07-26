@@ -31,8 +31,7 @@ use function mb_strtolower;
 /**
  * Accepts one of a fixed set of strings and converts it to some type of value.
  *
- * Unlike {@link MappedParameter}, the accepted strings are sent to the client, which uses them for
- * completion and to reject invalid input before the command reaches the server.
+ * Unlike {@link MappedParameter}, the accepted strings are sent to the client, which uses them for client-side completion.
  *
  * @phpstan-template TValue
  * @phpstan-extends Parameter<TValue>
