@@ -115,6 +115,7 @@ final class TeleportCommand{
 	) : void{
 		if(!$sender instanceof Player){
 			$sender->sendMessage(KnownTranslationFactory::pocketmine_command_error_playerUserOnly()->prefix(TextFormat::RED));
+			return;
 		}
 
 		self::tpCoords($sender, $sender, $coordinates, $yaw, $pitch);
