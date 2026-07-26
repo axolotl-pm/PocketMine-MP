@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe;
 use pmmp\encoding\ByteBufferReader;
 use pmmp\encoding\ByteBufferWriter;
 use pmmp\encoding\DataDecodeException;
+use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\overload\FloatRangeParameter;
 use pocketmine\command\overload\IntRangeParameter;
 use pocketmine\command\overload\RawParameter;
@@ -100,6 +101,7 @@ use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameterTypes;
 use pocketmine\network\mcpe\protocol\types\command\CommandPermissions;
+use pocketmine\network\mcpe\protocol\types\command\ConstrainedEnumValue;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
@@ -1182,6 +1184,7 @@ class NetworkSession{
 		$language = $this->player->getLanguage();
 
 		$literals = [];
+		$enums = [];
 		foreach($this->server->getCommandMap()->getUniqueCommands() as $command){
 			$overloads = $command->getPermittedOverloads($this->player);
 			if(count($overloads) === 0){
@@ -1214,6 +1217,30 @@ class NetworkSession{
 							optional: $k >= $required
 						);
 					}else{
+						$name = $parameter->getPrintableName();
+						$translated = $name instanceof Translatable ? $language->translate($name) : $name;
+
+						if($parameter instanceof EnumParameter){
+							$enum = $parameter->getEnum();
+							$enumName = $enum->getName();
+							$aliasKeys = $enum->getAliasKeys();
+							$networkEnum = $enums[$enumName] ??= new CommandHardEnum($enumName, [
+								...$enum->getKeys(),
+								//the client accepts these but keeps them out of its completion list
+								...array_map(
+									fn(string $alias) => new ConstrainedEnumValue($alias, [ConstrainedEnumValue::REQUIRES_ALLOW_ALIASES]),
+									$aliasKeys
+								)
+							]);
+							$parameters[] = CommandParameter::enum(
+								$translated,
+								$networkEnum,
+								flags: count($aliasKeys) > 0 ? CommandParameter::FLAG_HAS_ENUM_CONSTRAINT : 0,
+								optional: $k >= $required
+							);
+							continue;
+						}
+
 						$simpleArgType = match(true){
 							$parameter instanceof FloatRangeParameter => CommandParameterTypes::VAL,
 							$parameter instanceof IntRangeParameter => CommandParameterTypes::INT,
@@ -1223,8 +1250,6 @@ class NetworkSession{
 							default => CommandParameterTypes::ID //string
 						};
 						$suffix = $parameter->getSuffix();
-						$name = $parameter->getPrintableName();
-						$translated = $name instanceof Translatable ? $language->translate($name) : $name;
 						if($suffix !== ""){
 							//umm... client only allows suffixes on integer params???
 							//TODO: as of 1.21.111, the client crashes if we try to provide actual suffixes for /xp.

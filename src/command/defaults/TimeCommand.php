@@ -26,10 +26,10 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\overload\IntRangeParameter;
-use pocketmine\command\overload\MappedParameter;
+use pocketmine\command\overload\enum\CommandEnum;
+use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\overload\Overload;
 use pocketmine\command\overload\OverloadBuilder;
-use pocketmine\command\overload\ParameterParseException;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\player\Player;
@@ -55,16 +55,14 @@ final class TimeCommand{
 				], DefaultPermissionNames::COMMAND_TIME_ADD, self::addTime(...))
 				->branch(["set"], fn(OverloadBuilder $builder) => $builder
 					->executor([
-						new MappedParameter("time", "time name", static fn(string $v) : int => match ($v) {
+						new EnumParameter("time", "time name", CommandEnum::mapped("TimeName", [
 							"day" => World::TIME_DAY,
 							"noon" => World::TIME_NOON,
 							"sunset" => World::TIME_SUNSET,
 							"night" => World::TIME_NIGHT,
 							"midnight" => World::TIME_MIDNIGHT,
-							"sunrise" => World::TIME_SUNRISE,
-							//numeric times are handled in a separate overload, for clarity's sake
-							default => throw new ParameterParseException("Invalid time name: $v")
-						})
+							"sunrise" => World::TIME_SUNRISE
+						], "int"))
 					], DefaultPermissionNames::COMMAND_TIME_SET, self::setTime(...))
 					->executor([
 						new IntRangeParameter("time", "timestamp", 0, Limits::INT32_MAX)

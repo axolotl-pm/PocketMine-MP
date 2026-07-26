@@ -25,9 +25,8 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\overload\MappedParameter;
+use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\overload\OverloadBuilder;
-use pocketmine\command\overload\ParameterParseException;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\player\GameMode;
@@ -44,11 +43,7 @@ final class DefaultGamemodeCommand{
 			$namespace,
 			$name,
 			OverloadBuilder::single([
-				new MappedParameter(
-					"gameMode",
-					"game mode",
-					static fn(string $v) : GameMode => GameMode::fromString($v) ?? throw new ParameterParseException("Illegal gamemode value")
-				)
+				new EnumParameter("gameMode", "game mode", DefaultCommandEnums::gameMode())
 			], DefaultPermissionNames::COMMAND_DEFAULTGAMEMODE, self::execute(...)),
 			KnownTranslationFactory::pocketmine_command_defaultgamemode_description(),
 		);

@@ -65,6 +65,8 @@ use pocketmine\command\defaults\TransferServerCommand;
 use pocketmine\command\defaults\VersionCommand;
 use pocketmine\command\defaults\WhitelistCommand;
 use pocketmine\command\defaults\XpCommand;
+use pocketmine\command\overload\EnumParameter;
+use pocketmine\command\overload\enum\CommandEnum;
 use pocketmine\command\utils\CommandStringHelper;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissionNames;
@@ -81,6 +83,7 @@ use function implode;
 use function is_array;
 use function is_string;
 use function ltrim;
+use function spl_object_id;
 use function str_contains;
 use function strcasecmp;
 use function strtolower;
@@ -93,6 +96,16 @@ class SimpleCommandMap implements CommandMap{
 	 * @phpstan-var array<string, Command>
 	 */
 	private array $uniqueCommands = [];
+
+	/**
+	 * Command enums in use by registered commands, by name, along with the number of registered
+	 * commands using each one. Names have to be unique because the client identifies an enum by its
+	 * name, and nothing further down the stack checks this for us.
+	 *
+	 * @var array[]
+	 * @phpstan-var array<string, array{CommandEnum<mixed>, int}>
+	 */
+	private array $enums = [];
 
 	private CommandAliasMap $aliasMap;
 
@@ -157,6 +170,23 @@ class SimpleCommandMap implements CommandMap{
 			throw new \InvalidArgumentException("A command with ID $commandId has already been registered");
 		}
 
+		//validate every enum before touching any state, so a rejected command doesn't leave anything behind
+		$enums = self::collectEnums($command);
+		foreach($enums as $enum){
+			$enumName = $enum->getName();
+			if(isset($this->enums[$enumName]) && $this->enums[$enumName][0] !== $enum){
+				throw new \InvalidArgumentException("A different command enum named $enumName has already been registered");
+			}
+		}
+		foreach($enums as $enum){
+			$enumName = $enum->getName();
+			if(isset($this->enums[$enumName])){
+				$this->enums[$enumName][1]++;
+			}else{
+				$this->enums[$enumName] = [$enum, 1];
+			}
+		}
+
 		$preferredAlias = trim($command->getName());
 		$this->aliasMap->bindAlias($commandId, $preferredAlias, override: false);
 		foreach($otherAliases as $alias){
@@ -167,10 +197,40 @@ class SimpleCommandMap implements CommandMap{
 	}
 
 	public function unregister(Command $command) : bool{
+		if(($this->uniqueCommands[$command->getId()] ?? null) === $command){
+			foreach(self::collectEnums($command) as $enum){
+				$enumName = $enum->getName();
+				if(isset($this->enums[$enumName]) && --$this->enums[$enumName][1] <= 0){
+					unset($this->enums[$enumName]);
+				}
+			}
+		}
+
 		unset($this->uniqueCommands[$command->getId()]);
 		$this->aliasMap->unbindAliasesForCommand($command->getId());
 
 		return true;
+	}
+
+	/**
+	 * Returns the distinct enums used by any of the command's parameters, keyed by object ID so that
+	 * an enum reused across several overloads is only counted once.
+	 *
+	 * @return CommandEnum[]
+	 * @phpstan-return array<int, CommandEnum<mixed>>
+	 */
+	private static function collectEnums(Command $command) : array{
+		$enums = [];
+		foreach($command->collectOverloads() as $overload){
+			foreach($overload->getParameters() as $parameter){
+				if($parameter instanceof EnumParameter){
+					$enum = $parameter->getEnum();
+					$enums[spl_object_id($enum)] = $enum;
+				}
+			}
+		}
+
+		return $enums;
 	}
 
 	public function dispatch(CommandSender $sender, string $commandLine) : bool{

@@ -26,14 +26,12 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\overload\BoolParameter;
+use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\overload\IntRangeParameter;
-use pocketmine\command\overload\MappedParameter;
 use pocketmine\command\overload\OverloadBuilder;
-use pocketmine\command\overload\ParameterParseException;
 use pocketmine\command\overload\StringParameter;
 use pocketmine\entity\effect\Effect;
 use pocketmine\entity\effect\EffectInstance;
-use pocketmine\entity\effect\StringToEffectParser;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\utils\Limits;
@@ -65,10 +63,7 @@ final class EffectCommand{
 					self::OVERLOAD_PERMS, self::removeEffect(...),
 				)
 				->branch([
-					new MappedParameter("effect", "effect name", static fn(string $v) : Effect =>
-						StringToEffectParser::getInstance()->parse($v) ??
-						throw new ParameterParseException("Invalid effect name")
-					)
+					new EnumParameter("effect", "effect name", DefaultCommandEnums::effect())
 				], function(OverloadBuilder $builder) : void{
 					$amplifierParameter = new IntRangeParameter("amplifier", "amplifier", 0, 255);
 					$bubblesParameter = new BoolParameter("bubbles", "bubbles");

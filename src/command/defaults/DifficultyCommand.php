@@ -25,9 +25,8 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\overload\MappedParameter;
+use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\overload\OverloadBuilder;
-use pocketmine\command\overload\ParameterParseException;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\ServerProperties;
@@ -44,17 +43,7 @@ final class DifficultyCommand{
 			$namespace,
 			$name,
 			OverloadBuilder::single(
-				[new MappedParameter(
-					"difficulty",
-					"difficulty",
-					static function(string $v) : int{
-						$difficulty = World::getDifficultyFromString($v);
-						if($difficulty === -1){
-							throw new ParameterParseException("Invalid difficulty value");
-						}
-						return $difficulty;
-					}
-				)],
+				[new EnumParameter("difficulty", "difficulty", DefaultCommandEnums::difficulty())],
 				DefaultPermissionNames::COMMAND_DIFFICULTY,
 				self::execute(...)
 			),

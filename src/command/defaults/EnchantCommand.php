@@ -25,15 +25,13 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\overload\IntRangeParameter;
-use pocketmine\command\overload\MappedParameter;
 use pocketmine\command\overload\OverloadBuilder;
-use pocketmine\command\overload\ParameterParseException;
 use pocketmine\command\overload\StringParameter;
 use pocketmine\item\enchantment\EnchantingHelper;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\enchantment\StringToEnchantmentParser;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\utils\TextFormat;
@@ -54,9 +52,7 @@ final class EnchantCommand{
 			$name,
 			OverloadBuilder::single([
 				new StringParameter("target", "target"),
-				new MappedParameter("enchantment", "enchantment", static fn(string $v) : Enchantment => StringToEnchantmentParser::getInstance()->parse($v) ??
-					throw new ParameterParseException("Invalid enchantment name")
-				),
+				new EnumParameter("enchantment", "enchantment", DefaultCommandEnums::enchantment()),
 				//sad, this one depends on previous parameters :(
 				new IntRangeParameter("level", "level", 1, 10)
 			], self::OVERLOAD_PERMS, self::enchant(...)),

@@ -99,12 +99,22 @@ class Command{
 	}
 
 	/**
+	 * Returns every executor overload of this command, regardless of who is allowed to use them.
+	 *
+	 * @return ExecutorOverload[]
+	 * @phpstan-return list<ExecutorOverload>
+	 */
+	public function collectOverloads() : array{
+		return $this->overload->collectExecutors();
+	}
+
+	/**
 	 * @return ExecutorOverload[]
 	 * @phpstan-return list<ExecutorOverload>
 	 */
 	public function getPermittedOverloads(CommandSender $sender) : array{
 		$overloads = [];
-		foreach($this->overload->collectExecutors() as $overload){
+		foreach($this->collectOverloads() as $overload){
 			if($overload->senderHasAnyPermissions($sender)){
 				$overloads[] = $overload;
 			}
