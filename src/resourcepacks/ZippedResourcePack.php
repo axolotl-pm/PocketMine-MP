@@ -26,6 +26,8 @@ namespace pocketmine\resourcepacks;
 use Ahc\Json\Comment as CommentedJsonDecoder;
 use pocketmine\resourcepacks\json\Manifest;
 use pocketmine\utils\Utils;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use function assert;
 use function fclose;
 use function feof;
@@ -47,6 +49,8 @@ class ZippedResourcePack implements ResourcePack{
 
 	/** @var resource */
 	protected $fileResource;
+
+	private UuidInterface $uuid;
 
 	/**
 	 * @param string $zipPath Path to the resource pack zip
@@ -116,6 +120,10 @@ class ZippedResourcePack implements ResourcePack{
 		}catch(\JsonMapper_Exception $e){
 			throw new ResourcePackException("Invalid manifest.json contents: " . $e->getMessage(), 0, $e);
 		}
+		if(!Uuid::isValid($manifest->header->uuid)){
+			throw new ResourcePackException("Resource pack has an invalid UUID");
+		}
+		$this->uuid = Uuid::fromString($manifest->header->uuid);
 
 		$this->manifest = $manifest;
 
@@ -138,8 +146,8 @@ class ZippedResourcePack implements ResourcePack{
 		return implode(".", $this->manifest->header->version);
 	}
 
-	public function getPackId() : string{
-		return $this->manifest->header->uuid;
+	public function getPackId() : UuidInterface{
+		return $this->uuid;
 	}
 
 	public function getPackSize() : int{

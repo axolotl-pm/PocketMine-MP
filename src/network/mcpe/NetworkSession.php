@@ -58,6 +58,8 @@ use pocketmine\network\mcpe\handler\HandshakePacketHandler;
 use pocketmine\network\mcpe\handler\InGamePacketHandler;
 use pocketmine\network\mcpe\handler\LoginPacketHandler;
 use pocketmine\network\mcpe\handler\PacketHandler;
+use pocketmine\network\mcpe\handler\PacketHandlerAction;
+use pocketmine\network\mcpe\handler\PacketHandlerInspector;
 use pocketmine\network\mcpe\handler\PreSpawnPacketHandler;
 use pocketmine\network\mcpe\handler\ResourcePacksPacketHandler;
 use pocketmine\network\mcpe\handler\SessionStartPacketHandler;
@@ -126,6 +128,7 @@ use pocketmine\world\World;
 use pocketmine\YmlServerProperties;
 use function array_filter;
 use function array_map;
+use function array_slice;
 use function array_values;
 use function base64_encode;
 use function bin2hex;
@@ -163,6 +166,11 @@ class NetworkSession{
 	private ?int $ping = null;
 
 	private ?PacketHandler $handler = null;
+	/**
+	 * @var PacketHandlerAction[]|null
+	 * @phpstan-var array<class-string<Packet>, PacketHandlerAction>|null
+	 */
+	private ?array $handlerActions = null;
 
 	private bool $connected = true;
 	private bool $disconnectGuard = false;
@@ -358,7 +366,10 @@ class NetworkSession{
 		if($this->connected){ //TODO: this is fine since we can't handle anything from a disconnected session, but it might produce surprises in some cases
 			$this->handler = $handler;
 			if($this->handler !== null){
+				$this->handlerActions = PacketHandlerInspector::getHandlerActions($this->handler);
 				$this->handler->setUp();
+			}else{
+				$this->handlerActions = null;
 			}
 		}
 	}
@@ -451,7 +462,7 @@ class NetworkSession{
 					try{
 						$this->handleDataPacket($packet, $buffer);
 					}catch(PacketHandlingException $e){
-						$this->logger->debug($packet->getName() . ": " . base64_encode($buffer));
+						$this->unhandledPacketDebug($packet, $buffer, "Packet processing error");
 						throw PacketHandlingException::wrap($e, "Error processing " . $packet->getName());
 					}catch(FilterNoisyPacketException){
 						$this->noisyPacketBuffer = $buffer;
@@ -471,6 +482,14 @@ class NetworkSession{
 		}
 	}
 
+	private function unhandledPacketDebug(Packet $packet, string $buffer, string $label) : void{
+		$debugSegment = substr($buffer, 0, 1024);
+		$debugSegmentLength = strlen($debugSegment);
+		$fullLength = strlen($buffer);
+		$truncatedLabel = $debugSegmentLength === $fullLength ? "" : " ... (" . ($fullLength - $debugSegmentLength) . " bytes not shown)";
+		$this->logger->debug($label . ": " . $packet->getName() . " ($fullLength bytes): " . base64_encode($debugSegment) . $truncatedLabel);
+	}
+
 	/**
 	 * @throws PacketHandlingException
 	 * @throws FilterNoisyPacketException
@@ -484,12 +503,33 @@ class NetworkSession{
 		$timings->startTiming();
 
 		try{
+			$handlerAction = PacketHandlerAction::DISCARD_WITH_DEBUG;
+			//TODO: it would be better to use packet ID and avoid the object allocation, but it's unavoidable for now
+			//because I don't want to copy paste packet header decoding
+			if($this->handlerActions !== null && isset($this->handlerActions[$packet::class])){
+				$handlerAction = $this->handlerActions[$packet::class];
+			}
 			if(DataPacketDecodeEvent::hasHandlers()){
 				$ev = new DataPacketDecodeEvent($this, $packet->pid(), $buffer);
-				$ev->call();
-				if($ev->isCancelled()){
-					return;
+				$cancel = $handlerAction !== PacketHandlerAction::HANDLED;
+				if($cancel){
+					$ev->cancel();
 				}
+				$ev->call();
+				if($cancel && !$ev->isCancelled()){
+					//uncancelled by a plugin, let it through to DataPacketReceiveEvent
+					$handlerAction = PacketHandlerAction::HANDLED;
+				}elseif(!$cancel && $ev->isCancelled()){
+					//explicitly cancelled by plugin, drop it quietly
+					$handlerAction = PacketHandlerAction::DISCARD_SILENT;
+				}
+			}
+
+			if($handlerAction !== PacketHandlerAction::HANDLED){
+				if($handlerAction === PacketHandlerAction::DISCARD_WITH_DEBUG){
+					$this->unhandledPacketDebug($packet, $buffer, "Discarded without decoding");
+				}
+				return;
 			}
 
 			$decodeTimings = Timings::getDecodeDataPacketTimings($packet);
@@ -520,7 +560,7 @@ class NetworkSession{
 			$handlerTimings->startTiming();
 			try{
 				if($this->handler === null || !$packet->handle($this->handler)){
-					$this->logger->debug("Unhandled " . $packet->getName() . ": " . base64_encode($stream->getData()));
+					$this->unhandledPacketDebug($packet, $buffer, "Handler rejected");
 				}
 			}finally{
 				$handlerTimings->stopTiming();
@@ -976,7 +1016,7 @@ class NetworkSession{
 		foreach($resourcePacks as $resourcePack){
 			$key = $packManager->getPackEncryptionKey($resourcePack->getPackId());
 			if($key !== null){
-				$keys[$resourcePack->getPackId()] = $key;
+				$keys[$resourcePack->getPackId()->toString()] = $key;
 			}
 		}
 		$event = new PlayerResourcePackOfferEvent($this->info, $resourcePacks, $keys, $packManager->resourcePacksRequired());
@@ -1226,7 +1266,9 @@ class NetworkSession{
 		//we can't send nested translations to the client, so make sure they are always pre-translated by the server
 		$language = $this->player->getLanguage();
 		$parameters = array_map(fn(string|Translatable $p) => $p instanceof Translatable ? $language->translate($p) : $p, $message->getParameters());
-		return [$language->translateString($message->getText(), $parameters, "pocketmine."), $parameters];
+		$untranslatedParameterCount = 0;
+		$translated = $language->translateString($message->getText(), $parameters, "pocketmine.", $untranslatedParameterCount);
+		return [$translated, array_slice($parameters, 0, $untranslatedParameterCount)];
 	}
 
 	public function onChatMessage(Translatable|string $message) : void{

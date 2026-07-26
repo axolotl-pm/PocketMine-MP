@@ -26,9 +26,13 @@ namespace pocketmine\block\utils;
 use pocketmine\math\Facing;
 
 enum ChestPairHalf{
-	/** This is the left half of the chest */
+	/**
+	 * This is the left half of the chest
+	 */
 	case LEFT;
-	/** This is the right half of the chest */
+	/**
+	 * This is the right half of the chest
+	 */
 	case RIGHT;
 
 	public function getOtherHalfSide(HorizontalFacingOption $hzFacing) : Facing{

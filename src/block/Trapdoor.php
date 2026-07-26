@@ -65,7 +65,8 @@ class Trapdoor extends Transparent implements HorizontalFacing{
 	}
 
 	protected function recalculateCollisionBoxes() : array{
-		return [AxisAlignedBB::one()->trimmedCopy($this->open ? $this->facing->toFacing() : ($this->top ? Facing::DOWN : Facing::UP), 13 / 16)];
+		//TODO: like doors, these are slightly too thin in Bugrock (0.1825 instead of 0.1875)
+		return [AxisAlignedBB::one()->trimmedCopy($this->open ? $this->facing->toFacing() : ($this->top ? Facing::DOWN : Facing::UP), 1 - 0.1825)];
 	}
 
 	public function getSupportType(Facing $facing) : SupportType{

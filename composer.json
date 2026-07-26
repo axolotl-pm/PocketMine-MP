@@ -1,5 +1,5 @@
 {
-   "name": "pocketmine/pocketmine-mp",
+   "name": "axolotl-pm/pocketmine-mp",
    "description": "A server software for Minecraft: Bedrock Edition written in PHP",
    "type": "project",
    "homepage": "https://pmmp.io",
@@ -33,11 +33,11 @@
       "ext-zlib": ">=1.2.11",
       "composer-runtime-api": "^2.0",
       "adhocore/json-comment": "~1.2.0",
-      "netresearch/jsonmapper": "~v5.0.0",
+      "netresearch/jsonmapper": "~v6.0.0",
       "pocketmine/bedrock-block-upgrade-schema": "~5.2.0+bedrock-1.21.110",
-      "pocketmine/bedrock-data": "~6.3.0+bedrock-1.21.130",
-      "pocketmine/bedrock-item-upgrade-schema": "~1.16.0+bedrock-1.21.110",
-      "pocketmine/bedrock-protocol": "~54.0.0+bedrock-1.21.130",
+      "pocketmine/bedrock-data": "~6.7.0+bedrock-1.26.30",
+      "pocketmine/bedrock-item-upgrade-schema": "~1.17.0+bedrock-1.26.20",
+      "axolotl-pm/bedrock-protocol": "~58.0.0+bedrock-1.26.30",
       "pocketmine/binaryutils": "^0.2.1",
       "pocketmine/callback-validator": "dev-rewrite",
       "pocketmine/color": "^0.3.0",
@@ -49,10 +49,10 @@
       "pocketmine/raklib-ipc": "~1.0.0",
       "pocketmine/snooze": "^0.5.0",
       "ramsey/uuid": "~4.9.0",
-      "symfony/filesystem": "~7.3.0"
+      "symfony/filesystem": "~7.4.0"
    },
    "require-dev": {
-      "phpstan/phpstan": "2.1.32",
+      "phpstan/phpstan": "2.1.46",
       "phpstan/phpstan-phpunit": "^2.0.0",
       "phpstan/phpstan-strict-rules": "^2.0.0",
       "phpunit/phpunit": "^12.2.1"
@@ -63,7 +63,10 @@
    },
    "autoload": {
       "psr-4": {
-         "pocketmine\\": "src/"
+         "pocketmine\\": [
+            "src/",
+            "generated/"
+         ]
       },
       "files": [
          "src/CoreConstants.php"
@@ -87,13 +90,13 @@
          "@php -dphar.readonly=0 build/server-phar.php"
       ],
       "update-codegen": [
-         "@php build/generate-bedrockdata-path-consts.php",
-         "@php build/generate-biome-ids.php",
-         "@php build/generate-block-serializer-consts.php vendor/pocketmine/bedrock-data/canonical_block_states.nbt",
-         "@php build/generate-item-type-names.php vendor/pocketmine/bedrock-data/required_item_list.json",
-         "@php build/generate-known-translation-apis.php",
-         "@php build/generate-pocketmine-yml-property-consts.php",
-         "@php build/generate-registry-annotations.php src"
+         "@php build/codegen/bedrockdata-path-consts.php",
+         "@php build/codegen/biome-ids.php",
+         "@php build/codegen/block-serializer-consts.php vendor/pocketmine/bedrock-data/canonical_block_states.nbt",
+         "@php build/codegen/item-type-names.php vendor/pocketmine/bedrock-data/required_item_list.json",
+         "@php build/codegen/known-translation-apis.php",
+         "@php build/codegen/pocketmine-yml-property-consts.php",
+         "@php build/codegen/registry-interface.php src generated"
       ]
    }
 }
