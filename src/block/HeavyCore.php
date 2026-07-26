@@ -32,8 +32,8 @@ final class HeavyCore extends Transparent{
 
 	protected function recalculateCollisionBoxes() : array{
 		return [AxisAlignedBB::one()
-			->contractedCopy(0.25, 0, 0.25)
-			->trimmedCopy(Facing::UP, 0.5)
+			->contract(0.25, 0, 0.25)
+			->trim(Facing::UP, 0.5)
 		];
 	}
 
