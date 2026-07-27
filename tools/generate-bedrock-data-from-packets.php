@@ -471,16 +471,16 @@ class ParserPacketHandler extends PacketHandler{
 			}
 		}
 
+		if($this->itemTypeDictionary === null){
+			throw new AssumptionFailedError("We should have already crashed if this was null");
+		}
+
 		foreach($packet->potionTypeRecipes as $recipe){
 			$recipes["potion_type"][] = new PotionTypeRecipeData(
 				$this->recipeIngredientToJson(new RecipeIngredient(new NameItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getInputItemId()), $recipe->getInputItemMeta()), 1)),
 				$this->recipeIngredientToJson(new RecipeIngredient(new NameItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getIngredientItemId()), $recipe->getIngredientItemMeta()), 1)),
 				$this->itemStackToJson(new ItemStack($recipe->getOutputItemId(), $recipe->getOutputItemMeta(), 1, 0, "")),
 			);
-		}
-
-		if($this->itemTypeDictionary === null){
-			throw new AssumptionFailedError("We should have already crashed if this was null");
 		}
 		foreach($packet->potionContainerRecipes as $recipe){
 			$recipes["potion_container_change"][] = new PotionContainerChangeRecipeData(
