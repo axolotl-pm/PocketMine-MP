@@ -1524,8 +1524,8 @@ final class VanillaBlockMappings{
 					PotentSulfurState::ERUPTING => StringValues::POTENT_SULFUR_STATE_ERUPTING,
 					PotentSulfurState::CONTINUOUS => StringValues::POTENT_SULFUR_STATE_CONTINUOUS,
 				}),
-				fn(PotentSulfur $b) => $b->getState(),
-				fn(PotentSulfur $b, PotentSulfurState $v) => $b->setState($v)
+				fn(PotentSulfur $b) => $b->getPotentSulfurState(),
+				fn(PotentSulfur $b, PotentSulfurState $v) => $b->setPotentSulfurState($v)
 			)
 		]));
 		$reg->mapModel(Model::create(Blocks::SUGARCANE(), Ids::REEDS)->properties([

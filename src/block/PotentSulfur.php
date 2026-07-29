@@ -43,12 +43,12 @@ use function mt_rand;
 
 class PotentSulfur extends Opaque{
 
-	/** How far above the block water may reach before the gas can no longer escape */
+	/** Max depths of water above the block */
 	private const MAX_WATER_DEPTH = 4;
 
 	private const GAS_EFFECT_INTERVAL_TICKS = 10;
 	private const GAS_EFFECT_DURATION_TICKS = 80;
-	private const GAS_EFFECT_RANGE = 3.0;
+	private const GAS_EFFECT_RANGE = 3.0; // in blocks
 
 	private const COUNTDOWN_INTERVAL_TICKS = 20;
 
@@ -63,12 +63,18 @@ class PotentSulfur extends Opaque{
 		$w->enum($this->state);
 	}
 
-	public function getState() : PotentSulfurState{ return $this->state; }
+	public function getPotentSulfurState() : PotentSulfurState{ return $this->state; }
 
 	/** @return $this */
-	public function setState(PotentSulfurState $state) : self{
+	public function setPotentSulfurState(PotentSulfurState $state) : self{
 		$this->state = $state;
 		return $this;
+	}
+
+	private function getTile() : ?TilePotentSulfur{
+		$tile = $this->position->getWorld()->getTile($this->position);
+
+		return $tile instanceof TilePotentSulfur ? $tile : null;
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
@@ -150,12 +156,6 @@ class PotentSulfur extends Opaque{
 		}
 
 		$world->scheduleDelayedBlockUpdate($this->position, 1);
-	}
-
-	private function getTile() : ?TilePotentSulfur{
-		$tile = $this->position->getWorld()->getTile($this->position);
-
-		return $tile instanceof TilePotentSulfur ? $tile : null;
 	}
 
 	private function findGasSource() : ?Block{

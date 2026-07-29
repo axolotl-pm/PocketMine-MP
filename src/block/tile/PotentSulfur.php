@@ -25,19 +25,20 @@ namespace pocketmine\block\tile;
 
 use pocketmine\nbt\tag\CompoundTag;
 
-class PotentSulfur extends Tile{
-	private const TAG_COUNTDOWN = "countdown";
+/**
+ * This tile serves no purpose on bedrock (stuff are done in client-side), while Java saves the countdown for the block
+ * to erupt in the tile entity.
+ */
+final class PotentSulfur extends Tile{
 
 	public const NO_COUNTDOWN = -1;
 
 	private int $waitingCountdown = self::NO_COUNTDOWN;
 
 	public function readSaveData(CompoundTag $nbt) : void{
-		$this->waitingCountdown = $nbt->getInt(self::TAG_COUNTDOWN, self::NO_COUNTDOWN);
 	}
 
 	protected function writeSaveData(CompoundTag $nbt) : void{
-		$nbt->setInt(self::TAG_COUNTDOWN, $this->waitingCountdown);
 	}
 
 	public function getWaitingCountdown() : int{ return $this->waitingCountdown; }
