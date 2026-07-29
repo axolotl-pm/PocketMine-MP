@@ -46,8 +46,4 @@ final class PotentSulfur extends Tile{
 	public function setWaitingCountdown(int $waitingCountdown) : void{
 		$this->waitingCountdown = $waitingCountdown;
 	}
-
-	public function resetCountdown() : void{
-		$this->waitingCountdown = self::NO_COUNTDOWN;
-	}
 }

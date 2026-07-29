@@ -41,7 +41,7 @@ use function count;
 use function max;
 use function mt_rand;
 
-class PotentSulfur extends Opaque{
+final class PotentSulfur extends Opaque{
 
 	/** Max depths of water above the block */
 	private const MAX_WATER_DEPTH = 4;
@@ -129,7 +129,7 @@ class PotentSulfur extends Opaque{
 		}
 		if($this->state !== PotentSulfurState::DORMANT){
 			//this block wasn't a geyser until now, so don't inherit a countdown from a previous life
-			$this->getTile()?->resetCountdown();
+			$this->getTile()?->setWaitingCountdown(TilePotentSulfur::NO_COUNTDOWN);
 		}
 
 		return PotentSulfurState::DORMANT;
