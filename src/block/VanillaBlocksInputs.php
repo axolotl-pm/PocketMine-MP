@@ -61,8 +61,6 @@ use pocketmine\block\tile\Tile;
 use pocketmine\block\utils\AmethystTrait;
 use pocketmine\block\utils\LeavesType;
 use pocketmine\block\utils\SaplingType;
-use pocketmine\block\utils\Waterloggable;
-use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\block\utils\WoodType;
 use pocketmine\crafting\FurnaceType;
 use pocketmine\item\enchantment\ItemEnchantmentTags as EnchantmentTags;
@@ -154,9 +152,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("ominous_banner", fn(BID $id) => new OminousFloorBanner($id, "Ominous Banner", $bannerBreakInfo), TileBanner::class);
 		self::register("ominous_wall_banner", fn(BID $id) => new OminousWallBanner($id, "Ominous Wall Banner", $bannerBreakInfo), TileBanner::class);
 		self::register("barrel", fn(BID $id) => new Barrel($id, "Barrel", new Info(BreakInfo::axe(2.5))), TileBarrel::class);
-		self::register("barrier", fn(BID $id) => new class($id, "Barrier", new Info(BreakInfo::indestructible())) extends Transparent implements Waterloggable{
-			use WaterloggableTrait;
-		});
+		self::register("barrier", fn(BID $id) => new Barrier($id, "Barrier", new Info(BreakInfo::indestructible())));
 		self::register("beacon", fn(BID $id) => new Beacon($id, "Beacon", new Info(new BreakInfo(3.0))), TileBeacon::class);
 		self::register("bed", fn(BID $id) => new Bed($id, "Bed Block", new Info(new BreakInfo(0.2))), TileBed::class);
 		self::register("bedrock", fn(BID $id) => new Bedrock($id, "Bedrock", new Info(BreakInfo::indestructible(18000000.0))));

@@ -93,7 +93,7 @@ final class VanillaBlocks{
 	private static WallSign $_mBAMBOO_WALL_SIGN;
 	private static FloorBanner $_mBANNER;
 	private static Barrel $_mBARREL;
-	private static Transparent $_mBARRIER;
+	private static Barrier $_mBARRIER;
 	private static SimplePillar $_mBASALT;
 	private static Beacon $_mBEACON;
 	private static Bed $_mBED;
@@ -927,7 +927,7 @@ final class VanillaBlocks{
 			"bamboo_wall_sign" => fn(WallSign $v) => self::$_mBAMBOO_WALL_SIGN = $v,
 			"banner" => fn(FloorBanner $v) => self::$_mBANNER = $v,
 			"barrel" => fn(Barrel $v) => self::$_mBARREL = $v,
-			"barrier" => fn(Transparent $v) => self::$_mBARRIER = $v,
+			"barrier" => fn(Barrier $v) => self::$_mBARRIER = $v,
 			"basalt" => fn(SimplePillar $v) => self::$_mBASALT = $v,
 			"beacon" => fn(Beacon $v) => self::$_mBEACON = $v,
 			"bed" => fn(Bed $v) => self::$_mBED = $v,
@@ -1985,7 +1985,7 @@ final class VanillaBlocks{
 		return clone self::$_mBARREL;
 	}
 
-	public static function BARRIER() : Transparent{
+	public static function BARRIER() : Barrier{
 		if(!isset(self::$_mBARRIER)){ self::init(); }
 		return clone self::$_mBARRIER;
 	}
