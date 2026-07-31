@@ -28,6 +28,8 @@ use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\WoodMaterial;
 use pocketmine\block\utils\WoodTypeTrait;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
@@ -37,9 +39,13 @@ use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\DoorSound;
 
-class FenceGate extends Transparent implements HorizontalFacing, WoodMaterial{
+class FenceGate extends Transparent implements HorizontalFacing, WoodMaterial, Waterloggable{
 	use WoodTypeTrait;
 	use HorizontalFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	protected bool $open = false;
 	protected bool $inWall = false;
@@ -88,10 +94,12 @@ class FenceGate extends Transparent implements HorizontalFacing, WoodMaterial{
 
 		$this->inWall = $this->checkInWall();
 
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		$inWall = $this->checkInWall();
 		if($inWall !== $this->inWall){
 			$this->inWall = $inWall;

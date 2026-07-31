@@ -26,12 +26,26 @@ namespace pocketmine\block;
 use pocketmine\block\utils\PillarRotation;
 use pocketmine\block\utils\PillarRotationTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
+use pocketmine\item\Item;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 
-class Chain extends Transparent implements PillarRotation{
-	use PillarRotationTrait;
+class Chain extends Transparent implements PillarRotation, Waterloggable{
+	use PillarRotationTrait, WaterloggableTrait{
+		WaterloggableTrait::place insteadof PillarRotationTrait;
+		WaterloggableTrait::place as waterPlace;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		$this->axis = Facing::axis($face);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
 
 	public function getSupportType(int $facing) : SupportType{
 		return $this->axis === Axis::Y && Facing::axis($facing) === Axis::Y ? SupportType::CENTER : SupportType::NONE;

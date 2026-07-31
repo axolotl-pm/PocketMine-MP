@@ -23,7 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-final class Beacon extends Transparent{
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
+
+final class Beacon extends Transparent implements Waterloggable{
+	use WaterloggableTrait;
 
 	public function getLightLevel() : int{
 		return 15;

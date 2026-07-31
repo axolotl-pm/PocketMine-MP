@@ -30,6 +30,8 @@ use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\WoodMaterial;
 use pocketmine\block\utils\WoodType;
 use pocketmine\block\utils\WoodTypeTrait;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\color\Color;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\item\Dye;
@@ -49,8 +51,13 @@ use function fmod;
 use function rad2deg;
 use function strlen;
 
-abstract class BaseSign extends Transparent implements WoodMaterial{
+abstract class BaseSign extends Transparent implements WoodMaterial, Waterloggable{
 	use WoodTypeTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		readStateFromWorld as readWaterStateFromWorld;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	protected SignText $text; //TODO: rename this (BC break)
 	protected SignText $backText;
@@ -74,6 +81,8 @@ abstract class BaseSign extends Transparent implements WoodMaterial{
 
 	public function readStateFromWorld() : Block{
 		parent::readStateFromWorld();
+		$this->readWaterStateFromWorld();
+
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TileSign){
 			$this->text = $tile->getText();
@@ -114,6 +123,8 @@ abstract class BaseSign extends Transparent implements WoodMaterial{
 	abstract protected function getSupportingFace() : int;
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if($this->getSide($this->getSupportingFace())->getTypeId() === BlockTypeIds::AIR){
 			$this->position->getWorld()->useBreakOn($this->position);
 		}
@@ -123,7 +134,7 @@ abstract class BaseSign extends Transparent implements WoodMaterial{
 		if($player !== null){
 			$this->editorEntityRuntimeId = $player->getId();
 		}
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onPostPlace() : void{

@@ -24,6 +24,8 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\Axis;
@@ -33,7 +35,12 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class Lantern extends Transparent{
+class Lantern extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
+
 	private int $lightLevel; //readonly
 
 	protected bool $hanging = false;
@@ -80,10 +87,12 @@ class Lantern extends Transparent{
 		}
 
 		$this->hanging = $face === Facing::DOWN || !$downSupport;
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		$face = $this->hanging ? Facing::UP : Facing::DOWN;
 		if(!$this->canBeSupportedAt($this, $face)){
 			$this->position->getWorld()->useBreakOn($this->position);

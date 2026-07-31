@@ -35,7 +35,7 @@ use function array_shift;
 use function count;
 use function in_array;
 
-abstract class BaseRail extends Flowable{
+abstract class BaseRail extends WaterloggableFlowable{
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		if($blockReplace->getAdjacentSupportType(Facing::DOWN)->hasEdgeSupport()){
@@ -221,6 +221,8 @@ abstract class BaseRail extends Flowable{
 	}
 
 	public function onNearbyBlockChange() : void{
+		parent::onNearbyBlockChange();
+
 		$world = $this->position->getWorld();
 		if(!$this->getAdjacentSupportType(Facing::DOWN)->hasEdgeSupport()){
 			$world->useBreakOn($this->position);

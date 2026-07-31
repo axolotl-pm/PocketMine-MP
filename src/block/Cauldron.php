@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\tile\Cauldron as TileCauldron;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\WaterHelper;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\Potion;
@@ -38,7 +40,10 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use function assert;
 
-final class Cauldron extends Transparent{
+final class Cauldron extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	public function writeStateToWorld() : void{
 		parent::writeStateToWorld();
@@ -95,6 +100,8 @@ final class Cauldron extends Transparent{
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		$world = $this->position->getWorld();
 		$block = $world->getBlock($this->position->up());
 		if(WaterHelper::isWater($block)){

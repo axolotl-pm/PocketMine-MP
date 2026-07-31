@@ -28,6 +28,8 @@ use pocketmine\block\utils\AnyFacing;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\block\utils\FortuneDropHelper;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
@@ -39,9 +41,13 @@ use pocketmine\player\Player;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\world\BlockTransaction;
 
-final class AmethystCluster extends Transparent implements AnyFacing{
+final class AmethystCluster extends Transparent implements AnyFacing, Waterloggable{
 	use AmethystTrait;
 	use AnyFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	public const STAGE_SMALL_BUD = 0;
 	public const STAGE_MEDIUM_BUD = 1;
@@ -103,10 +109,12 @@ final class AmethystCluster extends Transparent implements AnyFacing{
 		}
 
 		$this->facing = $face;
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if(!$this->canBeSupportedAt($this, Facing::opposite($this->facing))){
 			$this->position->getWorld()->useBreakOn($this->position);
 		}

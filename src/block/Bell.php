@@ -28,6 +28,8 @@ use pocketmine\block\utils\BellAttachmentType;
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\entity\projectile\Projectile;
 use pocketmine\item\Item;
@@ -39,8 +41,12 @@ use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\BellRingSound;
 
-final class Bell extends Transparent implements HorizontalFacing{
+final class Bell extends Transparent implements HorizontalFacing, Waterloggable{
 	use HorizontalFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	private BellAttachmentType $attachmentType = BellAttachmentType::FLOOR;
 
@@ -106,10 +112,12 @@ final class Bell extends Transparent implements HorizontalFacing{
 					BellAttachmentType::ONE_WALL
 			);
 		}
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		foreach(match($this->attachmentType){
 			BellAttachmentType::CEILING => [Facing::UP],
 			BellAttachmentType::FLOOR => [Facing::DOWN],

@@ -25,6 +25,8 @@ namespace pocketmine\block;
 
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\entity\Entity;
 use pocketmine\event\block\PressurePlateUpdateEvent;
 use pocketmine\math\Axis;
@@ -34,8 +36,18 @@ use pocketmine\world\sound\PressurePlateActivateSound;
 use pocketmine\world\sound\PressurePlateDeactivateSound;
 use function count;
 
-abstract class PressurePlate extends Transparent{
-	use StaticSupportTrait;
+abstract class PressurePlate extends Transparent implements Waterloggable{
+	use StaticSupportTrait{
+		StaticSupportTrait::onNearbyBlockChange as onSupportBlockChange;
+	}
+	use WaterloggableTrait{
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onSupportBlockChange();
+	}
 
 	private readonly int $deactivationDelayTicks;
 

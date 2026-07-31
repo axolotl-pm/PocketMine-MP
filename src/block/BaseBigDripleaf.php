@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\event\block\StructureGrowEvent;
 use pocketmine\item\Fertilizer;
 use pocketmine\item\Item;
@@ -34,8 +36,12 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-abstract class BaseBigDripleaf extends Transparent implements HorizontalFacing{
+abstract class BaseBigDripleaf extends Transparent implements HorizontalFacing, Waterloggable{
 	use HorizontalFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	abstract protected function isHead() : bool;
 
@@ -49,6 +55,8 @@ abstract class BaseBigDripleaf extends Transparent implements HorizontalFacing{
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if(
 			(!$this->isHead() && !$this->getSide(Facing::UP) instanceof BaseBigDripleaf) ||
 			!$this->canBeSupportedBy($this->getSide(Facing::DOWN), false)
@@ -69,7 +77,7 @@ abstract class BaseBigDripleaf extends Transparent implements HorizontalFacing{
 			$this->facing = $block->facing;
 			$tx->addBlock($block->position, VanillaBlocks::BIG_DRIPLEAF_STEM()->setFacing($this->facing));
 		}
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{

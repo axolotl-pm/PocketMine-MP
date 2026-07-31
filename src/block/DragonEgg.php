@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\utils\Fallable;
 use pocketmine\block\utils\FallableTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\event\block\BlockTeleportEvent;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
@@ -37,8 +39,17 @@ use function max;
 use function min;
 use function mt_rand;
 
-class DragonEgg extends Transparent implements Fallable{
-	use FallableTrait;
+class DragonEgg extends Transparent implements Fallable, Waterloggable{
+	use FallableTrait, WaterloggableTrait{
+		WaterloggableTrait::onNearbyBlockChange insteadof FallableTrait;
+		FallableTrait::onNearbyBlockChange as onFallableBlockChange;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onFallableBlockChange();
+	}
 
 	public function getLightLevel() : int{
 		return 1;

@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\utils\AnalogRedstoneSignalEmitter;
 use pocketmine\block\utils\AnalogRedstoneSignalEmitterTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
@@ -37,8 +39,9 @@ use function max;
 use function round;
 use const M_PI;
 
-class DaylightSensor extends Transparent implements AnalogRedstoneSignalEmitter{
+class DaylightSensor extends Transparent implements AnalogRedstoneSignalEmitter, Waterloggable{
 	use AnalogRedstoneSignalEmitterTrait;
+	use WaterloggableTrait;
 
 	protected bool $inverted = false;
 

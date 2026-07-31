@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\tile\Banner as TileBanner;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
@@ -33,7 +35,11 @@ use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 use function assert;
 
-abstract class BaseOminousBanner extends Transparent{
+abstract class BaseOminousBanner extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	public function writeStateToWorld() : void{
 		parent::writeStateToWorld();
@@ -73,12 +79,14 @@ abstract class BaseOminousBanner extends Transparent{
 			return false;
 		}
 
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	abstract protected function getSupportingFace() : int;
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if(!$this->canBeSupportedBy($this->getSide($this->getSupportingFace()))){
 			$this->position->getWorld()->useBreakOn($this->position);
 		}

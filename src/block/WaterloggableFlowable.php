@@ -24,12 +24,14 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\math\Vector3;
 
 /**
  * Flowable blocks that can be waterlogged.
  */
 abstract class WaterloggableFlowable extends Flowable implements Waterloggable{
+	use WaterloggableTrait;
 
 	public function canBePlacedAt(Block $blockReplace, Vector3 $clickVector, int $face, bool $isClickedBlock) : bool{
 		return

@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\utils\FortuneDropHelper;
 use pocketmine\block\utils\LeavesType;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\event\block\LeavesDecayEvent;
 use pocketmine\item\Item;
@@ -37,7 +39,12 @@ use pocketmine\world\BlockTransaction;
 use pocketmine\world\World;
 use function mt_rand;
 
-class Leaves extends Transparent{
+class Leaves extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
+
 	private const MAX_LOG_DISTANCE = 4;
 
 	protected LeavesType $leavesType; //immutable for now
@@ -105,6 +112,8 @@ class Leaves extends Transparent{
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if(!$this->noDecay && !$this->checkDecay){
 			$this->checkDecay = true;
 			$this->position->getWorld()->setBlock($this->position, $this, false);
@@ -136,7 +145,7 @@ class Leaves extends Transparent{
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		$this->noDecay = true; //artificial leaves don't decay
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function getDropsForCompatibleTool(Item $item) : array{

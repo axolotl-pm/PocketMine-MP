@@ -24,10 +24,13 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
 use function mt_rand;
 
-class MonsterSpawner extends Transparent{
+class MonsterSpawner extends Transparent implements Waterloggable{
+	use WaterloggableTrait;
 
 	public function getDropsForCompatibleTool(Item $item) : array{
 		return [];
