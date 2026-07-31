@@ -59,9 +59,11 @@ use pocketmine\event\world\WorldDisplayNameChangeEvent;
 use pocketmine\event\world\WorldParticleEvent;
 use pocketmine\event\world\WorldSaveEvent;
 use pocketmine\event\world\WorldSoundEvent;
+use pocketmine\item\Bucket;
 use pocketmine\item\Item;
 use pocketmine\item\ItemUseResult;
 use pocketmine\item\LegacyStringToItemParser;
+use pocketmine\item\LiquidBucket;
 use pocketmine\item\StringToItemParser;
 use pocketmine\item\VanillaItems;
 use pocketmine\lang\KnownTranslationFactory;
@@ -2324,7 +2326,7 @@ class World implements ChunkManager{
 		if($player !== null){
 			$ev = new PlayerInteractEvent($player, $item, $blockClicked, $clickVector, $face, PlayerInteractEvent::RIGHT_CLICK_BLOCK);
 			if($player->isSneakPressed()){
-				$ev->setUseItem(false);
+				$ev->setUseItem($item instanceof Bucket || $item instanceof LiquidBucket);
 				$ev->setUseBlock($item->isNull()); //opening doors is still possible when sneaking if using an empty hand
 			}
 			if($player->isSpectator()){
