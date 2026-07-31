@@ -40,7 +40,6 @@ class Wall extends Transparent implements Waterloggable{
 		onNearbyBlockChange as onWaterBlockChange;
 	}
 
-
 	/**
 	 * @var WallConnectionType[]
 	 * @phpstan-var WallConnectionSet
