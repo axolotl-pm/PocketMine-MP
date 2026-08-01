@@ -33,7 +33,7 @@ final class PotentSulfur extends Tile{
 
 	public const NO_COUNTDOWN = -1;
 
-	private int $waitingCountdown = self::NO_COUNTDOWN;
+	private int $waitingCountdownTicks = self::NO_COUNTDOWN;
 
 	public function readSaveData(CompoundTag $nbt) : void{
 	}
@@ -41,9 +41,9 @@ final class PotentSulfur extends Tile{
 	protected function writeSaveData(CompoundTag $nbt) : void{
 	}
 
-	public function getWaitingCountdown() : int{ return $this->waitingCountdown; }
+	public function getWaitingCountdownTicks() : int{ return $this->waitingCountdownTicks; }
 
-	public function setWaitingCountdown(int $waitingCountdown) : void{
-		$this->waitingCountdown = $waitingCountdown;
+	public function setWaitingCountdownTicks(int $waitingCountdownTicks) : void{
+		$this->waitingCountdownTicks = $waitingCountdownTicks;
 	}
 }

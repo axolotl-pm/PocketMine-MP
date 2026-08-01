@@ -129,7 +129,7 @@ final class PotentSulfur extends Opaque{
 		}
 		if($this->state !== PotentSulfurState::DORMANT){
 			//this block wasn't a geyser until now, so don't inherit a countdown from a previous life
-			$this->getTile()?->setWaitingCountdown(TilePotentSulfur::NO_COUNTDOWN);
+			$this->getTile()?->setWaitingCountdownTicks(TilePotentSulfur::NO_COUNTDOWN);
 		}
 
 		return PotentSulfurState::DORMANT;
@@ -282,7 +282,7 @@ final class PotentSulfur extends Opaque{
 		}
 
 		$waterDepth = $this->getWaterDepth($source);
-		$countdown = $tile->getWaitingCountdown();
+		$countdown = $tile->getWaitingCountdownTicks();
 		if($countdown <= 0){
 			$countdown = $this->state === PotentSulfurState::DORMANT ?
 				10 * ($waterDepth - 1) + mt_rand(15, 30) :
@@ -290,7 +290,7 @@ final class PotentSulfur extends Opaque{
 			$countdown = max(1, $countdown);
 		}
 
-		$tile->setWaitingCountdown(--$countdown);
+		$tile->setWaitingCountdownTicks(--$countdown);
 		if($countdown > 0){
 			return;
 		}
