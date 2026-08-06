@@ -33,9 +33,10 @@ use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\types\recipe\CraftingRecipeBlockName;
 use pocketmine\network\mcpe\protocol\types\recipe\FurnaceRecipeBlockName;
-use pocketmine\network\mcpe\protocol\types\recipe\IntIdMetaItemDescriptor;
+use pocketmine\network\mcpe\protocol\types\recipe\NameItemDescriptor;
 use pocketmine\network\mcpe\protocol\types\recipe\PotionContainerChangeRecipe as ProtocolPotionContainerChangeRecipe;
 use pocketmine\network\mcpe\protocol\types\recipe\PotionTypeRecipe as ProtocolPotionTypeRecipe;
+use pocketmine\network\mcpe\protocol\types\recipe\RecipeUnlockingContext;
 use pocketmine\network\mcpe\protocol\types\recipe\RecipeUnlockingRequirement;
 use pocketmine\network\mcpe\protocol\types\recipe\ShapedRecipe as ProtocolShapedRecipe;
 use pocketmine\network\mcpe\protocol\types\recipe\ShapelessRecipe as ProtocolShapelessRecipe;
@@ -85,7 +86,7 @@ final class CraftingDataCache{
 		$converter = TypeConverter::getInstance();
 		$recipesWithTypeIds = [];
 
-		$noUnlockingRequirement = new RecipeUnlockingRequirement(null);
+		$noUnlockingRequirement = new RecipeUnlockingRequirement(RecipeUnlockingContext::ALWAYS_UNLOCKED, null);
 		$recipeNetId = self::RECIPE_ID_OFFSET;
 		foreach($manager->getCraftingRecipeIndex() as $index => $recipe){
 			//the client doesn't like recipes with an ID of 0, so we need to offset them
@@ -97,7 +98,7 @@ final class CraftingDataCache{
 					ShapelessRecipeType::CARTOGRAPHY => CraftingRecipeBlockName::CARTOGRAPHY_TABLE,
 					ShapelessRecipeType::SMITHING => CraftingRecipeBlockName::SMITHING_TABLE,
 				};
-				$recipesWithTypeIds[] = new ProtocolShapelessRecipe(
+				$recipesWithTypeIds[CraftingDataPacket::ENTRY_SHAPELESS][] = new ProtocolShapelessRecipe(
 					CraftingDataPacket::ENTRY_SHAPELESS,
 					BE::packUnsignedInt($recipeNetId), //TODO: this should probably be changed to something human-readable
 					array_map($converter->coreRecipeIngredientToNet(...), $recipe->getIngredientList()),
@@ -116,7 +117,7 @@ final class CraftingDataCache{
 						$inputs[$row][$column] = $converter->coreRecipeIngredientToNet($recipe->getIngredient($column, $row));
 					}
 				}
-				$recipesWithTypeIds[] = $r = new ProtocolShapedRecipe(
+				$recipesWithTypeIds[CraftingDataPacket::ENTRY_SHAPED][] = $r = new ProtocolShapedRecipe(
 					CraftingDataPacket::ENTRY_SHAPED,
 					BE::packUnsignedInt($recipeNetId), //TODO: this should probably be changed to something human-readable
 					$inputs,
@@ -143,7 +144,7 @@ final class CraftingDataCache{
 			};
 			foreach($manager->getFurnaceRecipeManager($furnaceType)->getAll() as $recipe){
 				$recipeNetId++;
-				$recipesWithTypeIds[] = new ProtocolShapelessRecipe(
+				$recipesWithTypeIds[CraftingDataPacket::ENTRY_SHAPELESS][] = new ProtocolShapelessRecipe(
 					CraftingDataPacket::ENTRY_SHAPELESS,
 					BE::packUnsignedInt($recipeNetId), //TODO: this should probably be changed to something human-readable
 					[$converter->coreRecipeIngredientToNet($recipe->getInput())],
@@ -158,17 +159,18 @@ final class CraftingDataCache{
 		}
 
 		$potionTypeRecipes = [];
+		$itemTypeDictionary = $converter->getItemTypeDictionary();
 		foreach($manager->getPotionTypeRecipes() as $recipe){
 			$input = $converter->coreRecipeIngredientToNet($recipe->getInput())->getDescriptor();
 			$ingredient = $converter->coreRecipeIngredientToNet($recipe->getIngredient())->getDescriptor();
-			if(!$input instanceof IntIdMetaItemDescriptor || !$ingredient instanceof IntIdMetaItemDescriptor){
+			if(!$input instanceof NameItemDescriptor || !$ingredient instanceof NameItemDescriptor){
 				throw new AssumptionFailedError();
 			}
 			$output = $converter->coreItemStackToNet($recipe->getOutput());
 			$potionTypeRecipes[] = new ProtocolPotionTypeRecipe(
-				$input->getId(),
+				$itemTypeDictionary->fromStringId($input->getName()),
 				$input->getMeta(),
-				$ingredient->getId(),
+				$itemTypeDictionary->fromStringId($ingredient->getName()),
 				$ingredient->getMeta(),
 				$output->getId(),
 				$output->getMeta()
@@ -176,17 +178,16 @@ final class CraftingDataCache{
 		}
 
 		$potionContainerChangeRecipes = [];
-		$itemTypeDictionary = $converter->getItemTypeDictionary();
 		foreach($manager->getPotionContainerChangeRecipes() as $recipe){
 			$input = $itemTypeDictionary->fromStringId($recipe->getInputItemId());
 			$ingredient = $converter->coreRecipeIngredientToNet($recipe->getIngredient())->getDescriptor();
-			if(!$ingredient instanceof IntIdMetaItemDescriptor){
+			if(!$ingredient instanceof NameItemDescriptor){
 				throw new AssumptionFailedError();
 			}
 			$output = $itemTypeDictionary->fromStringId($recipe->getOutputItemId());
 			$potionContainerChangeRecipes[] = new ProtocolPotionContainerChangeRecipe(
 				$input,
-				$ingredient->getId(),
+				$itemTypeDictionary->fromStringId($ingredient->getName()),
 				$output
 			);
 		}
