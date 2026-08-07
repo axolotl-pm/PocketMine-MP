@@ -161,7 +161,7 @@ class TypeConverter{
 			$id = $this->itemTypeDictionary->fromIntId($id);
 			$descriptor = new StringIdMetaItemDescriptor($id, $meta);
 		}elseif($ingredient instanceof TagWildcardRecipeIngredient){
-			$descriptor = new TagItemDescriptor($ingredient->getTagName(), 0);
+			$descriptor = new TagItemDescriptor($ingredient->getTagName());
 		}else{
 			throw new \LogicException("Unsupported recipe ingredient type " . get_class($ingredient) . ", only " . ExactRecipeIngredient::class . " and " . MetaWildcardRecipeIngredient::class . " are supported");
 		}
