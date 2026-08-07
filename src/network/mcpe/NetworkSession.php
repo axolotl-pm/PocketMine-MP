@@ -1349,7 +1349,7 @@ class NetworkSession{
 
 	public function onPlayerRemoved(Player $p) : void{
 		if($p !== $this->player){
-			$this->sendDataPacket(PlayerListPacket::remove([PlayerListEntry::createRemovalEntry($p->getUniqueId())]));
+			$this->sendDataPacket(PlayerListPacket::remove([$p->getUniqueId()]));
 		}
 	}
 
