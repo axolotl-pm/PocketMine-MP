@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7ebca7053c7c5d8170c018f7f035a552",
+    "content-hash": "3fde99ed51b13b3fa5ce6507e971e867",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -145,16 +145,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-protocol",
-            "version": "dev-bedrock-1.26.40",
+            "version": "59.0.0+bedrock-1.26.40",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "bc28c5ee25b92c7d3a6f400089f26097b5742868"
+                "reference": "14fccf65026d54ea9e16ddea7e5604a9cab384db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/bc28c5ee25b92c7d3a6f400089f26097b5742868",
-                "reference": "bc28c5ee25b92c7d3a6f400089f26097b5742868",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/14fccf65026d54ea9e16ddea7e5604a9cab384db",
+                "reference": "14fccf65026d54ea9e16ddea7e5604a9cab384db",
                 "shasum": ""
             },
             "require": {
@@ -186,9 +186,9 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
-                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/bedrock-1.26.40"
+                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/59.0.0+bedrock-1.26.40"
             },
-            "time": "2026-08-07T00:36:54+00:00"
+            "time": "2026-08-07T07:29:36+00:00"
         },
         {
             "name": "brick/math",
@@ -2764,8 +2764,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "axolotl-pm/bedrock-data": 20,
-        "axolotl-pm/bedrock-item-upgrade-schema": 20,
-        "axolotl-pm/bedrock-protocol": 20
+        "axolotl-pm/bedrock-item-upgrade-schema": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
