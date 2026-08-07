@@ -92,8 +92,8 @@ final class ItemStackResponseBuilder{
 					$slotId,
 					$item->getCount(),
 					$itemStackInfo->getStackId(),
-					$item->getCustomName(),
-					$item->getCustomName(),
+					"", //TODO: client crashes if we set this as of 1.26.40
+					"",
 					$item instanceof Durable ? $item->getDamage() : 0,
 				);
 			}
