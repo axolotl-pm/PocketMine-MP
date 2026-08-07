@@ -101,7 +101,7 @@ final class CraftingDataCache{
 					ShapelessRecipeType::SMITHING => CraftingRecipeBlockName::SMITHING_TABLE,
 				};
 				$shapelessRecipes[] = new ProtocolShapelessRecipe(
-					BE::packUnsignedInt($recipeNetId), //TODO: this should probably be changed to something human-readable
+					Uuid::uuid4()->toString(),
 					array_map($converter->coreRecipeIngredientToNet(...), $recipe->getIngredientList()),
 					array_map($converter->coreItemStackToNet(...), $recipe->getResults()),
 					$nullUUID,
@@ -121,7 +121,7 @@ final class CraftingDataCache{
 					$inputs[] = $rowInputs;
 				}
 				$shapedRecipes[] = $r = new ProtocolShapedRecipe(
-					BE::packUnsignedInt($recipeNetId), //TODO: this should probably be changed to something human-readable
+					Uuid::uuid4()->toString(),
 					$inputs,
 					array_map($converter->coreItemStackToNet(...), $recipe->getResults()),
 					$nullUUID,
@@ -147,7 +147,7 @@ final class CraftingDataCache{
 			foreach($manager->getFurnaceRecipeManager($furnaceType)->getAll() as $recipe){
 				$recipeNetId++;
 				$shapelessRecipes[] = new ProtocolShapelessRecipe(
-					BE::packUnsignedInt($recipeNetId), //TODO: this should probably be changed to something human-readable
+					Uuid::uuid4()->toString(),
 					[$converter->coreRecipeIngredientToNet($recipe->getInput())],
 					[$converter->coreItemStackToNet($recipe->getResult())],
 					$nullUUID,
