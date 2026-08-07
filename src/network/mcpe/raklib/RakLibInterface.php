@@ -283,9 +283,9 @@ class RakLibInterface implements ServerEventListener, AdvancedNetworkInterface{
 				(string) $this->server->getPortV6(),
 				self::SERVER_NAME_FLAG_FALSE, //isEditorWorld
 				//if the server can actually reach Xbox services
-				$this->server->getOnlineMode() ? self::SERVER_NAME_FLAG_TRUE : self::SERVER_NAME_FLAG_FALSE,
+				($isOnline = $this->server->getOnlineMode()) ? self::SERVER_NAME_FLAG_TRUE : self::SERVER_NAME_FLAG_FALSE,
 				//inverse of online-mode
-				!$this->server->getOnlineMode() ? self::SERVER_NAME_FLAG_TRUE : self::SERVER_NAME_FLAG_FALSE,
+				!$isOnline ? self::SERVER_NAME_FLAG_TRUE : self::SERVER_NAME_FLAG_FALSE,
 			]) . ";"
 		);
 	}
