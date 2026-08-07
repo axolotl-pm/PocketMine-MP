@@ -58,12 +58,12 @@ use pocketmine\network\mcpe\protocol\types\inventory\ItemStackExtraData;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackExtraDataShield;
 use pocketmine\network\mcpe\protocol\types\recipe\MolangItemDescriptor;
 use pocketmine\network\mcpe\protocol\types\recipe\MultiRecipe;
-use pocketmine\network\mcpe\protocol\types\recipe\NameItemDescriptor;
 use pocketmine\network\mcpe\protocol\types\recipe\RecipeIngredient;
 use pocketmine\network\mcpe\protocol\types\recipe\ShapedRecipe;
 use pocketmine\network\mcpe\protocol\types\recipe\ShapelessRecipe;
 use pocketmine\network\mcpe\protocol\types\recipe\SmithingTransformRecipe;
 use pocketmine\network\mcpe\protocol\types\recipe\SmithingTrimRecipe;
+use pocketmine\network\mcpe\protocol\types\recipe\StringIdMetaItemDescriptor;
 use pocketmine\network\mcpe\protocol\types\recipe\TagItemDescriptor;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\utils\AssumptionFailedError;
@@ -323,8 +323,8 @@ class ParserPacketHandler extends PacketHandler{
 		}
 		$data = new RecipeIngredientData();
 
-		if($descriptor instanceof NameItemDescriptor){
-			$data->name = $descriptor->getName();
+		if($descriptor instanceof StringIdMetaItemDescriptor){
+			$data->name = $descriptor->getId();
 
 			$meta = $descriptor->getMeta();
 			if($meta !== 32767){
@@ -432,23 +432,18 @@ class ParserPacketHandler extends PacketHandler{
 		@mkdir($recipesPath);
 
 		$recipes = [];
-		foreach($packet->recipesWithTypeIds as $entries){
+		$recipeTypes = [
+			"shaped_crafting" => $packet->shapedRecipes,
+			"shapeless_crafting" => $packet->shapelessRecipes,
+			"special_hardcoded" => $packet->multiRecipes,
+			"shapeless_shulker_box" => $packet->userDataShapelessRecipes,
+			"shapeless_chemistry" => $packet->shapelessChemistryRecipes,
+			"shaped_chemistry" => $packet->shapedChemistryRecipes,
+			"smithing" => $packet->smithingTransformRecipes,
+			"smithing_trim" => $packet->smithingTrimRecipes,
+		];
+		foreach($recipeTypes as $mappedType => $entries){
 			foreach($entries as $entry){
-				static $typeMap = [
-					CraftingDataPacket::ENTRY_SHAPELESS => "shapeless_crafting",
-					CraftingDataPacket::ENTRY_SHAPED => "shaped_crafting",
-					CraftingDataPacket::ENTRY_MULTI => "special_hardcoded",
-					CraftingDataPacket::ENTRY_USER_DATA_SHAPELESS => "shapeless_shulker_box",
-					CraftingDataPacket::ENTRY_SHAPELESS_CHEMISTRY => "shapeless_chemistry",
-					CraftingDataPacket::ENTRY_SHAPED_CHEMISTRY => "shaped_chemistry",
-					CraftingDataPacket::ENTRY_SMITHING_TRANSFORM => "smithing",
-					CraftingDataPacket::ENTRY_SMITHING_TRIM => "smithing_trim",
-				];
-				if(!isset($typeMap[$entry->getTypeId()])){
-					throw new \UnexpectedValueException("Unknown recipe type ID " . $entry->getTypeId());
-				}
-				$mappedType = $typeMap[$entry->getTypeId()];
-
 				if($entry instanceof ShapedRecipe){
 					//all known recipes are currently symmetric and I don't feel like attaching a `symmetric` field to
 					//every shaped recipe for this - split it into a separate category instead
@@ -477,15 +472,15 @@ class ParserPacketHandler extends PacketHandler{
 
 		foreach($packet->potionTypeRecipes as $recipe){
 			$recipes["potion_type"][] = new PotionTypeRecipeData(
-				$this->recipeIngredientToJson(new RecipeIngredient(new NameItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getInputItemId()), $recipe->getInputItemMeta()), 1)),
-				$this->recipeIngredientToJson(new RecipeIngredient(new NameItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getIngredientItemId()), $recipe->getIngredientItemMeta()), 1)),
+				$this->recipeIngredientToJson(new RecipeIngredient(new StringIdMetaItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getInputItemId()), $recipe->getInputItemMeta()), 1)),
+				$this->recipeIngredientToJson(new RecipeIngredient(new StringIdMetaItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getIngredientItemId()), $recipe->getIngredientItemMeta()), 1)),
 				$this->itemStackToJson(new ItemStack($recipe->getOutputItemId(), $recipe->getOutputItemMeta(), 1, 0, "")),
 			);
 		}
 		foreach($packet->potionContainerRecipes as $recipe){
 			$recipes["potion_container_change"][] = new PotionContainerChangeRecipeData(
 				$this->itemTypeDictionary->fromIntId($recipe->getInputItemId()),
-				$this->recipeIngredientToJson(new RecipeIngredient(new NameItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getIngredientItemId()), 0), 1)),
+				$this->recipeIngredientToJson(new RecipeIngredient(new StringIdMetaItemDescriptor($this->itemTypeDictionary->fromIntId($recipe->getIngredientItemId()), 0), 1)),
 				$this->itemTypeDictionary->fromIntId($recipe->getOutputItemId()),
 			);
 		}
