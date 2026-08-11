@@ -27,6 +27,8 @@ use pocketmine\entity\InvalidSkinException;
 use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\protocol\types\skin\SkinData;
 use pocketmine\network\mcpe\protocol\types\skin\SkinImage;
+use pocketmine\utils\Filesystem;
+use Symfony\Component\Filesystem\Path;
 use function is_array;
 use function is_string;
 use function json_decode;
@@ -36,18 +38,62 @@ use function str_repeat;
 use const JSON_THROW_ON_ERROR;
 
 class LegacySkinAdapter implements SkinAdapter{
+	private const DEFAULT_GEOMETRY_NAME = "geometry.humanoid.custom";
+
+	/**
+	 * Definitions of the vanilla player geometries, keyed by identifier. Clients reference these without
+	 * ever shipping a definition for them, and both the wide (Steve) and the slim (Alex) variant are
+	 * affected.
+	 *
+	 * @var array<string, string>|null
+	 * @phpstan-var array<string, string>|null
+	 */
+	private static ?array $defaultGeometryData = null;
+
+	/**
+	 * Returns a standalone geometry document containing only the requested definition, so a skin never
+	 * carries a geometry it doesn't reference.
+	 */
+	private static function defaultGeometryFor(string $geometryName) : ?string{
+		if(self::$defaultGeometryData === null){
+			$decoded = json_decode(Filesystem::fileGetContents(
+				Path::join(\pocketmine\RESOURCE_PATH, "default_skin_geometry.json")
+			), true);
+			$formatVersion = is_array($decoded) && is_string($decoded["format_version"] ?? null) ? $decoded["format_version"] : "1.21.0";
+			$geometries = is_array($decoded) && is_array($decoded["minecraft:geometry"] ?? null) ? $decoded["minecraft:geometry"] : [];
+
+			$result = [];
+			foreach($geometries as $geometry){
+				$identifier = is_array($geometry) ? ($geometry["description"]["identifier"] ?? null) : null;
+				if(!is_string($identifier)){
+					continue;
+				}
+				$encoded = json_encode([
+					"format_version" => $formatVersion,
+					"minecraft:geometry" => [$geometry],
+				]);
+				if($encoded !== false){
+					$result[$identifier] = $encoded;
+				}
+			}
+			self::$defaultGeometryData = $result;
+		}
+
+		return self::$defaultGeometryData[$geometryName] ?? null;
+	}
 
 	public function toSkinData(Skin $skin) : SkinData{
 		$capeData = $skin->getCapeData();
 		$capeImage = $capeData === "" ? new SkinImage(0, 0, "") : new SkinImage(32, 64, $capeData);
 		$geometryName = $skin->getGeometryName();
 		if($geometryName === ""){
-			$geometryName = "geometry.humanoid.custom";
+			$geometryName = self::DEFAULT_GEOMETRY_NAME;
 		}
 		$geometryData = $skin->getGeometryData();
 		if($geometryData === ""){
-			//the client drops the connection if it receives an empty geometry string
-			$geometryData = SkinData::GEOMETRY_DATA_NONE;
+			//the client drops the connection if it receives an empty geometry string, and since 1.26.40
+			//it also drops it when the skin names a geometry it doesn't ship a definition for
+			$geometryData = self::defaultGeometryFor($geometryName) ?? SkinData::GEOMETRY_DATA_NONE;
 		}
 		return new SkinData(
 			$skin->getSkinId(),
