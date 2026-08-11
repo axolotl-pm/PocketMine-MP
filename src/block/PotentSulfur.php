@@ -36,6 +36,9 @@ use pocketmine\math\Vector3;
 use pocketmine\math\VoxelRayTrace;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
+use pocketmine\world\sound\GeyserContinuousEruptionActiveSound;
+use pocketmine\world\sound\GeyserContinuousEruptionStartSound;
+use pocketmine\world\sound\GeyserEruptionActiveSound;
 use pocketmine\world\sound\GeyserEruptionStartSound;
 use function count;
 use function max;
@@ -43,14 +46,22 @@ use function mt_rand;
 
 final class PotentSulfur extends Opaque{
 
-	/** Max depths of water above the block */
 	private const MAX_WATER_DEPTH = 4;
 
 	private const GAS_EFFECT_INTERVAL_TICKS = 10;
 	private const GAS_EFFECT_DURATION_TICKS = 80;
-	private const GAS_EFFECT_RANGE = 3.0; // in blocks
+	private const GAS_EFFECT_RANGE_BLOCKS = 3.0;
 
-	private const COUNTDOWN_INTERVAL_TICKS = 20;
+	private const PHASE_STEP_TICKS = 20;
+	private const ERUPTION_SOUND_INTERVAL_TICKS = 40;
+
+	private const DORMANT_MIN_STEPS = 15;
+	private const DORMANT_MAX_STEPS = 30;
+	private const DORMANT_STEPS_PER_EXTRA_WATER = 10;
+
+	private const ERUPTING_MIN_STEPS = 1;
+	private const ERUPTING_MAX_STEPS = 2;
+	private const ERUPTING_STEPS_PER_EXTRA_WATER = 1;
 
 	private const GEYSER_BASE_LAUNCH_SPEED = 0.3;
 	private const GEYSER_LAUNCH_FORCE = 0.2;
@@ -59,8 +70,41 @@ final class PotentSulfur extends Opaque{
 
 	private PotentSulfurState $state = PotentSulfurState::DRY;
 
+	/** Ticks until the next dose of noxious gas. */
+	private int $gasEffectCooldown = 0;
+	/** Ticks left in the current phase. Unused while continuous, which never ends. */
+	private int $stateChangeCooldown = 0;
+	/** Ticks until the looping eruption sound plays again. */
+	private int $eruptionSoundCooldown = 0;
+
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->state);
+	}
+
+	public function readStateFromWorld() : Block{
+		parent::readStateFromWorld();
+		$tile = $this->getTile();
+		if($tile !== null){
+			$this->gasEffectCooldown = $tile->getGasEffectCooldown();
+			$this->stateChangeCooldown = $tile->getStateChangeCooldown();
+			$this->eruptionSoundCooldown = $tile->getEruptionSoundCooldown();
+		}
+
+		return $this;
+	}
+
+	public function writeStateToWorld() : void{
+		parent::writeStateToWorld();
+		$this->saveCooldowns();
+	}
+
+	private function saveCooldowns() : void{
+		$tile = $this->getTile();
+		if($tile !== null){
+			$tile->setGasEffectCooldown($this->gasEffectCooldown);
+			$tile->setStateChangeCooldown($this->stateChangeCooldown);
+			$tile->setEruptionSoundCooldown($this->eruptionSoundCooldown);
+		}
 	}
 
 	public function getPotentSulfurState() : PotentSulfurState{ return $this->state; }
@@ -91,16 +135,22 @@ final class PotentSulfur extends Opaque{
 	}
 
 	private function applyState(PotentSulfurState $state) : void{
-		$startedErupting = $state === PotentSulfurState::ERUPTING && $this->state !== PotentSulfurState::ERUPTING;
 		$this->state = $state;
-
-		$world = $this->position->getWorld();
-		$world->setBlock($this->position, $this);
-		if($startedErupting){
-			$world->addSound($this->position->add(0.5, 0.5, 0.5), new GeyserEruptionStartSound());
+		$this->position->getWorld()->setBlock($this->position, $this);
+		if($state->isErupting()){
+			$this->startErupting();
 		}
 
 		$this->scheduleTickIfActive();
+	}
+
+	private function startErupting() : void{
+		$this->eruptionSoundCooldown = 0;
+
+		$this->position->getWorld()->addSound(
+			$this->position->add(0.5, 0.5, 0.5),
+			$this->state === PotentSulfurState::CONTINUOUS ? new GeyserContinuousEruptionStartSound() : new GeyserEruptionStartSound()
+		);
 	}
 
 	private function scheduleTickIfActive() : void{
@@ -128,8 +178,8 @@ final class PotentSulfur extends Opaque{
 			return PotentSulfurState::ERUPTING;
 		}
 		if($this->state !== PotentSulfurState::DORMANT){
-			//this block wasn't a geyser until now, so don't inherit a countdown from a previous life
-			$this->getTile()?->setWaitingCountdownTicks(TilePotentSulfur::NO_COUNTDOWN);
+			//not a geyser until now, so don't inherit a countdown from a previous life
+			$this->stateChangeCooldown = 0;
 		}
 
 		return PotentSulfurState::DORMANT;
@@ -143,19 +193,51 @@ final class PotentSulfur extends Opaque{
 
 		$source = $this->findGasSource();
 		if($source !== null){
-			$tick = $world->getServer()->getTick();
-			if($tick % self::GAS_EFFECT_INTERVAL_TICKS === 0){
+			if(--$this->gasEffectCooldown <= 0){
+				$this->gasEffectCooldown = self::GAS_EFFECT_INTERVAL_TICKS;
 				$this->applyNoxiousGas($source);
 			}
+
+			if($this->state !== PotentSulfurState::CONTINUOUS){
+				if($this->stateChangeCooldown <= 0){
+					$this->stateChangeCooldown = $this->rollPhaseDuration($source);
+				}
+				if(--$this->stateChangeCooldown <= 0){
+					$this->applyState($this->state === PotentSulfurState::DORMANT ? PotentSulfurState::ERUPTING : PotentSulfurState::DORMANT);
+				}
+			}
+
 			if($this->state->isErupting()){
 				$this->launchEntities($source);
+				if(--$this->eruptionSoundCooldown <= 0){
+					$this->eruptionSoundCooldown = self::ERUPTION_SOUND_INTERVAL_TICKS;
+					$this->playEruptionSound($source);
+				}
 			}
-			if($tick % self::COUNTDOWN_INTERVAL_TICKS === 0 && $this->state !== PotentSulfurState::CONTINUOUS){
-				$this->tickCountdown($source);
-			}
+
+			$this->saveCooldowns();
 		}
 
 		$world->scheduleDelayedBlockUpdate($this->position, 1);
+	}
+
+	private function rollPhaseDuration(Block $source) : int{
+		$extraWater = $this->getWaterDepth($source) - 1;
+		$steps = $this->state === PotentSulfurState::DORMANT ?
+			mt_rand(self::DORMANT_MIN_STEPS, self::DORMANT_MAX_STEPS) + self::DORMANT_STEPS_PER_EXTRA_WATER * $extraWater :
+			mt_rand(self::ERUPTING_MIN_STEPS, self::ERUPTING_MAX_STEPS) + self::ERUPTING_STEPS_PER_EXTRA_WATER * $extraWater;
+
+		return max(1, $steps) * self::PHASE_STEP_TICKS;
+	}
+
+	/**
+	 * Plays the sound where the plume breaks the surface, unlike the sound that announces the eruption.
+	 */
+	private function playEruptionSound(Block $source) : void{
+		$this->position->getWorld()->addSound(
+			$source->position->add(0.5, 0.5, 0.5),
+			$this->state === PotentSulfurState::CONTINUOUS ? new GeyserContinuousEruptionActiveSound() : new GeyserEruptionActiveSound()
+		);
 	}
 
 	private function findGasSource() : ?Block{
@@ -208,7 +290,7 @@ final class PotentSulfur extends Opaque{
 		if(!self::isGeyserPassable($world->getBlock($eyePos))){
 			return false;
 		}
-		if($eyePos->distanceSquared($source->position->add(0.5, 0.5, 0.5)) > self::GAS_EFFECT_RANGE ** 2){
+		if($eyePos->distanceSquared($source->position->add(0.5, 0.5, 0.5)) > self::GAS_EFFECT_RANGE_BLOCKS ** 2){
 			return false;
 		}
 
@@ -236,7 +318,7 @@ final class PotentSulfur extends Opaque{
 	}
 
 	/**
-	 * Returns how far up the plume can travel before something gets in its way.
+	 * Returns how far up the plume gets before something blocks it.
 	 */
 	private function getPlumeHeight(int $waterDepth) : int{
 		$maxHeight = self::GEYSER_PLUME_BLOCKS_PER_WATER * $waterDepth;
@@ -275,30 +357,11 @@ final class PotentSulfur extends Opaque{
 		}
 	}
 
-	private function tickCountdown(Block $source) : void{
-		$tile = $this->getTile();
-		if($tile === null){
-			return;
-		}
-
-		$waterDepth = $this->getWaterDepth($source);
-		$countdown = $tile->getWaitingCountdownTicks();
-		if($countdown <= 0){
-			$countdown = $this->state === PotentSulfurState::DORMANT ?
-				10 * ($waterDepth - 1) + mt_rand(15, 30) :
-				$waterDepth - 1 + mt_rand(1, 2);
-			$countdown = max(1, $countdown);
-		}
-
-		$tile->setWaitingCountdownTicks(--$countdown);
-		if($countdown > 0){
-			return;
-		}
-
-		$this->applyState($this->state === PotentSulfurState::DORMANT ? PotentSulfurState::ERUPTING : PotentSulfurState::DORMANT);
-	}
-
 	public function onPostPlace() : void{
+		if($this->state->isErupting()){
+			$this->startErupting();
+		}
+
 		$this->scheduleTickIfActive();
 	}
 }
