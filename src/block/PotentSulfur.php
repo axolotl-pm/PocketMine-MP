@@ -115,10 +115,12 @@ final class PotentSulfur extends Opaque{
 		return $this;
 	}
 
-	private function getTile() : ?TilePotentSulfur{
-		$tile = $this->position->getWorld()->getTile($this->position);
+	public function onPostPlace() : void{
+		if($this->state->isErupting()){
+			$this->startErupting();
+		}
 
-		return $tile instanceof TilePotentSulfur ? $tile : null;
+		$this->scheduleTickIfActive();
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
@@ -132,6 +134,48 @@ final class PotentSulfur extends Opaque{
 		if($state !== $this->state){
 			$this->applyState($state);
 		}
+	}
+
+	private function getTile() : ?TilePotentSulfur{
+		$tile = $this->position->getWorld()->getTile($this->position);
+
+		return $tile instanceof TilePotentSulfur ? $tile : null;
+	}
+
+	public function onScheduledUpdate() : void{
+		$world = $this->position->getWorld();
+		if($this->state === PotentSulfurState::DRY){
+			return;
+		}
+
+		$source = $this->findGasSource();
+		if($source !== null){
+			if(--$this->gasEffectCooldown <= 0){
+				$this->gasEffectCooldown = self::GAS_EFFECT_INTERVAL_TICKS;
+				$this->applyNoxiousGas($source);
+			}
+
+			if($this->state !== PotentSulfurState::CONTINUOUS){
+				if($this->stateChangeCooldown <= 0){
+					$this->stateChangeCooldown = $this->rollPhaseDuration($source);
+				}
+				if(--$this->stateChangeCooldown <= 0){
+					$this->applyState($this->state === PotentSulfurState::DORMANT ? PotentSulfurState::ERUPTING : PotentSulfurState::DORMANT);
+				}
+			}
+
+			if($this->state->isErupting()){
+				$this->launchEntities($source);
+				if(--$this->eruptionSoundCooldown <= 0){
+					$this->eruptionSoundCooldown = self::ERUPTION_SOUND_INTERVAL_TICKS;
+					$this->playEruptionSound($source);
+				}
+			}
+
+			$this->saveCooldowns();
+		}
+
+		$world->scheduleDelayedBlockUpdate($this->position, 1);
 	}
 
 	private function applyState(PotentSulfurState $state) : void{
@@ -183,42 +227,6 @@ final class PotentSulfur extends Opaque{
 		}
 
 		return PotentSulfurState::DORMANT;
-	}
-
-	public function onScheduledUpdate() : void{
-		$world = $this->position->getWorld();
-		if($this->state === PotentSulfurState::DRY){
-			return;
-		}
-
-		$source = $this->findGasSource();
-		if($source !== null){
-			if(--$this->gasEffectCooldown <= 0){
-				$this->gasEffectCooldown = self::GAS_EFFECT_INTERVAL_TICKS;
-				$this->applyNoxiousGas($source);
-			}
-
-			if($this->state !== PotentSulfurState::CONTINUOUS){
-				if($this->stateChangeCooldown <= 0){
-					$this->stateChangeCooldown = $this->rollPhaseDuration($source);
-				}
-				if(--$this->stateChangeCooldown <= 0){
-					$this->applyState($this->state === PotentSulfurState::DORMANT ? PotentSulfurState::ERUPTING : PotentSulfurState::DORMANT);
-				}
-			}
-
-			if($this->state->isErupting()){
-				$this->launchEntities($source);
-				if(--$this->eruptionSoundCooldown <= 0){
-					$this->eruptionSoundCooldown = self::ERUPTION_SOUND_INTERVAL_TICKS;
-					$this->playEruptionSound($source);
-				}
-			}
-
-			$this->saveCooldowns();
-		}
-
-		$world->scheduleDelayedBlockUpdate($this->position, 1);
 	}
 
 	private function rollPhaseDuration(Block $source) : int{
@@ -355,13 +363,5 @@ final class PotentSulfur extends Opaque{
 				$entity->addMotion(0, self::GEYSER_LAUNCH_FORCE, 0);
 			}
 		}
-	}
-
-	public function onPostPlace() : void{
-		if($this->state->isErupting()){
-			$this->startErupting();
-		}
-
-		$this->scheduleTickIfActive();
 	}
 }
