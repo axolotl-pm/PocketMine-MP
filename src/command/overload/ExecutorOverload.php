@@ -204,6 +204,12 @@ final class ExecutorOverload implements Overload{
 	public function invoke(CommandContext $context, int $offset, array $parentArgs, int $parentParametersParsed) : bool{
 		$parameters = $parentParametersParsed > 0 ? array_slice($this->parameters, $parentParametersParsed) : $this->parameters;
 
+		$sender = $context->getSender();
+		if(!$this->senderHasAnyPermissions($sender)){
+			$context->permissionDenied($this);
+			return false;
+		}
+
 		$commandLine = $context->getCommandLine();
 		try{
 			$myArgs = CommandStringHelper::parseArguments($parameters, $commandLine, $offset);
@@ -222,11 +228,6 @@ final class ExecutorOverload implements Overload{
 		//Reflection magic here :)
 		//TODO: maybe we don't want to invoke this directly, but hand the args back to the caller?
 		//this would allow resolving by more than just overload order
-		$sender = $context->getSender();
-		if(!$this->senderHasAnyPermissions($sender)){
-			$context->permissionDenied($this);
-			return false;
-		}
 		try{
 			if($this->acceptsAliasUsed){
 				// @phpstan-ignore-next-line
