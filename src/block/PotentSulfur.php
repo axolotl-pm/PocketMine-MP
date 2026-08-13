@@ -33,7 +33,6 @@ use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
-use pocketmine\math\VoxelRayTrace;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\GeyserContinuousEruptionActiveSound;
@@ -308,21 +307,7 @@ final class PotentSulfur extends Opaque{
 			return false;
 		}
 
-		return $this->hasLineOfSight($source->position->add(0.5, -0.5, 0.5), $feetPos);
-	}
-
-	private function hasLineOfSight(Vector3 $from, Vector3 $to) : bool{
-		$world = $this->position->getWorld();
-		foreach(VoxelRayTrace::betweenPoints($from, $to) as $blockPos){
-			$block = $world->getBlockAt($blockPos->getFloorX(), $blockPos->getFloorY(), $blockPos->getFloorZ());
-			foreach($block->getCollisionBoxes() as $bb){
-				if($bb->calculateIntercept($from, $to) !== null){
-					return false;
-				}
-			}
-		}
-
-		return true;
+		return $world->hasLineOfSight($source->position->add(0.5, -0.5, 0.5), $feetPos);
 	}
 
 	/**
