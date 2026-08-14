@@ -46,12 +46,11 @@ use pocketmine\player\PlayerInfo;
 use pocketmine\player\XboxLivePlayerInfo;
 use pocketmine\Server;
 use pocketmine\utils\Utils;
+use pocketmine\utils\VersionString;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use function base64_decode;
 use function chr;
-use function count;
-use function explode;
 use function gettype;
 use function is_object;
 use function json_decode;
@@ -149,8 +148,12 @@ class LoginPacketHandler extends PacketHandler{
 		$clientData = $this->parseClientData($packet->clientDataJwt);
 		// TODO: Remove this check after v26.44
 		// This is a temporary measure because Mojang made breaking protocol changes in v26.44
-		$gameVersionPatch = $this->extractGameVersionPatch($clientData->GameVersion ?? '');
-		if($gameVersionPatch < 44){
+		try{
+			$version = new VersionString($clientData->GameVersion);
+		}catch(\InvalidArgumentException $e){
+			throw PacketHandlingException::wrap($e);
+		}
+		if($version->getPatch() < 44){
 			$this->session->disconnectWithError(KnownTranslationFactory::disconnectionScreen_outdatedClient());
 			return null;
 		}
@@ -352,25 +355,5 @@ class LoginPacketHandler extends PacketHandler{
 				throw new PacketHandlingException("$context: Too many unexpected JSON properties");
 			}
 		};
-	}
-
-	/**
-	 * Extracts the patch version number from a game version string.
-	 *
-	 * GameVersion format: "major.minor.patch.revision" (e.g., "1.26.44.3")
-	 * Returns the patch number (e.g., 44 from "1.26.44.3").
-	 *
-	 * @param string $gameVersion The game version string from ClientData
-	 * @return int The patch version number, or 0 if parsing fails
-	 */
-	private function extractGameVersionPatch(string $gameVersion) : int{
-		if($gameVersion === ''){
-			return 0;
-		}
-		$parts = explode('.', $gameVersion);
-		if(count($parts) < 3){
-			return 0;
-		}
-		return (int) ($parts[2] ?? 0);
 	}
 }
