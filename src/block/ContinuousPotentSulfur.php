@@ -21,16 +21,25 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\utils;
+namespace pocketmine\block;
 
-enum PotentSulfurState{
-	case DRY;
-	case WET;
-	case DORMANT;
-	case ERUPTING;
-	case CONTINUOUS;
+use pocketmine\world\sound\GeyserContinuousEruptionActiveSound;
+use pocketmine\world\sound\GeyserContinuousEruptionStartSound;
+use pocketmine\world\sound\Sound;
 
-	public function isErupting() : bool{
-		return $this === self::ERUPTING || $this === self::CONTINUOUS;
+final class ContinuousPotentSulfur extends EruptivePotentSulfur{
+
+	public function isErupting() : bool { return true; }
+
+	public function getEruptionStartSound() : Sound{
+		return new GeyserContinuousEruptionStartSound();
+	}
+
+	public function getEruptionPulseSound() : Sound{
+		return new GeyserContinuousEruptionActiveSound();
+	}
+
+	public function getFormationSound() : Sound{
+		return $this->getEruptionStartSound();
 	}
 }

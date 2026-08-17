@@ -621,7 +621,6 @@ final class VanillaBlocksInputs extends RegistrySource{
 		$sulfurBreakInfo = new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0));
 
 		self::register("sulfur", fn(BID $id) => new Opaque($id, "Sulfur", $sulfurBreakInfo));
-		self::register("potent_sulfur", fn(BID $id) => new PotentSulfur($id, "Potent Sulfur", $sulfurBreakInfo), TilePotentSulfur::class);
 		self::register("sulfur_slab", fn(BID $id) => new Slab($id, "Sulfur", $sulfurBreakInfo));
 		self::register("sulfur_stairs", fn(BID $id) => new Stair($id, "Sulfur Stairs", $sulfurBreakInfo));
 		self::register("sulfur_wall", fn(BID $id) => new Wall($id, "Sulfur Wall", $sulfurBreakInfo));
@@ -636,6 +635,11 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("sulfur_brick_slab", fn(BID $id) => new Slab($id, "Sulfur Brick", $sulfurBreakInfo));
 		self::register("sulfur_brick_stairs", fn(BID $id) => new Stair($id, "Sulfur Brick Stairs", $sulfurBreakInfo));
 		self::register("sulfur_brick_wall", fn(BID $id) => new Wall($id, "Sulfur Brick Wall", $sulfurBreakInfo));
+
+		self::register("potent_sulfur", fn(BID $id) => new PotentSulfur($id, "Potent Sulfur", $sulfurBreakInfo), TilePotentSulfur::class);
+		self::register("wet_potent_sulfur", fn(BID $id) => new WetPotentSulfur($id, "Wet Potent Sulfur", $sulfurBreakInfo), TilePotentSulfur::class);
+		self::register("continuous_potent_sulfur", fn(BID $id) => new ContinuousPotentSulfur($id, "Continuous Potent Sulfur", $sulfurBreakInfo), TilePotentSulfur::class);
+		self::register("cycling_potent_sulfur", fn(BID $id) => new CyclingPotentSulfur($id, "Cycling Potent Sulfur", $sulfurBreakInfo), TilePotentSulfur::class);
 
 		$cinnabarBreakInfo = new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0));
 

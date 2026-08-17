@@ -31,9 +31,7 @@ use pocketmine\nbt\tag\CompoundTag;
  */
 final class PotentSulfur extends Tile{
 
-	private int $gasEffectCooldown = 0;
-	private int $stateChangeCooldown = 0;
-	private int $eruptionSoundCooldown = 0;
+	private int $heartbeatsUntilPhaseShift = 0;
 
 	public function readSaveData(CompoundTag $nbt) : void{
 	}
@@ -41,21 +39,9 @@ final class PotentSulfur extends Tile{
 	protected function writeSaveData(CompoundTag $nbt) : void{
 	}
 
-	public function getGasEffectCooldown() : int{ return $this->gasEffectCooldown; }
+	public function getHeartbeatsUntilPhaseShift() : int{ return $this->heartbeatsUntilPhaseShift; }
 
-	public function setGasEffectCooldown(int $gasEffectCooldown) : void{
-		$this->gasEffectCooldown = $gasEffectCooldown;
-	}
-
-	public function getStateChangeCooldown() : int{ return $this->stateChangeCooldown; }
-
-	public function setStateChangeCooldown(int $stateChangeCooldown) : void{
-		$this->stateChangeCooldown = $stateChangeCooldown;
-	}
-
-	public function getEruptionSoundCooldown() : int{ return $this->eruptionSoundCooldown; }
-
-	public function setEruptionSoundCooldown(int $eruptionSoundCooldown) : void{
-		$this->eruptionSoundCooldown = $eruptionSoundCooldown;
+	public function setHeartbeatsUntilPhaseShift(int $heartbeats) : void{
+		$this->heartbeatsUntilPhaseShift = $heartbeats;
 	}
 }

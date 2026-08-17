@@ -44,6 +44,7 @@ use pocketmine\block\ChorusFlower;
 use pocketmine\block\CocoaBlock;
 use pocketmine\block\Copper;
 use pocketmine\block\CopperLantern;
+use pocketmine\block\CyclingPotentSulfur;
 use pocketmine\block\DaylightSensor;
 use pocketmine\block\DetectorRail;
 use pocketmine\block\Dirt;
@@ -70,7 +71,6 @@ use pocketmine\block\NetherVines;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\PinkPetals;
 use pocketmine\block\PitcherCrop;
-use pocketmine\block\PotentSulfur;
 use pocketmine\block\PoweredRail;
 use pocketmine\block\Rail;
 use pocketmine\block\RedMushroomBlock;
@@ -102,7 +102,6 @@ use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\MobHeadType;
 use pocketmine\block\utils\MushroomBlockType;
-use pocketmine\block\utils\PotentSulfurState;
 use pocketmine\block\utils\PoweredByRedstone;
 use pocketmine\block\VanillaBlocks as Blocks;
 use pocketmine\block\Vine;
@@ -1514,20 +1513,6 @@ final class VanillaBlockMappings{
 		$reg->mapModel(Model::create(Blocks::STONECUTTER(), Ids::STONECUTTER_BLOCK)->properties([
 			$commonProperties->horizontalFacingCardinal
 		]));
-		$reg->mapModel(Model::create(Blocks::POTENT_SULFUR(), Ids::POTENT_SULFUR)->properties([
-			new ValueFromStringProperty(
-				StateNames::POTENT_SULFUR_STATE,
-				EnumFromRawStateMap::string(PotentSulfurState::class, fn(PotentSulfurState $case) => match($case){
-					PotentSulfurState::DRY => StringValues::POTENT_SULFUR_STATE_DRY,
-					PotentSulfurState::WET => StringValues::POTENT_SULFUR_STATE_WET,
-					PotentSulfurState::DORMANT => StringValues::POTENT_SULFUR_STATE_DORMANT,
-					PotentSulfurState::ERUPTING => StringValues::POTENT_SULFUR_STATE_ERUPTING,
-					PotentSulfurState::CONTINUOUS => StringValues::POTENT_SULFUR_STATE_CONTINUOUS,
-				}),
-				fn(PotentSulfur $b) => $b->getPotentSulfurState(),
-				fn(PotentSulfur $b, PotentSulfurState $v) => $b->setPotentSulfurState($v)
-			)
-		]));
 		$reg->mapModel(Model::create(Blocks::SUGARCANE(), Ids::REEDS)->properties([
 			new IntProperty(StateNames::AGE, 0, 15, fn(Sugarcane $b) => $b->getAge(), fn(Sugarcane $b, int $v) => $b->setAge($v))
 		]));
@@ -1735,5 +1720,30 @@ final class VanillaBlockMappings{
 				) :
 				self::deserializeAsymmetric($wallModel, $in));
 		}
+
+		//potent sulfure
+		$dryPotentSulfurModel = Model::create(Blocks::POTENT_SULFUR(), Ids::POTENT_SULFUR)->properties([
+			new DummyProperty(StateNames::POTENT_SULFUR_STATE, StringValues::POTENT_SULFUR_STATE_DRY)
+		]);
+		$wetPotentSulfurModel = Model::create(Blocks::WET_POTENT_SULFUR(), Ids::POTENT_SULFUR)->properties([
+			new DummyProperty(StateNames::POTENT_SULFUR_STATE, StringValues::POTENT_SULFUR_STATE_WET)
+		]);
+		$continuousPotentSulfurModel = Model::create(Blocks::CONTINUOUS_POTENT_SULFUR(), Ids::POTENT_SULFUR)->properties([
+			new DummyProperty(StateNames::POTENT_SULFUR_STATE, StringValues::POTENT_SULFUR_STATE_CONTINUOUS)
+		]);
+		$cyclingPotentSulfurModel = Model::create(Blocks::CYCLING_POTENT_SULFUR(), Ids::POTENT_SULFUR)->properties([
+			new BoolFromStringProperty(StateNames::POTENT_SULFUR_STATE, StringValues::POTENT_SULFUR_STATE_DORMANT, StringValues::POTENT_SULFUR_STATE_ERUPTING, fn(CyclingPotentSulfur $b) => $b->isErupting(), fn(CyclingPotentSulfur $b, bool $v) => $b->setErupting($v))
+		]);
+		self::mapAsymmetricSerializer($reg, $dryPotentSulfurModel);
+		self::mapAsymmetricSerializer($reg, $wetPotentSulfurModel);
+		self::mapAsymmetricSerializer($reg, $continuousPotentSulfurModel);
+		self::mapAsymmetricSerializer($reg, $cyclingPotentSulfurModel);
+		$reg->deserializer->map(Ids::POTENT_SULFUR, fn(Reader $in) => match($state = $in->readString(StateNames::POTENT_SULFUR_STATE)){
+				StringValues::POTENT_SULFUR_STATE_DRY => self::deserializeAsymmetric($dryPotentSulfurModel, $in),
+				StringValues::POTENT_SULFUR_STATE_WET => self::deserializeAsymmetric($wetPotentSulfurModel, $in),
+				StringValues::POTENT_SULFUR_STATE_CONTINUOUS => self::deserializeAsymmetric($continuousPotentSulfurModel, $in),
+				default => self::deserializeAsymmetric($cyclingPotentSulfurModel, $in)
+			}
+		);
 	}
 }

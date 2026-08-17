@@ -212,6 +212,7 @@ final class VanillaBlocks{
 	private static ChemistryTable $_mCOMPOUND_CREATOR;
 	private static Concrete $_mCONCRETE;
 	private static ConcretePowder $_mCONCRETE_POWDER;
+	private static ContinuousPotentSulfur $_mCONTINUOUS_POTENT_SULFUR;
 	private static Copper $_mCOPPER;
 	private static CopperBars $_mCOPPER_BARS;
 	private static CopperBulb $_mCOPPER_BULB;
@@ -259,6 +260,7 @@ final class VanillaBlocks{
 	private static Slab $_mCUT_RED_SANDSTONE_SLAB;
 	private static Opaque $_mCUT_SANDSTONE;
 	private static Slab $_mCUT_SANDSTONE_SLAB;
+	private static CyclingPotentSulfur $_mCYCLING_POTENT_SULFUR;
 	private static Flower $_mDANDELION;
 	private static WoodenButton $_mDARK_OAK_BUTTON;
 	private static CeilingCenterHangingSign $_mDARK_OAK_CEILING_CENTER_HANGING_SIGN;
@@ -861,6 +863,7 @@ final class VanillaBlocks{
 	private static NetherVines $_mWEEPING_VINES;
 	private static WeightedPressurePlateHeavy $_mWEIGHTED_PRESSURE_PLATE_HEAVY;
 	private static WeightedPressurePlateLight $_mWEIGHTED_PRESSURE_PLATE_LIGHT;
+	private static WetPotentSulfur $_mWET_POTENT_SULFUR;
 	private static Wheat $_mWHEAT;
 	private static Flower $_mWHITE_TULIP;
 	private static WitherRose $_mWITHER_ROSE;
@@ -1073,6 +1076,7 @@ final class VanillaBlocks{
 			"compound_creator" => fn(ChemistryTable $v) => self::$_mCOMPOUND_CREATOR = $v,
 			"concrete" => fn(Concrete $v) => self::$_mCONCRETE = $v,
 			"concrete_powder" => fn(ConcretePowder $v) => self::$_mCONCRETE_POWDER = $v,
+			"continuous_potent_sulfur" => fn(ContinuousPotentSulfur $v) => self::$_mCONTINUOUS_POTENT_SULFUR = $v,
 			"copper" => fn(Copper $v) => self::$_mCOPPER = $v,
 			"copper_bars" => fn(CopperBars $v) => self::$_mCOPPER_BARS = $v,
 			"copper_bulb" => fn(CopperBulb $v) => self::$_mCOPPER_BULB = $v,
@@ -1120,6 +1124,7 @@ final class VanillaBlocks{
 			"cut_red_sandstone_slab" => fn(Slab $v) => self::$_mCUT_RED_SANDSTONE_SLAB = $v,
 			"cut_sandstone" => fn(Opaque $v) => self::$_mCUT_SANDSTONE = $v,
 			"cut_sandstone_slab" => fn(Slab $v) => self::$_mCUT_SANDSTONE_SLAB = $v,
+			"cycling_potent_sulfur" => fn(CyclingPotentSulfur $v) => self::$_mCYCLING_POTENT_SULFUR = $v,
 			"dandelion" => fn(Flower $v) => self::$_mDANDELION = $v,
 			"dark_oak_button" => fn(WoodenButton $v) => self::$_mDARK_OAK_BUTTON = $v,
 			"dark_oak_ceiling_center_hanging_sign" => fn(CeilingCenterHangingSign $v) => self::$_mDARK_OAK_CEILING_CENTER_HANGING_SIGN = $v,
@@ -1722,6 +1727,7 @@ final class VanillaBlocks{
 			"weeping_vines" => fn(NetherVines $v) => self::$_mWEEPING_VINES = $v,
 			"weighted_pressure_plate_heavy" => fn(WeightedPressurePlateHeavy $v) => self::$_mWEIGHTED_PRESSURE_PLATE_HEAVY = $v,
 			"weighted_pressure_plate_light" => fn(WeightedPressurePlateLight $v) => self::$_mWEIGHTED_PRESSURE_PLATE_LIGHT = $v,
+			"wet_potent_sulfur" => fn(WetPotentSulfur $v) => self::$_mWET_POTENT_SULFUR = $v,
 			"wheat" => fn(Wheat $v) => self::$_mWHEAT = $v,
 			"white_tulip" => fn(Flower $v) => self::$_mWHITE_TULIP = $v,
 			"wither_rose" => fn(WitherRose $v) => self::$_mWITHER_ROSE = $v,
@@ -2634,6 +2640,11 @@ final class VanillaBlocks{
 		return clone self::$_mCONCRETE_POWDER;
 	}
 
+	public static function CONTINUOUS_POTENT_SULFUR() : ContinuousPotentSulfur{
+		if(!isset(self::$_mCONTINUOUS_POTENT_SULFUR)){ self::init(); }
+		return clone self::$_mCONTINUOUS_POTENT_SULFUR;
+	}
+
 	public static function COPPER() : Copper{
 		if(!isset(self::$_mCOPPER)){ self::init(); }
 		return clone self::$_mCOPPER;
@@ -2867,6 +2878,11 @@ final class VanillaBlocks{
 	public static function CUT_SANDSTONE_SLAB() : Slab{
 		if(!isset(self::$_mCUT_SANDSTONE_SLAB)){ self::init(); }
 		return clone self::$_mCUT_SANDSTONE_SLAB;
+	}
+
+	public static function CYCLING_POTENT_SULFUR() : CyclingPotentSulfur{
+		if(!isset(self::$_mCYCLING_POTENT_SULFUR)){ self::init(); }
+		return clone self::$_mCYCLING_POTENT_SULFUR;
 	}
 
 	public static function DANDELION() : Flower{
@@ -5877,6 +5893,11 @@ final class VanillaBlocks{
 	public static function WEIGHTED_PRESSURE_PLATE_LIGHT() : WeightedPressurePlateLight{
 		if(!isset(self::$_mWEIGHTED_PRESSURE_PLATE_LIGHT)){ self::init(); }
 		return clone self::$_mWEIGHTED_PRESSURE_PLATE_LIGHT;
+	}
+
+	public static function WET_POTENT_SULFUR() : WetPotentSulfur{
+		if(!isset(self::$_mWET_POTENT_SULFUR)){ self::init(); }
+		return clone self::$_mWET_POTENT_SULFUR;
 	}
 
 	public static function WHEAT() : Wheat{
