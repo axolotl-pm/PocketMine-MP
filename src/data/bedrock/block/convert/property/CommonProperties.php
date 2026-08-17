@@ -203,6 +203,18 @@ final class CommonProperties{
 	 */
 	public readonly array $wallProperties;
 
+	/**
+	 * @var Property[]
+	 * @phpstan-var non-empty-list<Property<object>>
+	 */
+	public readonly array $horizontalConnectionProperties;
+
+	/**
+	 * @var Property[]
+	 * @phpstan-var non-empty-list<Property<object>>
+	 */
+	public readonly array $allConnectionProperties;
+
 	private function __construct(){
 		$vm = ValueMappings::getInstance();
 
@@ -390,8 +402,27 @@ final class CommonProperties{
 		];
 
 		$this->stairProperties = [
+			new DummyProperty(StateNames::MC_CORNER, BlockStateStringValues::MC_CORNER_NONE),
 			new BoolProperty(StateNames::UPSIDE_DOWN_BIT, fn(Stair $b) => $b->isUpsideDown(), fn(Stair $b, bool $v) => $b->setUpsideDown($v)),
 			new ValueFromIntProperty(StateNames::WEIRDO_DIRECTION, $vm->horizontalFacing5Minus, $hfGet, $hfSet),
+		];
+
+		//TODO: PM doesn't model these connection states yet, so emit them for now.
+		$this->horizontalConnectionProperties = [
+			new DummyProperty(StateNames::MC_CONNECTION_EAST, false),
+			new DummyProperty(StateNames::MC_CONNECTION_NORTH, false),
+			new DummyProperty(StateNames::MC_CONNECTION_SOUTH, false),
+			new DummyProperty(StateNames::MC_CONNECTION_WEST, false),
+		];
+
+		//Same as above
+		$this->allConnectionProperties = [
+			new DummyProperty(StateNames::MC_CONNECTION_DOWN, false),
+			new DummyProperty(StateNames::MC_CONNECTION_EAST, false),
+			new DummyProperty(StateNames::MC_CONNECTION_NORTH, false),
+			new DummyProperty(StateNames::MC_CONNECTION_SOUTH, false),
+			new DummyProperty(StateNames::MC_CONNECTION_UP, false),
+			new DummyProperty(StateNames::MC_CONNECTION_WEST, false),
 		];
 
 		$this->stemProperties = [

@@ -183,7 +183,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::CHISELED_STONE_BRICKS(), Ids::CHISELED_STONE_BRICKS);
 		$reg->mapSimple(Blocks::CHISELED_TUFF(), Ids::CHISELED_TUFF);
 		$reg->mapSimple(Blocks::CHISELED_TUFF_BRICKS(), Ids::CHISELED_TUFF_BRICKS);
-		$reg->mapSimple(Blocks::CHORUS_PLANT(), Ids::CHORUS_PLANT);
+		$reg->mapAllConnections(Blocks::CHORUS_PLANT(), Ids::CHORUS_PLANT);
 		$reg->mapSimple(Blocks::CLAY(), Ids::CLAY);
 		$reg->mapSimple(Blocks::COAL(), Ids::COAL_BLOCK);
 		$reg->mapSimple(Blocks::COAL_ORE(), Ids::COAL_ORE);
@@ -347,7 +347,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::FLOWERING_AZALEA(), Ids::FLOWERING_AZALEA);
 		$reg->mapSimple(Blocks::GILDED_BLACKSTONE(), Ids::GILDED_BLACKSTONE);
 		$reg->mapSimple(Blocks::GLASS(), Ids::GLASS);
-		$reg->mapSimple(Blocks::GLASS_PANE(), Ids::GLASS_PANE);
+		$reg->mapHorizontalConnections(Blocks::GLASS_PANE(), Ids::GLASS_PANE);
 		$reg->mapSimple(Blocks::GLOWING_OBSIDIAN(), Ids::GLOWINGOBSIDIAN);
 		$reg->mapSimple(Blocks::GLOWSTONE(), Ids::GLOWSTONE);
 		$reg->mapSimple(Blocks::GOLD(), Ids::GOLD_BLOCK);
@@ -359,7 +359,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::HANGING_ROOTS(), Ids::HANGING_ROOTS);
 		$reg->mapSimple(Blocks::HARDENED_CLAY(), Ids::HARDENED_CLAY);
 		$reg->mapSimple(Blocks::HARDENED_GLASS(), Ids::HARD_GLASS);
-		$reg->mapSimple(Blocks::HARDENED_GLASS_PANE(), Ids::HARD_GLASS_PANE);
+		$reg->mapHorizontalConnections(Blocks::HARDENED_GLASS_PANE(), Ids::HARD_GLASS_PANE);
 		$reg->mapSimple(Blocks::HONEYCOMB(), Ids::HONEYCOMB_BLOCK);
 		$reg->mapSimple(Blocks::ICE(), Ids::ICE);
 		$reg->mapSimple(Blocks::INFESTED_CHISELED_STONE_BRICK(), Ids::INFESTED_CHISELED_STONE_BRICKS);
@@ -372,7 +372,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::INFO_UPDATE2(), Ids::INFO_UPDATE2);
 		$reg->mapSimple(Blocks::INVISIBLE_BEDROCK(), Ids::INVISIBLE_BEDROCK);
 		$reg->mapSimple(Blocks::IRON(), Ids::IRON_BLOCK);
-		$reg->mapSimple(Blocks::IRON_BARS(), Ids::IRON_BARS);
+		$reg->mapHorizontalConnections(Blocks::IRON_BARS(), Ids::IRON_BARS);
 		$reg->mapSimple(Blocks::IRON_ORE(), Ids::IRON_ORE);
 		$reg->mapSimple(Blocks::JUKEBOX(), Ids::JUKEBOX);
 		$reg->mapSimple(Blocks::LAPIS_LAZULI(), Ids::LAPIS_BLOCK);
@@ -391,7 +391,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::NETHERITE(), Ids::NETHERITE_BLOCK);
 		$reg->mapSimple(Blocks::NETHERRACK(), Ids::NETHERRACK);
 		$reg->mapSimple(Blocks::NETHER_BRICKS(), Ids::NETHER_BRICK);
-		$reg->mapSimple(Blocks::NETHER_BRICK_FENCE(), Ids::NETHER_BRICK_FENCE);
+		$reg->mapHorizontalConnections(Blocks::NETHER_BRICK_FENCE(), Ids::NETHER_BRICK_FENCE);
 		$reg->mapSimple(Blocks::NETHER_GOLD_ORE(), Ids::NETHER_GOLD_ORE);
 		$reg->mapSimple(Blocks::NETHER_QUARTZ_ORE(), Ids::QUARTZ_ORE);
 		$reg->mapSimple(Blocks::NETHER_REACTOR_CORE(), Ids::NETHERREACTOR);
@@ -473,7 +473,7 @@ final class VanillaBlockMappings{
 
 	private static function registerColoredMappings(BlockSerializerDeserializerRegistrar $reg, CommonProperties $commonProperties) : void{
 		$reg->mapColored(Blocks::STAINED_HARDENED_GLASS(), "minecraft:hard_", "_stained_glass");
-		$reg->mapColored(Blocks::STAINED_HARDENED_GLASS_PANE(), "minecraft:hard_", "_stained_glass_pane");
+		$reg->mapColoredHorizontalConnections(Blocks::STAINED_HARDENED_GLASS_PANE(), "minecraft:hard_", "_stained_glass_pane");
 
 		$reg->mapColored(Blocks::CARPET(), "minecraft:", "_carpet");
 		$reg->mapColored(Blocks::CONCRETE(), "minecraft:", "_concrete");
@@ -481,7 +481,7 @@ final class VanillaBlockMappings{
 		$reg->mapColored(Blocks::DYED_SHULKER_BOX(), "minecraft:", "_shulker_box");
 		$reg->mapColored(Blocks::STAINED_CLAY(), "minecraft:", "_terracotta");
 		$reg->mapColored(Blocks::STAINED_GLASS(), "minecraft:", "_stained_glass");
-		$reg->mapColored(Blocks::STAINED_GLASS_PANE(), "minecraft:", "_stained_glass_pane");
+		$reg->mapColoredHorizontalConnections(Blocks::STAINED_GLASS_PANE(), "minecraft:", "_stained_glass_pane");
 		$reg->mapColored(Blocks::WOOL(), "minecraft:", "_wool");
 
 		$reg->mapFlattenedId(FlattenedIdModel::create(Blocks::GLAZED_TERRACOTTA())
@@ -673,7 +673,7 @@ final class VanillaBlockMappings{
 			->properties([$commonProperties->slabPositionProperty])
 		);
 
-		$reg->mapFlattenedId(FlattenedIdModel::create(Blocks::COPPER_BARS())->idComponents([...$commonProperties->copperIdPrefixes, "copper_bars"]));
+		$reg->mapFlattenedId(FlattenedIdModel::create(Blocks::COPPER_BARS())->idComponents([...$commonProperties->copperIdPrefixes, "copper_bars"])->properties($commonProperties->horizontalConnectionProperties));
 		$reg->mapFlattenedId(FlattenedIdModel::create(Blocks::COPPER_CHAIN())
 			->idComponents([...$commonProperties->copperIdPrefixes, "copper_chain"])
 			->properties([$commonProperties->pillarAxis])
@@ -1043,7 +1043,7 @@ final class VanillaBlockMappings{
 			[Blocks::CRIMSON_FENCE(), Ids::CRIMSON_FENCE],
 			[Blocks::WARPED_FENCE(), Ids::WARPED_FENCE]
 		] as [$block, $id]){
-			$reg->mapSimple($block, $id);
+			$reg->mapHorizontalConnections($block, $id);
 		}
 
 		foreach([
@@ -1362,7 +1362,8 @@ final class VanillaBlockMappings{
 			new IntProperty(StateNames::MOISTURIZED_AMOUNT, 0, 7, fn(Farmland $b) => $b->getWetness(), fn(Farmland $b, int $v) => $b->setWetness($v))
 		]));
 		$reg->mapModel(Model::create(Blocks::FIRE(), Ids::FIRE)->properties([
-			new IntProperty(StateNames::AGE, 0, 15, fn(Fire $b) => $b->getAge(), fn(Fire $b, int $v) => $b->setAge($v))
+			new IntProperty(StateNames::AGE, 0, 15, fn(Fire $b) => $b->getAge(), fn(Fire $b, int $v) => $b->setAge($v)),
+			...$commonProperties->allConnectionProperties
 		]));
 		$reg->mapModel(Model::create(Blocks::FLOWER_POT(), Ids::FLOWER_POT)->properties([
 			BoolProperty::unused(StateNames::UPDATE_BIT, false)
@@ -1497,6 +1498,7 @@ final class VanillaBlockMappings{
 			new BoolProperty(StateNames::DISARMED_BIT, fn(Tripwire $b) => $b->isDisarmed(), fn(Tripwire $b, bool $v) => $b->setDisarmed($v)),
 			new BoolProperty(StateNames::SUSPENDED_BIT, fn(Tripwire $b) => $b->isSuspended(), fn(Tripwire $b, bool $v) => $b->setSuspended($v)),
 			new BoolProperty(StateNames::POWERED_BIT, fn(Tripwire $b) => $b->isTriggered(), fn(Tripwire $b, bool $v) => $b->setTriggered($v)),
+			...$commonProperties->horizontalConnectionProperties
 		]));
 		$reg->mapModel(Model::create(Blocks::TRIPWIRE_HOOK(), Ids::TRIPWIRE_HOOK)->properties([
 			new BoolProperty(StateNames::ATTACHED_BIT, fn(TripwireHook $b) => $b->isConnected(), fn(TripwireHook $b, bool $v) => $b->setConnected($v)),

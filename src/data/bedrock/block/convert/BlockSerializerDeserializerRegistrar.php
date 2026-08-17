@@ -198,6 +198,29 @@ final class BlockSerializerDeserializerRegistrar{
 		);
 	}
 
+	public function mapHorizontalConnections(Block $block, string $id) : void{
+		$this->mapModel(Model::create($block, $id)->properties(CommonProperties::getInstance()->horizontalConnectionProperties));
+	}
+
+	public function mapAllConnections(Block $block, string $id) : void{
+		$this->mapModel(Model::create($block, $id)->properties(CommonProperties::getInstance()->allConnectionProperties));
+	}
+
+	/**
+	 * @phpstan-template TBlock of Block&Colored
+	 * @phpstan-param TBlock $block
+	 */
+	public function mapColoredHorizontalConnections(Block $block, string $idPrefix, string $idSuffix) : void{
+		$this->mapFlattenedId(FlattenedIdModel::create($block)
+			->idComponents([
+				$idPrefix,
+				CommonProperties::getInstance()->dyeColorIdInfix,
+				$idSuffix
+			])
+			->properties(CommonProperties::getInstance()->horizontalConnectionProperties)
+		);
+	}
+
 	public function mapSlab(Slab $block, string $type) : void{
 		$commonProperties = CommonProperties::getInstance();
 		$this->mapFlattenedId(FlattenedIdModel::create($block)
