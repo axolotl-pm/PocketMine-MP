@@ -42,6 +42,11 @@ final class BuddingAmethyst extends Opaque{
 			$face = Facing::ALL[array_rand(Facing::ALL)];
 
 			$adjacent = $this->getSide($face);
+
+			if(!$this->position->getWorld()->isInWorld($adjacent->position->x, $adjacent->position->y, $adjacent->position->z)){
+				return;
+			}
+
 			//TODO: amethyst buds can spawn in water - we need waterlogging support for this
 
 			$newStage = null;
