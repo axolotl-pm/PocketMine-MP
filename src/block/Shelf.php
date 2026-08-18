@@ -141,7 +141,6 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 			}
 			$inventory->setItem($slot, $item);
 			$player->getInventory()->setItemInHand($shelfItem);
-			$this->position->getWorld()->setBlock($this->position, $this);
 			$this->position->getWorld()->addSound(
 				$this->position,
 				$shelfItem->isNull() ? new ShelfPlaceItemSound() : new ShelfSingleSwapSound()
@@ -149,11 +148,6 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		}
 
 		return true;
-	}
-
-	/** @return Item[] */
-	public function getDropsForCompatibleTool(Item $item) : array{
-		return [$this->asItem()];
 	}
 
 	public function getFuelTime() : int{
@@ -217,11 +211,6 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 				$tile->getInventory()->setItem($shelfSlot, $hotbarItem);
 				$inventory->setItem($hotbarSlot - 1, $shelfItem);
 			}
-		}
-
-		$world = $this->position->getWorld();
-		foreach($shelves as $shelf){
-			$world->setBlock($shelf->getPosition(), $shelf, false);
 		}
 
 		return true;

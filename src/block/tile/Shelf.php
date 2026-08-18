@@ -50,7 +50,7 @@ class Shelf extends Spawnable implements Container{
 		parent::__construct($world, $pos);
 		$this->inventory = new SimpleInventory(self::SLOT_COUNT);
 		$this->inventory->getListeners()->add(CallbackInventoryListener::onAnyChange(
-			static function(Inventory $unused) use ($world, $pos) : void{
+			static function(Inventory $_) use ($world, $pos) : void{
 				$block = $world->getBlock($pos);
 				if($block instanceof BlockShelf){
 					$world->setBlock($pos, $block);
