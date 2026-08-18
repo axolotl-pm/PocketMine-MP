@@ -40,6 +40,7 @@ use pocketmine\player\Player;
 use pocketmine\world\sound\ShelfActivateSound;
 use pocketmine\world\sound\ShelfDeactivateSound;
 use pocketmine\world\sound\ShelfMultiSwapSound;
+use pocketmine\world\sound\ShelfPlaceItemSound;
 use pocketmine\world\sound\ShelfSingleSwapSound;
 use function array_slice;
 use function array_unshift;
@@ -135,10 +136,16 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 
 			$inventory = $tile->getInventory();
 			$shelfItem = $inventory->getItem($slot);
+			if($shelfItem->isNull() && $item->isNull()){
+				return true;
+			}
 			$inventory->setItem($slot, $item);
 			$player->getInventory()->setItemInHand($shelfItem);
 			$this->position->getWorld()->setBlock($this->position, $this);
-			$this->position->getWorld()->addSound($this->position, new ShelfSingleSwapSound());
+			$this->position->getWorld()->addSound(
+				$this->position,
+				$shelfItem->isNull() ? new ShelfPlaceItemSound() : new ShelfSingleSwapSound()
+			);
 		}
 
 		return true;

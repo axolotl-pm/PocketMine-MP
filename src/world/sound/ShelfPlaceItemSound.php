@@ -27,10 +27,10 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\PlaySoundPacket;
 
-final class ShelfSingleSwapSound implements Sound{
+final class ShelfPlaceItemSound implements Sound{
 
 	/** @return ClientboundPacket[] */
 	public function encode(Vector3 $pos) : array{
-		return [PlaySoundPacket::create("block.shelf.single_swap", $pos->x, $pos->y, $pos->z, 1.0, 1.0, 0, null)];
+		return [PlaySoundPacket::create("block.shelf.place_item", $pos->x, $pos->y, $pos->z, 1.0, 1.0, 0, null)];
 	}
 }

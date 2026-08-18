@@ -25,13 +25,12 @@ namespace pocketmine\world\sound;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
-use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
-use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use pocketmine\network\mcpe\protocol\PlaySoundPacket;
 
 final class ShelfDeactivateSound implements Sound{
 
 	/** @return ClientboundPacket[] */
 	public function encode(Vector3 $pos) : array{
-		return [LevelSoundEventPacket::nonActorSound(LevelSoundEvent::DEACTIVATE, $pos, false)];
+		return [PlaySoundPacket::create("block.shelf.deactivate", $pos->x, $pos->y, $pos->z, 1.0, 1.0, 0, null)];
 	}
 }
