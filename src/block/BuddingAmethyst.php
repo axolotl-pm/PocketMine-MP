@@ -43,7 +43,7 @@ final class BuddingAmethyst extends Opaque{
 
 			$adjacent = $this->getSide($face);
 
-			if(!$this->position->getWorld()->isInWorld($adjacent->position->x, $adjacent->position->y, $adjacent->position->z)){
+			if(!$this->position->getWorld()->isInWorld($adjacent->position->getFloorX(), $adjacent->position->getFloorY(), $adjacent->position->getFloorZ())){
 				return;
 			}
 
