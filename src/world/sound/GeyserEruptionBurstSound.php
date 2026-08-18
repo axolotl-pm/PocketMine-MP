@@ -27,14 +27,9 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 
-final class GeyserContinuousEruptionActiveSound implements Sound{
+final class GeyserEruptionBurstSound implements Sound{
 
 	public function encode(Vector3 $pos) : array{
-		return [LevelSoundEventPacket::nonActorSound(
-			LevelSoundEvent::GEYSER_CONTINUOUS_ERUPTION_ACTIVE,
-			$pos,
-			false,
-			-1
-		)];
+		return [LevelSoundEventPacket::nonActorSound(LevelSoundEvent::GEYSER_ERUPTION_ACTIVE, $pos, false)];
 	}
 }

@@ -23,20 +23,20 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\world\sound\GeyserContinuousEruptionActiveSound;
+use pocketmine\world\sound\GeyserContinuousEruptionBurstSound;
 use pocketmine\world\sound\GeyserContinuousEruptionStartSound;
 use pocketmine\world\sound\Sound;
 
 final class ContinuousPotentSulfur extends EruptivePotentSulfur{
 
-	public function isErupting() : bool { return true; }
+	public function isErupting() : bool{ return true; }
 
 	public function getEruptionStartSound() : Sound{
 		return new GeyserContinuousEruptionStartSound();
 	}
 
-	public function getEruptionPulseSound() : Sound{
-		return new GeyserContinuousEruptionActiveSound();
+	public function getEruptionBurstSound() : Sound{
+		return new GeyserContinuousEruptionBurstSound();
 	}
 
 	public function getFormationSound() : Sound{

@@ -34,7 +34,7 @@ use function count;
 
 class WetPotentSulfur extends PotentSulfur{
 
-	protected const HEARTBEAT_TICKS = 10;
+	private const HEARTBEAT_TICKS = 10;
 
 	private const MAX_COLUMN_HEIGHT_BLOCKS = 4;
 
@@ -46,21 +46,36 @@ class WetPotentSulfur extends PotentSulfur{
 	}
 
 	public function onScheduledUpdate() : void{
-		$this->onGeyserHeartbeat($this->findOutlet());
+		$this->onGeyserHeartbeat($this->findGeyserOutlet());
 		$this->position->getWorld()->scheduleDelayedBlockUpdate($this->position, self::HEARTBEAT_TICKS);
 	}
 
+	/**
+	 * Handles the geyser's periodic heartbeat update.
+	 * Called every {@link WetPotentSulfur::HEARTBEAT_TICKS} ticks.
+	 */
 	protected function onGeyserHeartbeat(?Block $outlet) : void{
 		if($outlet !== null){
 			$this->pulseGas($outlet);
 		}
 	}
 
+	protected function isGeyserPassable(Block $block) : bool{
+		return count($block->getCollisionBoxes()) === 0;
+	}
+
+	/**
+	 * Returns the number of water blocks between this block and the outlet.
+	 */
+	protected function getWaterColumnLength(Block $outlet) : int{
+		return $outlet->position->getFloorY() - $this->position->getFloorY() - 1;
+	}
+
 	/**
 	 * Returns the first outlet block found by walking up the water column
 	 * above this block, or null if not found.
 	 */
-	protected function findOutlet() : ?Block{
+	private function findGeyserOutlet() : ?Block{
 		$maxY = $this->position->getFloorY() + self::MAX_COLUMN_HEIGHT_BLOCKS + 1;
 
 		$block = $this->getSide(Facing::UP, 2); //Skip immediate water above
@@ -76,14 +91,6 @@ class WetPotentSulfur extends PotentSulfur{
 		return null;
 	}
 
-	protected function isGeyserPassable(Block $block) : bool{
-		return count($block->getCollisionBoxes()) === 0;
-	}
-
-	protected function getWaterColumnDepth(Block $outlet) : int{
-		return $outlet->position->getFloorY() - $this->position->getFloorY() - 1;
-	}
-
 	private function pulseGas(Block $outlet) : void{
 		$world = $this->position->getWorld();
 		$bb = AxisAlignedBB::one()
@@ -95,14 +102,13 @@ class WetPotentSulfur extends PotentSulfur{
 				continue;
 			}
 
-			$eyePos = $entity->getEyePos();
-			if($this->gasCanReach($outlet, $eyePos)){
+			if($this->isExposedToGas($outlet, $entity->getEyePos())){
 				$entity->getEffects()->add(new EffectInstance(VanillaEffects::NAUSEA(), self::GAS_EFFECT_DURATION_TICKS, 0, true, true));
 			}
 		}
 	}
 
-	private function gasCanReach(Block $outlet, Vector3 $eyePos) : bool{
+	private function isExposedToGas(Block $outlet, Vector3 $eyePos) : bool{
 		$world = $this->position->getWorld();
 		if(!$this->isGeyserPassable($world->getBlock($eyePos))){
 			return false;

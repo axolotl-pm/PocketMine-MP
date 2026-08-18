@@ -48,6 +48,10 @@ class PotentSulfur extends Opaque{
 		}
 	}
 
+	/**
+	 * Returns the sound played once when this block is the result of a
+	 * variant transition, or null if it has no characteristic sound.
+	 */
 	public function getFormationSound() : ?Sound{
 		return null;
 	}

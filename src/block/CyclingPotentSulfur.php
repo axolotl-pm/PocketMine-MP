@@ -25,7 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\block\tile\PotentSulfur as TilePotentSulfur;
 use pocketmine\data\runtime\RuntimeDataDescriber;
-use pocketmine\world\sound\GeyserEruptionActiveSound;
+use pocketmine\world\sound\GeyserEruptionBurstSound;
 use pocketmine\world\sound\GeyserEruptionStartSound;
 use pocketmine\world\sound\Sound;
 use function max;
@@ -35,11 +35,11 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 
 	private const DORMANT_MIN_HEARTBEATS = 30; //15 seconds
 	private const DORMANT_MAX_HEARTBEATS = 60; //30 seconds
-	private const DORMANT_HEARTBEATS_PER_EXTRA_DEPTH = 20; //10 seconds
+	private const DORMANT_HEARTBEATS_PER_EXTRA_LENGTH = 20; //10 seconds
 
 	private const ERUPTING_MIN_HEARTBEATS = 2; //1 second
 	private const ERUPTING_MAX_HEARTBEATS = 4; //2 seconds
-	private const ERUPTING_HEARTBEATS_PER_EXTRA_DEPTH = 2; //1 second
+	private const ERUPTING_HEARTBEATS_PER_EXTRA_LENGTH = 2; //1 second
 
 	private bool $erupting = false;
 
@@ -85,8 +85,8 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		return new GeyserEruptionStartSound();
 	}
 
-	public function getEruptionPulseSound() : Sound{
-		return new GeyserEruptionActiveSound();
+	public function getEruptionBurstSound() : Sound{
+		return new GeyserEruptionBurstSound();
 	}
 
 	protected function onGeyserHeartbeat(?Block $outlet) : void{
@@ -99,7 +99,7 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 
 			//Even when outlet is blocks keep rerolling a fresh
 			//budget so it doesn't erupt the instant it reopens.
-			$this->heartbeatsUntilPhaseShift = $this->rollPhaseShiftHeartbeats($outlet);
+			$this->heartbeatsUntilPhaseShift = $this->getPhaseHeartbeats($outlet);
 			$this->position->getWorld()->setBlock($this->position, $this);
 		}
 	}
@@ -110,15 +110,23 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		if($this->erupting){
 			$soundPosition = $outlet->position->add(0.5, 0.5, 0.5);
 			$this->position->getWorld()->addSound($soundPosition, $this->getEruptionStartSound());
-			$this->position->getWorld()->addSound($soundPosition, $this->getEruptionPulseSound());
+			$this->position->getWorld()->addSound($soundPosition, $this->getEruptionBurstSound());
 		}
 	}
 
-	private function rollPhaseShiftHeartbeats(?Block $outlet) : int{
-		$extraDepth = $outlet !== null ? max(0, $this->getWaterColumnDepth($outlet) - 1) : 0;
+	private function getPhaseHeartbeats(?Block $outlet) : int{
+		$extraLength = $outlet !== null ? max(0, $this->getWaterColumnLength($outlet) - 1) : 0;
 
-		return $this->erupting
-			? mt_rand(self::ERUPTING_MIN_HEARTBEATS, self::ERUPTING_MAX_HEARTBEATS) + self::ERUPTING_HEARTBEATS_PER_EXTRA_DEPTH * $extraDepth
-			: mt_rand(self::DORMANT_MIN_HEARTBEATS, self::DORMANT_MAX_HEARTBEATS) + self::DORMANT_HEARTBEATS_PER_EXTRA_DEPTH * $extraDepth;
+		if($this->erupting){
+			$min = self::ERUPTING_MIN_HEARTBEATS;
+			$max = self::ERUPTING_MAX_HEARTBEATS;
+			$extra = self::ERUPTING_HEARTBEATS_PER_EXTRA_LENGTH;
+		}else{
+			$min = self::DORMANT_MIN_HEARTBEATS;
+			$max = self::DORMANT_MAX_HEARTBEATS;
+			$extra = self::DORMANT_HEARTBEATS_PER_EXTRA_LENGTH;
+		}
+
+		return mt_rand($min, $max) + ($extra * $extraLength);
 	}
 }

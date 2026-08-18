@@ -33,13 +33,16 @@ abstract class EruptivePotentSulfur extends WetPotentSulfur{
 
 	private const ERUPTION_SOUND_INTERVAL_HEARTBEATS = 4; //2 seconds
 
+	/** Initial upward motion limit in blocks per tick. */
 	private const BASE_LAUNCH_SPEED = 0.3;
+	/** Vertical acceleration added to entity motion per pulse. */
 	private const LAUNCH_FORCE = 0.2;
+
 	private const PLUME_BLOCKS_PER_DEPTH = 6;
 
 	abstract public function isErupting() : bool;
 	abstract public function getEruptionStartSound() : Sound;
-	abstract public function getEruptionPulseSound() : Sound;
+	abstract public function getEruptionBurstSound() : Sound;
 
 	protected function onGeyserHeartbeat(?Block $outlet) : void{
 		parent::onGeyserHeartbeat($outlet);
@@ -50,18 +53,10 @@ abstract class EruptivePotentSulfur extends WetPotentSulfur{
 	}
 
 	/**
-	 * Pushes entities up the plume and fires the eruption sound on its own cadence.
+	 * Returns how many blocks upward the plume can extend before hitting an obstacle.
 	 */
-	protected function pulseEruption(Block $outlet) : void{
-		$this->pulsePush($outlet);
-
-		if (mt_rand(1, self::ERUPTION_SOUND_INTERVAL_HEARTBEATS) === 1) {
-			$this->position->getWorld()->addSound($outlet->position->add(0.5, 0.5, 0.5), $this->getEruptionPulseSound());
-		}
-	}
-
-	private function plumeReach(int $depth) : int{
-		$maxHeight = self::PLUME_BLOCKS_PER_DEPTH * $depth;
+	private function getPlumeHeight(int $columnDepth) : int{
+		$maxHeight = self::PLUME_BLOCKS_PER_DEPTH * $columnDepth;
 
 		for($i = 0; $i < $maxHeight; $i++){
 			if(!$this->isGeyserPassable($this->getSide(Facing::UP, $i + 1))){
@@ -72,17 +67,31 @@ abstract class EruptivePotentSulfur extends WetPotentSulfur{
 		return $maxHeight;
 	}
 
+	/**
+	 * Triggers the eruption push effect and periodically plays the pulse sound.
+	 */
+	private function pulseEruption(Block $outlet) : void{
+		$this->pulsePush($outlet);
+
+		if(mt_rand(1, self::ERUPTION_SOUND_INTERVAL_HEARTBEATS) === 1){
+			$this->position->getWorld()->addSound($outlet->position->add(0.5, 0.5, 0.5), $this->getEruptionBurstSound());
+		}
+	}
+
+	/**
+	 * Pushes entities upward within the active plume area.
+	 */
 	private function pulsePush(Block $outlet) : void{
-		$depth = $this->getWaterColumnDepth($outlet);
-		$reach = $this->plumeReach($depth);
-		if($reach <= 0){
+		$columnLength = $this->getWaterColumnLength($outlet);
+		$plumeHeight = $this->getPlumeHeight($columnLength);
+		if($plumeHeight <= 0){
 			return;
 		}
 
 		$bb = AxisAlignedBB::one()
 			->offset($this->position->x, $this->position->y + 1, $this->position->z)
-			->extend(Facing::UP, $reach - 1);
-		$maxSpeed = self::BASE_LAUNCH_SPEED + $depth * 0.1;
+			->extend(Facing::UP, $plumeHeight - 1);
+		$maxSpeed = self::BASE_LAUNCH_SPEED + $columnLength * 0.1;
 
 		foreach($this->position->getWorld()->getCollidingEntities($bb) as $entity){
 			if($entity instanceof Player && $entity->isFlying()){
