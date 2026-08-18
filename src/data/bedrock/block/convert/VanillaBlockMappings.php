@@ -79,6 +79,7 @@ use pocketmine\block\RedstoneTorch;
 use pocketmine\block\RespawnAnchor;
 use pocketmine\block\Sapling;
 use pocketmine\block\SeaPickle;
+use pocketmine\block\Shelf;
 use pocketmine\block\SmallDripleaf;
 use pocketmine\block\SnowLayer;
 use pocketmine\block\Sponge;
@@ -1134,6 +1135,27 @@ final class VanillaBlockMappings{
 			[Blocks::WARPED_PLANKS(), Ids::WARPED_PLANKS]
 		] as [$block, $id]){
 			$reg->mapSimple($block, $id);
+		}
+
+		foreach([
+			[Blocks::ACACIA_SHELF(), Ids::ACACIA_SHELF],
+			[Blocks::BAMBOO_SHELF(), Ids::BAMBOO_SHELF],
+			[Blocks::BIRCH_SHELF(), Ids::BIRCH_SHELF],
+			[Blocks::CHERRY_SHELF(), Ids::CHERRY_SHELF],
+			[Blocks::CRIMSON_SHELF(), Ids::CRIMSON_SHELF],
+			[Blocks::DARK_OAK_SHELF(), Ids::DARK_OAK_SHELF],
+			[Blocks::JUNGLE_SHELF(), Ids::JUNGLE_SHELF],
+			[Blocks::MANGROVE_SHELF(), Ids::MANGROVE_SHELF],
+			[Blocks::OAK_SHELF(), Ids::OAK_SHELF],
+			[Blocks::PALE_OAK_SHELF(), Ids::PALE_OAK_SHELF],
+			[Blocks::SPRUCE_SHELF(), Ids::SPRUCE_SHELF],
+			[Blocks::WARPED_SHELF(), Ids::WARPED_SHELF]
+		] as [$block, $id]){
+			$reg->mapModel(Model::create($block, $id)->properties([
+				$commonProperties->horizontalFacingCardinal,
+				new BoolProperty(StateNames::POWERED_BIT, fn(PoweredByRedstone $b) => $b->isPowered(), fn(PoweredByRedstone $b, bool $v) => $b->setPowered($v)),
+				new IntProperty(StateNames::POWERED_SHELF_TYPE, 0, 3, fn(Shelf $b) => $b->getPoweredShelfType(), fn(Shelf $b, int $v) => $b->setPoweredShelfType($v))
+			]));
 		}
 
 		//pressure plates
