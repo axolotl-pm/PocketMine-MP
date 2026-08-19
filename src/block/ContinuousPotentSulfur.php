@@ -29,7 +29,9 @@ use pocketmine\world\sound\Sound;
 
 final class ContinuousPotentSulfur extends EruptivePotentSulfur{
 
-	public function isErupting() : bool{ return true; }
+	public function isErupting() : bool{
+		return $this->findGeyserOutlet() !== null;
+	}
 
 	public function getEruptionStartSound() : Sound{
 		return new GeyserContinuousEruptionStartSound();
@@ -37,9 +39,5 @@ final class ContinuousPotentSulfur extends EruptivePotentSulfur{
 
 	public function getEruptionBurstSound() : Sound{
 		return new GeyserContinuousEruptionBurstSound();
-	}
-
-	public function getFormationSound() : Sound{
-		return $this->getEruptionStartSound();
 	}
 }

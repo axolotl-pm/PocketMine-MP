@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\math\Facing;
-use pocketmine\world\sound\Sound;
 
 class PotentSulfur extends Opaque{
 
@@ -41,19 +40,7 @@ class PotentSulfur extends Opaque{
 		$result = $this->computeVariant();
 		if($result->getTypeId() !== $this->getTypeId()){
 			$this->position->getWorld()->setBlock($this->position, $result);
-
-			if(($sound = $this->getFormationSound()) !== null){
-				$this->position->getWorld()->addSound($this->position->add(0.5, 0.5, 0.5), $sound);
-			}
 		}
-	}
-
-	/**
-	 * Returns the sound played once when this block is the result of a
-	 * variant transition, or null if it has no characteristic sound.
-	 */
-	public function getFormationSound() : ?Sound{
-		return null;
 	}
 
 	private function computeVariant() : PotentSulfur{

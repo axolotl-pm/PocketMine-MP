@@ -34,9 +34,11 @@ final class PotentSulfur extends Tile{
 	private int $heartbeatsUntilPhaseShift = 0;
 
 	public function readSaveData(CompoundTag $nbt) : void{
+		//NOOP
 	}
 
 	protected function writeSaveData(CompoundTag $nbt) : void{
+		//NOOP
 	}
 
 	public function getHeartbeatsUntilPhaseShift() : int{ return $this->heartbeatsUntilPhaseShift; }
