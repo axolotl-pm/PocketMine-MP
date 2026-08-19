@@ -30,11 +30,13 @@ use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\PoweredByRedstone;
 use pocketmine\block\utils\PoweredByRedstoneTrait;
 use pocketmine\block\utils\ShelfSlot;
+use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\WoodMaterial;
 use pocketmine\block\utils\WoodTypeTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\Axis;
+use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
@@ -66,6 +68,15 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		$w->horizontalFacing($this->facing);
 		$w->bool($this->powered);
 		$w->boundedIntAuto(0, 3, $this->poweredShelfType);
+	}
+
+	/** @return AxisAlignedBB[] */
+	protected function recalculateCollisionBoxes() : array{
+		return [AxisAlignedBB::one()->trim($this->facing, 11 / 16)];
+	}
+
+	public function getSupportType(int $facing) : SupportType{
+		return $facing === Facing::opposite($this->facing) ? SupportType::FULL : SupportType::NONE;
 	}
 
 	public function getPoweredShelfType() : int{
