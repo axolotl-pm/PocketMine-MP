@@ -81,6 +81,29 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		return $this;
 	}
 
+	/**
+	 * Shifts to an eruption phase immediately and plays the appropriate sounds.
+	 *
+	 * Returns whether the eruption was triggered, false if it was already
+	 * erupting or has no valid water column to erupt through.
+	 */
+	public function erupt() : bool{
+		if($this->erupting){
+			return false;
+		}
+
+		$outlet = $this->findGeyserOutlet();
+		if($outlet === null){
+			return false;
+		}
+
+		$this->shiftPhase($outlet);
+		$this->heartbeatsUntilPhaseShift = $this->getPhaseHeartbeats($outlet);
+		$this->position->getWorld()->setBlock($this->position, $this);
+
+		return true;
+	}
+
 	public function getEruptionStartSound() : Sound{
 		return new GeyserEruptionStartSound();
 	}
@@ -97,8 +120,8 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 				$this->shiftPhase($outlet);
 			}
 
-			//Even when outlet is blocks keep rerolling a fresh
-			//budget so it doesn't erupt the instant it reopens.
+			//Even when the outlet is blocked, keep rerolling
+			//a fresh budget so it doesn't erupt the instant it reopens.
 			$this->heartbeatsUntilPhaseShift = $this->getPhaseHeartbeats($outlet);
 			$this->position->getWorld()->setBlock($this->position, $this);
 		}

@@ -38,7 +38,7 @@ class WetPotentSulfur extends PotentSulfur{
 
 	private const MAX_COLUMN_HEIGHT_BLOCKS = 4;
 
-	private const GAS_EFFECT_DURATION_TICKS = 80;
+	private const GAS_EFFECT_DURATION_TICKS = 80; //4 seconds
 	private const GAS_EFFECT_RANGE_BLOCKS = 3.0;
 
 	public function asItem() : Item{
@@ -75,7 +75,7 @@ class WetPotentSulfur extends PotentSulfur{
 	 * Returns the first outlet block found by walking up the water column
 	 * above this block, or null if not found.
 	 */
-	private function findGeyserOutlet() : ?Block{
+	protected function findGeyserOutlet() : ?Block{
 		$maxY = $this->position->getFloorY() + self::MAX_COLUMN_HEIGHT_BLOCKS + 1;
 
 		$block = $this->getSide(Facing::UP, 2); //Skip immediate water above

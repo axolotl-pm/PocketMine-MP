@@ -58,7 +58,7 @@ class PotentSulfur extends Opaque{
 
 	private function computeVariant() : PotentSulfur{
 		$above = $this->getSide(Facing::UP);
-		if(!($above instanceof Water) || !$above->isSource()){
+		if(!($above instanceof Water) || !$above->isSource()){ //TODO: waterlogging!
 			return VanillaBlocks::POTENT_SULFUR();
 		}
 
