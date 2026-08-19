@@ -202,10 +202,6 @@ final class BlockSerializerDeserializerRegistrar{
 		$this->mapModel(Model::create($block, $id)->properties(CommonProperties::getInstance()->horizontalConnectionProperties));
 	}
 
-	public function mapAllConnections(Block $block, string $id) : void{
-		$this->mapModel(Model::create($block, $id)->properties(CommonProperties::getInstance()->allConnectionProperties));
-	}
-
 	/**
 	 * @phpstan-template TBlock of Block&Colored
 	 * @phpstan-param TBlock $block

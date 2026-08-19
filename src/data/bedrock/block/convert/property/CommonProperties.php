@@ -209,12 +209,6 @@ final class CommonProperties{
 	 */
 	public readonly array $horizontalConnectionProperties;
 
-	/**
-	 * @var Property[]
-	 * @phpstan-var non-empty-list<Property<object>>
-	 */
-	public readonly array $allConnectionProperties;
-
 	private function __construct(){
 		$vm = ValueMappings::getInstance();
 
@@ -412,16 +406,6 @@ final class CommonProperties{
 			new DummyProperty(StateNames::MC_CONNECTION_EAST, false),
 			new DummyProperty(StateNames::MC_CONNECTION_NORTH, false),
 			new DummyProperty(StateNames::MC_CONNECTION_SOUTH, false),
-			new DummyProperty(StateNames::MC_CONNECTION_WEST, false),
-		];
-
-		//Same as above
-		$this->allConnectionProperties = [
-			new DummyProperty(StateNames::MC_CONNECTION_DOWN, false),
-			new DummyProperty(StateNames::MC_CONNECTION_EAST, false),
-			new DummyProperty(StateNames::MC_CONNECTION_NORTH, false),
-			new DummyProperty(StateNames::MC_CONNECTION_SOUTH, false),
-			new DummyProperty(StateNames::MC_CONNECTION_UP, false),
 			new DummyProperty(StateNames::MC_CONNECTION_WEST, false),
 		];
 
