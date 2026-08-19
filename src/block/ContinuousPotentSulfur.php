@@ -33,6 +33,10 @@ final class ContinuousPotentSulfur extends EruptivePotentSulfur{
 		return $this->findGeyserOutlet() !== null;
 	}
 
+	protected function onVariantApplied() : void{
+		$this->announceEruption();
+	}
+
 	public function getEruptionStartSound() : Sound{
 		return new GeyserContinuousEruptionStartSound();
 	}

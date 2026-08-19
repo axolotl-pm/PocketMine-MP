@@ -66,7 +66,10 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 
 	public function writeStateToWorld() : void{
 		parent::writeStateToWorld();
+		$this->saveHeartbeats();
+	}
 
+	private function saveHeartbeats() : void{
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TilePotentSulfur){
 			$tile->setHeartbeatsUntilPhaseShift($this->heartbeatsUntilPhaseShift);
@@ -115,25 +118,32 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 	protected function onGeyserHeartbeat(?Block $outlet) : void{
 		parent::onGeyserHeartbeat($outlet);
 
-		if(--$this->heartbeatsUntilPhaseShift <= 0){
-			if($outlet !== null){
-				$this->shiftPhase($outlet);
-			}
-
+		if($this->heartbeatsUntilPhaseShift <= 0){
+			//Roll before counting down, or a geyser that hasn't got a budget yet shifts on its very first heartbeat.
 			//Even when the outlet is blocked, keep rerolling
 			//a fresh budget so it doesn't erupt the instant it reopens.
 			$this->heartbeatsUntilPhaseShift = $this->getPhaseHeartbeats($outlet);
-			$this->position->getWorld()->setBlock($this->position, $this);
 		}
+
+		if(--$this->heartbeatsUntilPhaseShift > 0){
+			//The counter on its own isn't block state, so it goes straight to the tile rather than through setBlock.
+			$this->saveHeartbeats();
+			return;
+		}
+
+		if($outlet !== null){
+			$this->shiftPhase($outlet);
+		}
+
+		$this->position->getWorld()->setBlock($this->position, $this);
 	}
 
 	private function shiftPhase(Block $outlet) : void{
 		$this->erupting = !$this->erupting;
 
 		if($this->erupting){
-			$soundPosition = $outlet->position->add(0.5, 0.5, 0.5);
-			$this->position->getWorld()->addSound($soundPosition, $this->getEruptionStartSound());
-			$this->position->getWorld()->addSound($soundPosition, $this->getEruptionBurstSound());
+			$this->announceEruption();
+			$this->position->getWorld()->addSound($outlet->position->add(0.5, 0.5, 0.5), $this->getEruptionBurstSound());
 		}
 	}
 

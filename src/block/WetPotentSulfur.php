@@ -78,7 +78,7 @@ class WetPotentSulfur extends PotentSulfur{
 	protected function findGeyserOutlet() : ?Block{
 		$maxY = $this->position->getFloorY() + self::MAX_COLUMN_HEIGHT_BLOCKS + 1;
 
-		$block = $this->getSide(Facing::UP, 2); //Skip immediate water above
+		$block = $this->getSide(Facing::UP);
 		while($block->position->getFloorY() <= $maxY){
 			if($block instanceof Water && $block->isSource()){
 				$block = $block->getSide(Facing::UP);

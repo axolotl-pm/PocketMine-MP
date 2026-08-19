@@ -44,6 +44,10 @@ abstract class EruptivePotentSulfur extends WetPotentSulfur{
 	abstract public function getEruptionStartSound() : Sound;
 	abstract public function getEruptionBurstSound() : Sound;
 
+	protected function announceEruption() : void{
+		$this->position->getWorld()->addSound($this->position->add(0.5, 0.5, 0.5), $this->getEruptionStartSound());
+	}
+
 	protected function onGeyserHeartbeat(?Block $outlet) : void{
 		parent::onGeyserHeartbeat($outlet);
 

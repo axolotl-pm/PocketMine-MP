@@ -39,8 +39,21 @@ class PotentSulfur extends Opaque{
 	public function onNearbyBlockChange() : void{
 		$result = $this->computeVariant();
 		if($result->getTypeId() !== $this->getTypeId()){
-			$this->position->getWorld()->setBlock($this->position, $result);
+			$world = $this->position->getWorld();
+			$world->setBlock($this->position, $result);
+
+			$applied = $world->getBlock($this->position);
+			if($applied instanceof PotentSulfur){
+				$applied->onVariantApplied();
+			}
 		}
+	}
+
+	/**
+	 * Called once this variant has been swapped in for a different one.
+	 */
+	protected function onVariantApplied() : void{
+		//NOOP
 	}
 
 	private function computeVariant() : PotentSulfur{
