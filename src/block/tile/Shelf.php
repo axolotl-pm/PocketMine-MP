@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\block\tile;
 
 use pocketmine\block\Shelf as BlockShelf;
+use pocketmine\block\utils\ShelfSlot;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\inventory\CallbackInventoryListener;
@@ -38,17 +39,16 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\UnexpectedTagTypeException;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\world\World;
+use function count;
 
 class Shelf extends Spawnable implements Container{
 	use ContainerTrait;
-
-	private const SLOT_COUNT = 3;
 
 	private SimpleInventory $inventory;
 
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
-		$this->inventory = new SimpleInventory(self::SLOT_COUNT);
+		$this->inventory = new SimpleInventory(count(ShelfSlot::cases()));
 		$this->inventory->getListeners()->add(CallbackInventoryListener::onAnyChange(
 			static function(Inventory $_) use ($world, $pos) : void{
 				$block = $world->getBlock($pos);

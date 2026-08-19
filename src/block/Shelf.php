@@ -29,6 +29,7 @@ use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\PoweredByRedstone;
 use pocketmine\block\utils\PoweredByRedstoneTrait;
+use pocketmine\block\utils\ShelfSlot;
 use pocketmine\block\utils\WoodMaterial;
 use pocketmine\block\utils\WoodTypeTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
@@ -52,7 +53,6 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 	use PoweredByRedstoneTrait;
 	use WoodTypeTrait;
 
-	private const SLOTS_PER_SHELF = 3;
 	private const MAX_CONNECTED_SHELVES = 3;
 
 	private const POWERED_SHELF_TYPE_UNCONNECTED = 0;
@@ -73,25 +73,26 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 	}
 
 	/** @return $this */
-	public function setPowered(bool $powered) : self{
-		if($powered === $this->powered){
-			return $this;
-		}
-
-		$this->powered = $powered;
-		if($this->position->isValid()){
-			$this->position->getWorld()->addSound($this->position, $powered ? new ShelfActivateSound() : new ShelfDeactivateSound());
-		}
-
-		return $this;
-	}
-
-	/** @return $this */
 	public function setPoweredShelfType(int $poweredShelfType) : self{
 		if($poweredShelfType < self::POWERED_SHELF_TYPE_UNCONNECTED || $poweredShelfType > self::POWERED_SHELF_TYPE_LEFT){
 			throw new \InvalidArgumentException("Powered shelf type must be in range 0-3");
 		}
 		$this->poweredShelfType = $poweredShelfType;
+		return $this;
+	}
+
+	/** @return $this */
+	public function togglePowered(bool $powered) : self{
+		if($powered === $this->powered){
+			return $this;
+		}
+
+		$oldState = clone $this;
+		$this->setPowered($powered);
+		if($this->position->isValid()){
+			$this->position->getWorld()->addSound($this->position, $powered ? new ShelfActivateSound($oldState) : new ShelfDeactivateSound($oldState));
+		}
+
 		return $this;
 	}
 
@@ -124,15 +125,11 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 			if(!$this->swapAllStacks($player)){
 				return false;
 			}
-			$this->position->getWorld()->addSound($this->position, new ShelfMultiSwapSound());
+			$this->position->getWorld()->addSound($this->position, new ShelfMultiSwapSound($this));
 		}else{
 			$x = Facing::axis($face) === Axis::X ? $clickVector->z : $clickVector->x;
 			$x = Facing::isPositive(Facing::rotateY($face, true)) ? 1 - $x : $x;
-			$slot = match(true){
-				$x < 1 / 3 => 0,
-				$x < 2 / 3 => 1,
-				default => 2
-			};
+			$slot = ShelfSlot::fromBlockFaceCoordinate($x)->value;
 
 			$inventory = $tile->getInventory();
 			$shelfItem = $inventory->getItem($slot);
@@ -141,10 +138,7 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 			}
 			$inventory->setItem($slot, $item);
 			$player->getInventory()->setItemInHand($shelfItem);
-			$this->position->getWorld()->addSound(
-				$this->position,
-				$shelfItem->isNull() ? new ShelfPlaceItemSound() : new ShelfSingleSwapSound()
-			);
+			$this->position->getWorld()->addSound($this->position, $shelfItem->isNull() ? new ShelfPlaceItemSound($this) : new ShelfSingleSwapSound($this));
 		}
 
 		return true;
@@ -203,9 +197,9 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		}
 
 		$inventory = $player->getInventory();
-		$hotbarSlot = $inventory->getHotbarSize() - (count($tiles) * self::SLOTS_PER_SHELF);
+		$hotbarSlot = $inventory->getHotbarSize() - (count($tiles) * count(ShelfSlot::cases()));
 		foreach($tiles as $tile){
-			for($shelfSlot = 0; $shelfSlot < self::SLOTS_PER_SHELF; ++$shelfSlot){
+			for($shelfSlot = 0; $shelfSlot < count(ShelfSlot::cases()); ++$shelfSlot){
 				$shelfItem = $tile->getInventory()->getItem($shelfSlot);
 				$hotbarItem = $inventory->getHotbarSlotItem($hotbarSlot++);
 				$tile->getInventory()->setItem($shelfSlot, $hotbarItem);
