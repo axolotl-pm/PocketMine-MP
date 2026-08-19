@@ -33,8 +33,8 @@ final class ContinuousPotentSulfur extends EruptivePotentSulfur{
 		return $this->findGeyserOutlet() !== null;
 	}
 
-	protected function onVariantApplied() : void{
-		parent::onVariantApplied();
+	protected function onGeyserVariantApplied() : void{
+		parent::onGeyserVariantApplied();
 		$this->position->getWorld()->addSound($this->position->add(0.5, 0.5, 0.5), $this->getEruptionStartSound());
 	}
 

@@ -33,17 +33,20 @@ class PotentSulfur extends Opaque{
 			$world = $this->position->getWorld();
 			$world->setBlock($this->position, $result);
 
+			//TODO: HACK! World operations cannot be performed on the instance just
+			//created here because it lacks a position, and World::setBlock()
+			//clones the passed instance before placing it in the world.
 			$applied = $world->getBlock($this->position);
 			if($applied instanceof PotentSulfur){
-				$applied->onVariantApplied();
+				$applied->onGeyserVariantApplied();
 			}
 		}
 	}
 
 	/**
-	 * Called once this variant has been swapped in for a different one.
+	 * Called on the new target block immediately after a variant swap.
 	 */
-	protected function onVariantApplied() : void{
+	protected function onGeyserVariantApplied() : void{
 		//NOOP
 	}
 
