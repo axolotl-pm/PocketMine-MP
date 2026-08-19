@@ -178,12 +178,12 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 
 		if($this->poweredShelfType !== ShelfConnectionType::UNCONNECTED){
 			$leftCount = match($this->poweredShelfType){
-				ShelfConnectionType::UNCONNECTED, ShelfConnectionType::LEFT => 0,
+				ShelfConnectionType::LEFT => 0,
 				ShelfConnectionType::CENTER => 1,
 				ShelfConnectionType::RIGHT => isset($left[0]) && $left[0]->poweredShelfType === ShelfConnectionType::LEFT ? 1 : 2
 			};
 			$rightCount = match($this->poweredShelfType){
-				ShelfConnectionType::UNCONNECTED, ShelfConnectionType::RIGHT => 0,
+				ShelfConnectionType::RIGHT => 0,
 				ShelfConnectionType::CENTER => 1,
 				ShelfConnectionType::LEFT => isset($right[0]) && $right[0]->poweredShelfType === ShelfConnectionType::RIGHT ? 1 : 2
 			};
