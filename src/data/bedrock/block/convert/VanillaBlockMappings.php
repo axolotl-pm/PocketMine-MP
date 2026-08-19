@@ -58,6 +58,7 @@ use pocketmine\block\FloorCoralFan;
 use pocketmine\block\Froglight;
 use pocketmine\block\FrostedIce;
 use pocketmine\block\GlazedTerracotta;
+use pocketmine\block\Grindstone;
 use pocketmine\block\Hopper;
 use pocketmine\block\Lantern;
 use pocketmine\block\Leaves;
@@ -97,6 +98,7 @@ use pocketmine\block\utils\DirtType;
 use pocketmine\block\utils\DripleafState;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\utils\FroglightType;
+use pocketmine\block\utils\GrindstoneAttachmentType;
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\MobHeadType;
@@ -1289,6 +1291,10 @@ final class VanillaBlockMappings{
 		$reg->mapModel(Model::create(Blocks::BELL(), Ids::BELL)->properties([
 			BoolProperty::unused(StateNames::TOGGLE_BIT, false),
 			new ValueFromStringProperty(StateNames::ATTACHMENT, ValueMappings::getInstance()->bellAttachmentType, fn(Bell $b) => $b->getAttachmentType(), fn(Bell $b, BellAttachmentType $v) => $b->setAttachmentType($v)),
+			$commonProperties->horizontalFacingSWNE
+		]));
+		$reg->mapModel(Model::create(Blocks::GRINDSTONE(), Ids::GRINDSTONE)->properties([
+			new ValueFromStringProperty(StateNames::ATTACHMENT, ValueMappings::getInstance()->grindstoneAttachmentType, fn(Grindstone $b) => $b->getAttachmentType(), fn(Grindstone $b, GrindstoneAttachmentType $v) => $b->setAttachmentType($v)),
 			$commonProperties->horizontalFacingSWNE
 		]));
 		$reg->mapModel(Model::create(Blocks::BONE_BLOCK(), Ids::BONE_BLOCK)->properties([

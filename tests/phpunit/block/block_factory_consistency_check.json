@@ -426,6 +426,7 @@
         "GRASS_PATH": 1,
         "GRAVEL": 1,
         "GREEN_TORCH": 5,
+        "GRINDSTONE": 16,
         "HANGING_ROOTS": 1,
         "HARDENED_CLAY": 1,
         "HARDENED_GLASS": 1,
