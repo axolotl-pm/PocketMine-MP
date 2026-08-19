@@ -129,7 +129,7 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		$this->erupting = !$this->erupting;
 
 		if($this->erupting){
-			$this->announceEruption();
+			$this->position->getWorld()->addSound($this->position->add(0.5, 0.5, 0.5), $this->getEruptionStartSound());
 			$this->position->getWorld()->addSound($outlet->position->add(0.5, 0.5, 0.5), $this->getEruptionBurstSound());
 		}
 	}

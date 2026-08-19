@@ -35,7 +35,7 @@ final class ContinuousPotentSulfur extends EruptivePotentSulfur{
 
 	protected function onVariantApplied() : void{
 		parent::onVariantApplied();
-		$this->announceEruption();
+		$this->position->getWorld()->addSound($this->position->add(0.5, 0.5, 0.5), $this->getEruptionStartSound());
 	}
 
 	public function getEruptionStartSound() : Sound{
