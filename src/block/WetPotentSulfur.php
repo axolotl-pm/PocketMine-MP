@@ -50,6 +50,12 @@ class WetPotentSulfur extends PotentSulfur{
 		$this->position->getWorld()->scheduleDelayedBlockUpdate($this->position, self::HEARTBEAT_TICKS);
 	}
 
+	protected function onVariantApplied() : void{
+		//A dry block doesn't tick, so its heartbeat has died by the time it becomes a geyser and has to be started again
+		//here. Scheduling is idempotent at this delay, so doing it for a variant that is already beating costs nothing.
+		$this->position->getWorld()->scheduleDelayedBlockUpdate($this->position, self::HEARTBEAT_TICKS);
+	}
+
 	/**
 	 * Handles the geyser's periodic heartbeat update.
 	 * Called every {@link WetPotentSulfur::HEARTBEAT_TICKS} ticks.

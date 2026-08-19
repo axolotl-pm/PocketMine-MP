@@ -51,10 +51,7 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 	}
 
 	public function readStateFromWorld() : Block{
-		$result = parent::readStateFromWorld();
-		if($result->getTypeId() !== $this->getTypeId()){
-			return $result;
-		}
+		parent::readStateFromWorld();
 
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TilePotentSulfur){

@@ -34,6 +34,7 @@ final class ContinuousPotentSulfur extends EruptivePotentSulfur{
 	}
 
 	protected function onVariantApplied() : void{
+		parent::onVariantApplied();
 		$this->announceEruption();
 	}
 

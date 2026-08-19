@@ -27,15 +27,6 @@ use pocketmine\math\Facing;
 
 class PotentSulfur extends Opaque{
 
-	public function readStateFromWorld() : Block{
-		$result = parent::readStateFromWorld();
-		if($result->getTypeId() !== $this->getTypeId()){
-			return $result;
-		}
-
-		return $this->computeVariant();
-	}
-
 	public function onNearbyBlockChange() : void{
 		$result = $this->computeVariant();
 		if($result->getTypeId() !== $this->getTypeId()){
