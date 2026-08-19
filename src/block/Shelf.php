@@ -70,7 +70,6 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		$w->boundedIntAuto(0, 3, $this->poweredShelfType);
 	}
 
-	/** @return AxisAlignedBB[] */
 	protected function recalculateCollisionBoxes() : array{
 		return [AxisAlignedBB::one()->trim($this->facing, 11 / 16)];
 	}
