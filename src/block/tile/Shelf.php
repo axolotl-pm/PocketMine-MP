@@ -41,7 +41,7 @@ use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\world\World;
 use function count;
 
-class Shelf extends Spawnable implements Container{
+final class Shelf extends Spawnable implements Container{
 	use ContainerTrait;
 
 	private SimpleInventory $inventory;

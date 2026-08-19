@@ -103,6 +103,7 @@ use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\MobHeadType;
 use pocketmine\block\utils\MushroomBlockType;
 use pocketmine\block\utils\PoweredByRedstone;
+use pocketmine\block\utils\ShelfConnectionType;
 use pocketmine\block\VanillaBlocks as Blocks;
 use pocketmine\block\Vine;
 use pocketmine\data\bedrock\block\BlockLegacyMetadata;
@@ -1154,7 +1155,17 @@ final class VanillaBlockMappings{
 			$reg->mapModel(Model::create($block, $id)->properties([
 				$commonProperties->horizontalFacingCardinal,
 				new BoolProperty(StateNames::POWERED_BIT, fn(PoweredByRedstone $b) => $b->isPowered(), fn(PoweredByRedstone $b, bool $v) => $b->setPowered($v)),
-				new IntProperty(StateNames::POWERED_SHELF_TYPE, 0, 3, fn(Shelf $b) => $b->getPoweredShelfType(), fn(Shelf $b, int $v) => $b->setPoweredShelfType($v))
+				new ValueFromIntProperty(
+					StateNames::POWERED_SHELF_TYPE,
+					EnumFromRawStateMap::int(ShelfConnectionType::class, fn(ShelfConnectionType $case) => match($case){
+						ShelfConnectionType::UNCONNECTED => 0,
+						ShelfConnectionType::RIGHT => 1,
+						ShelfConnectionType::CENTER => 2,
+						ShelfConnectionType::LEFT => 3
+					}),
+					fn(Shelf $b) => $b->getPoweredShelfType(),
+					fn(Shelf $b, ShelfConnectionType $v) => $b->setPoweredShelfType($v)
+				)
 			]));
 		}
 

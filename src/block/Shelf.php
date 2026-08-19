@@ -29,6 +29,7 @@ use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\PoweredByRedstone;
 use pocketmine\block\utils\PoweredByRedstoneTrait;
+use pocketmine\block\utils\ShelfConnectionType;
 use pocketmine\block\utils\ShelfSlot;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\WoodMaterial;
@@ -57,17 +58,12 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 
 	private const MAX_CONNECTED_SHELVES = 3;
 
-	private const POWERED_SHELF_TYPE_UNCONNECTED = 0;
-	private const POWERED_SHELF_TYPE_RIGHT = 1;
-	private const POWERED_SHELF_TYPE_CENTER = 2;
-	private const POWERED_SHELF_TYPE_LEFT = 3;
-
-	private int $poweredShelfType = 0;
+	private ShelfConnectionType $poweredShelfType = ShelfConnectionType::UNCONNECTED;
 
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->horizontalFacing($this->facing);
 		$w->bool($this->powered);
-		$w->boundedIntAuto(0, 3, $this->poweredShelfType);
+		$w->enum($this->poweredShelfType);
 	}
 
 	protected function recalculateCollisionBoxes() : array{
@@ -78,15 +74,12 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		return $facing === Facing::opposite($this->facing) ? SupportType::FULL : SupportType::NONE;
 	}
 
-	public function getPoweredShelfType() : int{
+	public function getPoweredShelfType() : ShelfConnectionType{
 		return $this->poweredShelfType;
 	}
 
 	/** @return $this */
-	public function setPoweredShelfType(int $poweredShelfType) : self{
-		if($poweredShelfType < self::POWERED_SHELF_TYPE_UNCONNECTED || $poweredShelfType > self::POWERED_SHELF_TYPE_LEFT){
-			throw new \InvalidArgumentException("Powered shelf type must be in range 0-3");
-		}
+	public function setPoweredShelfType(ShelfConnectionType $poweredShelfType) : self{
 		$this->poweredShelfType = $poweredShelfType;
 		return $this;
 	}
@@ -99,15 +92,9 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 
 		$oldState = clone $this;
 		$this->setPowered($powered);
-		if($this->position->isValid()){
-			$this->position->getWorld()->addSound($this->position, $powered ? new ShelfActivateSound($oldState) : new ShelfDeactivateSound($oldState));
-		}
+		$this->position->getWorld()->addSound($this->position, $powered ? new ShelfActivateSound($oldState) : new ShelfDeactivateSound($oldState));
 
 		return $this;
-	}
-
-	public function onPostPlace() : void{
-		$this->updatePoweredShelfType();
 	}
 
 	public function onNearbyBlockChange() : void{
@@ -226,12 +213,12 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		$world = $this->position->getWorld();
 		foreach($shelves as $index => $shelf){
 			$type = match($count){
-				1 => self::POWERED_SHELF_TYPE_UNCONNECTED,
-				2 => $index === 0 ? self::POWERED_SHELF_TYPE_LEFT : self::POWERED_SHELF_TYPE_RIGHT,
+				1 => ShelfConnectionType::UNCONNECTED,
+				2 => $index === 0 ? ShelfConnectionType::LEFT : ShelfConnectionType::RIGHT,
 				default => match($index){
-					0 => self::POWERED_SHELF_TYPE_LEFT,
-					$count - 1 => self::POWERED_SHELF_TYPE_RIGHT,
-					default => self::POWERED_SHELF_TYPE_CENTER
+					0 => ShelfConnectionType::LEFT,
+					$count - 1 => ShelfConnectionType::RIGHT,
+					default => ShelfConnectionType::CENTER
 				}
 			};
 			if($shelf->poweredShelfType !== $type){

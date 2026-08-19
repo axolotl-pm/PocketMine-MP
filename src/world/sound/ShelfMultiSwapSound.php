@@ -26,15 +26,18 @@ namespace pocketmine\world\sound;
 use pocketmine\block\Shelf;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\convert\TypeConverter;
-use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 
 final class ShelfMultiSwapSound implements Sound{
 	public function __construct(private readonly Shelf $shelf){}
 
-	/** @return ClientboundPacket[] */
 	public function encode(Vector3 $pos) : array{
-		return [LevelSoundEventPacket::nonActorSound(LevelSoundEvent::MULTI_SWAP, $pos, false, TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId($this->shelf->getStateId()))];
+		return [LevelSoundEventPacket::nonActorSound(
+			LevelSoundEvent::MULTI_SWAP,
+			$pos,
+			false,
+			TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId($this->shelf->getStateId())
+		)];
 	}
 }
