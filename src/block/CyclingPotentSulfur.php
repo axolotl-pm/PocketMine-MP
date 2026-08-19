@@ -63,10 +63,7 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 
 	public function writeStateToWorld() : void{
 		parent::writeStateToWorld();
-		$this->saveHeartbeats();
-	}
 
-	private function saveHeartbeats() : void{
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TilePotentSulfur){
 			$tile->setHeartbeatsUntilPhaseShift($this->heartbeatsUntilPhaseShift);
@@ -116,19 +113,12 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		parent::onGeyserHeartbeat($outlet);
 
 		if($this->heartbeatsUntilPhaseShift <= 0){
-			//Roll before counting down, or a geyser that hasn't got a budget yet shifts on its very first heartbeat.
-			//Even when the outlet is blocked, keep rerolling
-			//a fresh budget so it doesn't erupt the instant it reopens.
+			//Set budget before countdown to prevent an instant shift on the first heartbeat,
+			//and to avoid immediate eruptions the moment a blocked outlet reopens.
 			$this->heartbeatsUntilPhaseShift = $this->getPhaseHeartbeats($outlet);
 		}
 
-		if(--$this->heartbeatsUntilPhaseShift > 0){
-			//The counter on its own isn't block state, so it goes straight to the tile rather than through setBlock.
-			$this->saveHeartbeats();
-			return;
-		}
-
-		if($outlet !== null){
+		if(--$this->heartbeatsUntilPhaseShift <= 0 && $outlet !== null){
 			$this->shiftPhase($outlet);
 		}
 
