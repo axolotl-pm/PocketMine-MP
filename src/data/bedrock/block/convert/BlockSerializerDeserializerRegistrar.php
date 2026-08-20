@@ -27,6 +27,7 @@ use pocketmine\block\Block;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\block\utils\Colored;
+use pocketmine\block\utils\HorizontalConnectable;
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\convert\BlockStateReader as Reader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter as Writer;
@@ -198,12 +199,16 @@ final class BlockSerializerDeserializerRegistrar{
 		);
 	}
 
+	/**
+	 * @phpstan-template TBlock of Block&HorizontalConnectable
+	 * @phpstan-param TBlock $block
+	 */
 	public function mapHorizontalConnections(Block $block, string $id) : void{
 		$this->mapModel(Model::create($block, $id)->properties(CommonProperties::getInstance()->horizontalConnectionProperties));
 	}
 
 	/**
-	 * @phpstan-template TBlock of Block&Colored
+	 * @phpstan-template TBlock of Block&Colored&HorizontalConnectable
 	 * @phpstan-param TBlock $block
 	 */
 	public function mapColoredHorizontalConnections(Block $block, string $idPrefix, string $idSuffix) : void{
