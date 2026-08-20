@@ -100,7 +100,7 @@ final class GrindstoneHelper{
 	}
 
 	private static function calculateSingleOutput(Item $input) : ?Item{
-		//see https://bugs.mojang.com/browse/MCPE-54256
+		//A single input must not produce a result unless the grindstone changes it. See https://bugs.mojang.com/browse/MCPE-54256
 		if($input->getCount() !== 1 || (!$input->hasEnchantments() && !$input instanceof Durable)){
 			return null;
 		}

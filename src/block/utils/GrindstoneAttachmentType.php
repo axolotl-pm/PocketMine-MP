@@ -23,11 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\utils;
 
-use pocketmine\utils\LegacyEnumShimTrait;
-
 enum GrindstoneAttachmentType{
-	use LegacyEnumShimTrait;
-
 	case CEILING;
 	case FLOOR;
 	case ONE_WALL;

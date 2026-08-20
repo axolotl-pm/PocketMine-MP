@@ -52,7 +52,7 @@ final class Grindstone extends Transparent implements HorizontalFacing{
 			GrindstoneAttachmentType::ONE_WALL => Facing::axis($this->facing),
 			GrindstoneAttachmentType::CEILING, GrindstoneAttachmentType::FLOOR, GrindstoneAttachmentType::MULTIPLE => Facing::axis(Facing::UP),
 		};
-		$inset = (1 - 3 / 4) / 2;
+		$inset = 1 / 8;
 
 		return [AxisAlignedBB::one()->contract($inset, $inset, $inset)->stretch($longAxis, $inset)];
 	}
