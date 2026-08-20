@@ -462,6 +462,7 @@ final class ItemTypeNames{
 	public const PARROT_SPAWN_EGG = "minecraft:parrot_spawn_egg";
 	public const PHANTOM_MEMBRANE = "minecraft:phantom_membrane";
 	public const PHANTOM_SPAWN_EGG = "minecraft:phantom_spawn_egg";
+	public const PHOTO_ITEM = "minecraft:photo_item";
 	public const PIG_SPAWN_EGG = "minecraft:pig_spawn_egg";
 	public const PIGLIN_BANNER_PATTERN = "minecraft:piglin_banner_pattern";
 	public const PIGLIN_BRUTE_SPAWN_EGG = "minecraft:piglin_brute_spawn_egg";
@@ -483,6 +484,7 @@ final class ItemTypeNames{
 	public const POPLAR_SIGN = "minecraft:poplar_sign";
 	public const POPPED_CHORUS_FRUIT = "minecraft:popped_chorus_fruit";
 	public const PORKCHOP = "minecraft:porkchop";
+	public const PORTFOLIO = "minecraft:portfolio";
 	public const POTATO = "minecraft:potato";
 	public const POTION = "minecraft:potion";
 	public const POWDER_SNOW_BUCKET = "minecraft:powder_snow_bucket";
