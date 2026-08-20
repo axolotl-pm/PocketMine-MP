@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a57c2951515c9e7249a06777bcef4383",
+    "content-hash": "db5973c7cc7e5d8977cc7013e03453ba",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -145,16 +145,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-protocol",
-            "version": "60.0.0+bedrock-1.26.44",
+            "version": "dev-bedrock-1.26.45",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "0a50f503f08a3f80adcf6b6dd625a83c5c23c60a"
+                "reference": "52311a37b8d1a551fbb36c9ded1205c8cb39dccd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/0a50f503f08a3f80adcf6b6dd625a83c5c23c60a",
-                "reference": "0a50f503f08a3f80adcf6b6dd625a83c5c23c60a",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/52311a37b8d1a551fbb36c9ded1205c8cb39dccd",
+                "reference": "52311a37b8d1a551fbb36c9ded1205c8cb39dccd",
                 "shasum": ""
             },
             "require": {
@@ -186,9 +186,9 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
-                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/60.0.0+bedrock-1.26.44"
+                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/bedrock-1.26.45"
             },
-            "time": "2026-08-15T00:32:48+00:00"
+            "time": "2026-08-20T10:23:39+00:00"
         },
         {
             "name": "brick/math",
@@ -2762,7 +2762,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "axolotl-pm/bedrock-protocol": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
