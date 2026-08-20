@@ -91,19 +91,18 @@ final class Grindstone extends Transparent implements HorizontalFacing{
 	}
 
 	public function onNearbyBlockChange() : void{
-		foreach(match($this->attachmentType){
-			GrindstoneAttachmentType::CEILING => [Facing::UP],
-			GrindstoneAttachmentType::FLOOR, GrindstoneAttachmentType::MULTIPLE => [Facing::DOWN],
-			GrindstoneAttachmentType::ONE_WALL => [Facing::opposite($this->facing)],
-		} as $supportBlockDirection){
-			if(!$this->canBeSupportedAt($this, $supportBlockDirection)){
-				$world = $this->position->getWorld();
-				if($world->useBreakOn($this->position, createParticles: true)){
-					foreach($this->getDropsForCompatibleTool(VanillaItems::AIR()) as $drop){
-						$world->dropItem($this->position->add(0.5, 0.5, 0.5), $drop);
-					}
+		$supportBlockDirection = match($this->attachmentType){
+			GrindstoneAttachmentType::CEILING => Facing::UP,
+			GrindstoneAttachmentType::FLOOR, GrindstoneAttachmentType::MULTIPLE => Facing::DOWN, //Grindstones have a multiple attachment type, but it has no unique functionality and just represents floor attachment.
+			GrindstoneAttachmentType::ONE_WALL => Facing::opposite($this->facing),
+		};
+
+		if(!$this->canBeSupportedAt($this, $supportBlockDirection)){
+			$world = $this->position->getWorld();
+			if($world->useBreakOn($this->position, createParticles: true)){
+				foreach($this->getDropsForCompatibleTool(VanillaItems::AIR()) as $drop){
+					$world->dropItem($this->position->add(0.5, 0.5, 0.5), $drop);
 				}
-				break;
 			}
 		}
 	}
