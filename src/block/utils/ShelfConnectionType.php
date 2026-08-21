@@ -28,4 +28,43 @@ enum ShelfConnectionType : int{
 	case RIGHT = 1;
 	case CENTER = 2;
 	case LEFT = 3;
+
+	public function isConnected() : bool{
+		return $this !== self::UNCONNECTED;
+	}
+
+	public function canBeNeighbor(bool $onLeft) : bool{
+		return match($onLeft){
+			true => $this === self::LEFT || $this === self::CENTER,
+			false => $this === self::CENTER || $this === self::RIGHT
+		};
+	}
+
+	public function getMaximumNeighborCount(bool $onLeft, ?self $nearestNeighbor) : int{
+		return match($this){
+			self::UNCONNECTED => 0,
+			self::LEFT => $onLeft ? 0 : ($nearestNeighbor === self::RIGHT ? 1 : 2),
+			self::CENTER => 1,
+			self::RIGHT => $onLeft ? ($nearestNeighbor === self::LEFT ? 1 : 2) : 0
+		};
+	}
+
+	public static function fromGroupPosition(int $position, int $groupSize) : self{
+		if($groupSize < 1 || $groupSize > 3){
+			throw new \InvalidArgumentException("Group size must be between 1 and 3");
+		}
+		if($position < 0 || $position >= $groupSize){
+			throw new \InvalidArgumentException("Group position must be within group size");
+		}
+
+		return match($groupSize){
+			1 => self::UNCONNECTED,
+			2 => $position === 0 ? self::LEFT : self::RIGHT,
+			3 => match($position){
+				0 => self::LEFT,
+				1 => self::CENTER,
+				2 => self::RIGHT
+			}
+		};
+	}
 }

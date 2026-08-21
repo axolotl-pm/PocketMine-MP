@@ -161,41 +161,21 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 
 		$leftSide = Facing::rotateY($this->facing, true);
 		$rightSide = Facing::rotateY($this->facing, false);
-		/** @return array<int, Shelf> */
-		$getSideShelves = function(int $side) : array{
-			$shelves = [];
-			for($i = 1; $i <= self::MAX_CONNECTED_SHELVES; ++$i){
-				$block = $this->getSide($side, $i);
-				if(!$block instanceof self || !$block->isPowered() || $block->getFacing() !== $this->facing){
-					break;
-				}
-				$shelves[] = $block;
-			}
-			return $shelves;
-		};
-		$left = $getSideShelves($leftSide);
-		$right = $getSideShelves($rightSide);
+		$left = $this->getCompatibleShelvesOnSide($leftSide);
+		$right = $this->getCompatibleShelvesOnSide($rightSide);
 
-		if($this->poweredShelfType !== ShelfConnectionType::UNCONNECTED){
-			$leftCount = match($this->poweredShelfType){
-				ShelfConnectionType::LEFT => 0,
-				ShelfConnectionType::CENTER => 1,
-				ShelfConnectionType::RIGHT => isset($left[0]) && $left[0]->poweredShelfType === ShelfConnectionType::LEFT ? 1 : 2
-			};
-			$rightCount = match($this->poweredShelfType){
-				ShelfConnectionType::RIGHT => 0,
-				ShelfConnectionType::CENTER => 1,
-				ShelfConnectionType::LEFT => isset($right[0]) && $right[0]->poweredShelfType === ShelfConnectionType::RIGHT ? 1 : 2
-			};
+		if($this->poweredShelfType->isConnected()){
+			$leftCount = $this->poweredShelfType->getMaximumNeighborCount(true, isset($left[0]) ? $left[0]->poweredShelfType : null);
+			$rightCount = $this->poweredShelfType->getMaximumNeighborCount(false, isset($right[0]) ? $right[0]->poweredShelfType : null);
 			$connected = [$this];
 			foreach(array_slice($left, 0, $leftCount) as $block){
-				if($block->poweredShelfType === ShelfConnectionType::UNCONNECTED || $block->poweredShelfType === ShelfConnectionType::RIGHT){
+				if(!$block->poweredShelfType->canBeNeighbor(true)){
 					break;
 				}
 				array_unshift($connected, $block);
 			}
 			foreach(array_slice($right, 0, $rightCount) as $block){
-				if($block->poweredShelfType === ShelfConnectionType::UNCONNECTED || $block->poweredShelfType === ShelfConnectionType::LEFT){
+				if(!$block->poweredShelfType->canBeNeighbor(false)){
 					break;
 				}
 				$connected[] = $block;
@@ -203,8 +183,8 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 			return $connected;
 		}
 
-		$leftGroup = isset($left[0]) && $left[0]->poweredShelfType !== ShelfConnectionType::UNCONNECTED ? $left[0]->getConnectedShelves() : null;
-		$rightGroup = isset($right[0]) && $right[0]->poweredShelfType !== ShelfConnectionType::UNCONNECTED ? $right[0]->getConnectedShelves() : null;
+		$leftGroup = isset($left[0]) && $left[0]->poweredShelfType->isConnected() ? $left[0]->getConnectedShelves() : null;
+		$rightGroup = isset($right[0]) && $right[0]->poweredShelfType->isConnected() ? $right[0]->getConnectedShelves() : null;
 		if($leftGroup !== null && $rightGroup !== null && count($leftGroup) + count($rightGroup) < self::MAX_CONNECTED_SHELVES){
 			return [...$leftGroup, $this, ...$rightGroup];
 		}
@@ -235,6 +215,19 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		}
 
 		return array_slice($unconnected, 0, self::MAX_CONNECTED_SHELVES);
+	}
+
+	/** @return array<int, Shelf> */
+	private function getCompatibleShelvesOnSide(int $side) : array{
+		$shelves = [];
+		for($i = 1; $i <= self::MAX_CONNECTED_SHELVES; ++$i){
+			$block = $this->getSide($side, $i);
+			if(!$block instanceof self || !$block->isPowered() || $block->getFacing() !== $this->facing){
+				break;
+			}
+			$shelves[] = $block;
+		}
+		return $shelves;
 	}
 
 	private function swapAllStacks(Player $player) : bool{
@@ -268,15 +261,7 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		$count = count($shelves);
 		$world = $this->position->getWorld();
 		foreach($shelves as $index => $shelf){
-			$type = match($count){
-				1 => ShelfConnectionType::UNCONNECTED,
-				2 => $index === 0 ? ShelfConnectionType::LEFT : ShelfConnectionType::RIGHT,
-				default => match($index){
-					0 => ShelfConnectionType::LEFT,
-					$count - 1 => ShelfConnectionType::RIGHT,
-					default => ShelfConnectionType::CENTER
-				}
-			};
+			$type = ShelfConnectionType::fromGroupPosition($index, $count);
 			if($shelf->poweredShelfType !== $type){
 				$shelf->poweredShelfType = $type;
 				$world->setBlock($shelf->getPosition(), $shelf, false);
