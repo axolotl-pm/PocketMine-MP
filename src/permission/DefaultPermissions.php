@@ -108,6 +108,7 @@ abstract class DefaultPermissions{
 			Names::COMMAND_SPAWNPOINT_OTHER,
 			Names::COMMAND_SPAWNPOINT_SELF,
 			Names::COMMAND_STATUS,
+		    Named::COMMAND_RELOAD,
 			Names::COMMAND_STOP,
 			Names::COMMAND_TELEPORT_OTHER,
 			Names::COMMAND_TELEPORT_SELF,
