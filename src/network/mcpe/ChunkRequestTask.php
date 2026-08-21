@@ -40,6 +40,7 @@ use function chr;
 
 class ChunkRequestTask extends AsyncTask{
 	private const TLS_KEY_PROMISE = "promise";
+	private static ?TypeConverter $typeConverter = null;
 
 	protected string $chunk;
 	protected int $chunkX;
@@ -53,7 +54,7 @@ class ChunkRequestTask extends AsyncTask{
 	/**
 	 * @phpstan-param DimensionIds::* $dimensionId
 	 */
-	public function __construct(int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, CompressBatchPromise $promise, Compressor $compressor){
+	public function __construct(int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, CompressBatchPromise $promise, Compressor $compressor, private bool $blockNetworkIdsAreHashes = false){
 		$this->compressor = new NonThreadSafeValue($compressor);
 
 		$this->chunk = FastChunkSerializer::serializeTerrain($chunk);
@@ -70,7 +71,10 @@ class ChunkRequestTask extends AsyncTask{
 		$dimensionId = $this->dimensionId;
 
 		$subCount = ChunkSerializer::getSubChunkCount($chunk, $dimensionId);
-		$converter = TypeConverter::getInstance();
+		$converter = self::$typeConverter;
+		if($converter === null || $converter->blockNetworkIdsAreHashes() !== $this->blockNetworkIdsAreHashes){
+			self::$typeConverter = $converter = new TypeConverter($this->blockNetworkIdsAreHashes);
+		}
 		$payload = ChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getBlockTranslator(), $this->tiles);
 
 		$stream = new ByteBufferWriter();

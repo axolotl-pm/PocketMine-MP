@@ -44,6 +44,12 @@ use const JSON_THROW_ON_ERROR;
  */
 final class BlockStateDictionary{
 	/**
+	 * @var BlockStateDictionaryEntry[]
+	 * @phpstan-var array<int, BlockStateDictionaryEntry>
+	 */
+	private array $states = [];
+
+	/**
 	 * @var int[][]|int[]
 	 * @phpstan-var array<string, array<string, int>|int>
 	 */
@@ -61,10 +67,19 @@ final class BlockStateDictionary{
 	 * @phpstan-param list<BlockStateDictionaryEntry> $states
 	 */
 	public function __construct(
-		private array $states
+		array $states,
+		private bool $networkIdsAreHashes = false
 	){
 		$table = [];
-		foreach($this->states as $stateId => $stateNbt){
+		foreach($states as $stateId => $stateNbt){
+			$stateId = $this->networkIdsAreHashes ? $stateNbt->getNetworkIdHash() : $stateId;
+			if(isset($this->states[$stateId])){
+				$existingState = $this->states[$stateId];
+				throw new \InvalidArgumentException(
+					"Blockstate network ID collision between {$existingState->getStateName()} and {$stateNbt->getStateName()} ($stateId)"
+				);
+			}
+			$this->states[$stateId] = $stateNbt;
 			$table[$stateNbt->getStateName()][$stateNbt->getRawStateProperties()] = $stateId;
 		}
 
@@ -152,6 +167,8 @@ final class BlockStateDictionary{
 	 */
 	public function getStates() : array{ return $this->states; }
 
+	public function networkIdsAreHashes() : bool{ return $this->networkIdsAreHashes; }
+
 	/**
 	 * @return BlockStateData[]
 	 * @phpstan-return list<BlockStateData>
@@ -165,7 +182,7 @@ final class BlockStateDictionary{
 		);
 	}
 
-	public static function loadFromString(string $blockPaletteContents, string $metaMapContents) : self{
+	public static function loadFromString(string $blockPaletteContents, string $metaMapContents, bool $networkIdsAreHashes = false) : self{
 		$metaMap = json_decode($metaMapContents, flags: JSON_THROW_ON_ERROR);
 		if(!is_array($metaMap)){
 			throw new \InvalidArgumentException("Invalid metaMap, expected array for root type, got " . get_debug_type($metaMap));
@@ -195,6 +212,6 @@ final class BlockStateDictionary{
 			$entries[$i] = new BlockStateDictionaryEntry($uniqueName, $state->getStates(), $meta);
 		}
 
-		return new self($entries);
+		return new self($entries, $networkIdsAreHashes);
 	}
 }
