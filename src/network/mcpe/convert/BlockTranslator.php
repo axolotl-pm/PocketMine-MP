@@ -87,5 +87,7 @@ final class BlockTranslator{
 
 	public function getBlockStateDictionary() : BlockStateDictionary{ return $this->blockStateDictionary; }
 
+	public function networkIdsAreHashes() : bool{ return $this->blockStateDictionary->networkIdsAreHashes(); }
+
 	public function getFallbackStateData() : BlockStateData{ return $this->fallbackStateData; }
 }

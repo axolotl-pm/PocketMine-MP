@@ -27,6 +27,7 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\ChunkRequestTask;
 use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\compression\Compressor;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\world\ChunkListener;
 use pocketmine\world\ChunkListenerNoOpTrait;
@@ -116,7 +117,8 @@ class ChunkCache implements ChunkListener{
 					$this->dimensionId,
 					$chunk,
 					$promise,
-					$this->compressor
+					$this->compressor,
+					TypeConverter::getInstance()->blockNetworkIdsAreHashes()
 				)
 			);
 			$this->caches[$chunkHash] = $promise;
