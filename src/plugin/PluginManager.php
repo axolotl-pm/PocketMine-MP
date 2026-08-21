@@ -548,13 +548,20 @@ class PluginManager{
 		$this->enabledPlugins = [];
 		$this->fileAssociations = [];
 	}
-	
+	public function enablePlugins() : void{
+		foreach($this->plugins as $plugin){
+			if(!$plugin->isEnabled()){
+				$this->enablePlugin($plugin);
+			}
+		}
+	}
+
 	public function reloadPlugins() : void{
 		if($this->loadPluginsGuard){
 			throw new \LogicException(__METHOD__ . "() cannot be called from within itself");
 		}
 
-		$this->server->getLogger()->info($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_plugin_reload()));
+		$this->server->getLogger()->info($this->server->getLanguage()->translateString("pocketmine.plugin.reload"));
 
 		$this->disablePlugins();
 
@@ -585,14 +592,12 @@ class PluginManager{
 		if($this->pluginDataDirectory !== null){
 			$pluginsPath = Path::join(dirname($this->pluginDataDirectory), "plugins");
 			if(is_dir($pluginsPath)){
-				$loadedPlugins = $this->loadPlugins($pluginsPath);
-				foreach($loadedPlugins as $plugin){
-					$this->enablePlugin($plugin);
-				}
+				$this->loadPlugins($pluginsPath);
+				$this->enablePlugins();
 			}
 		}
 
-		$this->server->getLogger()->info($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_plugin_reloadSuccess()));
+		$this->server->getLogger()->info($this->server->getLanguage()->translateString("pocketmine.plugin.reloadSuccess"));
 	}
 
 	/**
