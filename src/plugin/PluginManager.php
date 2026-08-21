@@ -548,6 +548,52 @@ class PluginManager{
 		$this->enabledPlugins = [];
 		$this->fileAssociations = [];
 	}
+	
+	public function reloadPlugins() : void{
+		if($this->loadPluginsGuard){
+			throw new \LogicException(__METHOD__ . "() cannot be called from within itself");
+		}
+
+		$this->server->getLogger()->info($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_plugin_reload()));
+
+		$this->disablePlugins();
+
+		HandlerListManager::global()->unregisterAll();
+
+		$permManager = PermissionManager::getInstance();
+		$opRoot = $permManager->getPermission(DefaultPermissions::ROOT_OPERATOR);
+		$everyoneRoot = $permManager->getPermission(DefaultPermissions::ROOT_USER);
+
+		foreach($this->plugins as $plugin){
+			foreach($plugin->getDescription()->getPermissions() as $permsGroup){
+				foreach($permsGroup as $perm){
+					$permManager->removePermission($perm);
+					if($opRoot !== null){
+						$opRoot->removeChild($perm->getName());
+					}
+					if($everyoneRoot !== null){
+						$everyoneRoot->removeChild($perm->getName());
+					}
+				}
+			}
+		}
+
+		$this->plugins = [];
+		$this->enabledPlugins = [];
+		$this->pluginDependents = [];
+
+		if($this->pluginDataDirectory !== null){
+			$pluginsPath = Path::join(dirname($this->pluginDataDirectory), "plugins");
+			if(is_dir($pluginsPath)){
+				$loadedPlugins = $this->loadPlugins($pluginsPath);
+				foreach($loadedPlugins as $plugin){
+					$this->enablePlugin($plugin);
+				}
+			}
+		}
+
+		$this->server->getLogger()->info($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_plugin_reloadSuccess()));
+	}
 
 	/**
 	 * Returns whether the given ReflectionMethod could be used as an event handler. Used to filter methods on Listeners
