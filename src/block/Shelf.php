@@ -249,9 +249,10 @@ class Shelf extends Transparent implements HorizontalFacing, PoweredByRedstone, 
 		}
 
 		$inventory = $player->getInventory();
-		$hotbarSlot = $inventory->getHotbarSize() - (count($tiles) * count(ShelfSlot::cases()));
+		$shelfSlotMax = count(ShelfSlot::cases());
+		$hotbarSlot = $inventory->getHotbarSize() - (count($tiles) * $shelfSlotMax);
 		foreach($tiles as $tile){
-			for($shelfSlot = 0; $shelfSlot < count(ShelfSlot::cases()); ++$shelfSlot){
+			for($shelfSlot = 0; $shelfSlot < $shelfSlotMax; ++$shelfSlot){
 				$shelfItem = $tile->getInventory()->getItem($shelfSlot);
 				$hotbarItem = $inventory->getHotbarSlotItem($hotbarSlot++);
 				$tile->getInventory()->setItem($shelfSlot, $hotbarItem);
