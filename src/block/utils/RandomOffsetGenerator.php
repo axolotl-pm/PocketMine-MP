@@ -107,7 +107,7 @@ final class RandomOffsetGenerator{
 	 * Note the asymmetry: the index is scaled by $steps but spread across $steps - 1 intervals, so the endpoints are
 	 * both reachable. A step count of 0 means the axis is continuous, and 1 means it is pinned to the midpoint.
 	 */
-	private static function quantise(float $min, float $max, int $steps, float $random) : float{
+	private static function quantize(float $min, float $max, int $steps, float $random) : float{
 		if($min >= $max){
 			return $min;
 		}
@@ -131,9 +131,9 @@ final class RandomOffsetGenerator{
 	public static function horizontal(int $x, int $z, float $min, float $max, int $steps) : array{
 		$random = Xoroshiro128PP::fromSeed(self::positionHash($x, $z));
 
-		$offsetX = self::quantise($min, $max, $steps, $random->nextFloat());
+		$offsetX = self::quantize($min, $max, $steps, $random->nextFloat());
 		$random->nextFloat(); //the Y axis draw is consumed even though its range is empty in XZ mode
-		$offsetZ = self::quantise($min, $max, $steps, $random->nextFloat());
+		$offsetZ = self::quantize($min, $max, $steps, $random->nextFloat());
 
 		return [$offsetX, $offsetZ];
 	}

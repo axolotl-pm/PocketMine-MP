@@ -93,7 +93,7 @@ class Bamboo extends Transparent{
 	}
 
 	protected function recalculateCollisionBoxes() : array{
-		//the stalk starts at the block centre and extends towards +X/+Z; the random offset then moves it around.
+		//the stalk starts at the block center and extends towards +X/+Z; the random offset then moves it around.
 		$width = ($this->thick ? 3 : 2) / 16;
 		return [
 			AxisAlignedBB::one()
