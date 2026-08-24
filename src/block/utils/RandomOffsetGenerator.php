@@ -43,7 +43,7 @@ use function gmp_xor;
  * position hash seeds a Xoroshiro128++ generator and each axis draws one value quantised into the configured range
  * and step count.
  */
-final class BedrockRandomOffset{
+final class RandomOffsetGenerator{
 
 	private const MASK64 = "0xffffffffffffffff";
 
