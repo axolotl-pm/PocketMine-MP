@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\utils;
 
-use pocketmine\xoroshiro\Xoroshiro128PlusPlus;
+use pocketmine\xoroshiro\Xoroshiro128PP;
 use function gmp_add;
 use function gmp_and;
 use function gmp_cmp;
@@ -129,7 +129,7 @@ final class BedrockRandomOffset{
 	 * @phpstan-return array{float, float}
 	 */
 	public static function horizontal(int $x, int $z, float $min, float $max, int $steps) : array{
-		$random = Xoroshiro128PlusPlus::fromSeed(self::positionHash($x, $z));
+		$random = Xoroshiro128PP::fromSeed(self::positionHash($x, $z));
 
 		$offsetX = self::quantise($min, $max, $steps, $random->nextFloat());
 		$random->nextFloat(); //the Y axis draw is consumed even though its range is empty in XZ mode

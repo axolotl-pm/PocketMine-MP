@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "23ccff895d054eebdc7bef84dfdb4a45",
+    "content-hash": "383989a47dd96aa3e2ce4409b285714e",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -191,17 +191,17 @@
             "time": "2026-08-15T00:32:48+00:00"
         },
         {
-            "name": "axolotl-pm/xoroshiropp",
+            "name": "axolotl-pm/xoroshiro128pp",
             "version": "0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/Xoroshiro128PP.git",
-                "reference": "c7ae1f9a038982639d91eaa6a1e73762954236da"
+                "reference": "bf2c11c939cb82c770692e12f9795893c660d891"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/Xoroshiro128PP/zipball/c7ae1f9a038982639d91eaa6a1e73762954236da",
-                "reference": "c7ae1f9a038982639d91eaa6a1e73762954236da",
+                "url": "https://api.github.com/repos/axolotl-pm/Xoroshiro128PP/zipball/bf2c11c939cb82c770692e12f9795893c660d891",
+                "reference": "bf2c11c939cb82c770692e12f9795893c660d891",
                 "shasum": ""
             },
             "require": {
@@ -230,7 +230,7 @@
                 "issues": "https://github.com/axolotl-pm/Xoroshiro128PP/issues",
                 "source": "https://github.com/axolotl-pm/Xoroshiro128PP/tree/0.1.0"
             },
-            "time": "2026-08-24T04:46:20+00:00"
+            "time": "2026-08-24T05:25:19+00:00"
         },
         {
             "name": "brick/math",
@@ -435,6 +435,7 @@
                 "issues": "https://github.com/pmmp/CallbackValidator/issues",
                 "source": "https://github.com/pmmp/CallbackValidator/tree/1.0.4"
             },
+            "abandoned": true,
             "time": "2025-12-24T01:25:05+00:00"
         },
         {
@@ -473,6 +474,7 @@
                 "issues": "https://github.com/pmmp/Color/issues",
                 "source": "https://github.com/pmmp/Color/tree/0.3.1"
             },
+            "abandoned": true,
             "time": "2023-04-10T11:38:05+00:00"
         },
         {
@@ -512,6 +514,7 @@
                 "issues": "https://github.com/pmmp/ErrorHandler/issues",
                 "source": "https://github.com/pmmp/ErrorHandler/tree/0.7.1"
             },
+            "abandoned": true,
             "time": "2025-12-24T02:26:52+00:00"
         },
         {
@@ -553,6 +556,7 @@
                 "issues": "https://github.com/pmmp/Log/issues",
                 "source": "https://github.com/pmmp/Log/tree/0.4.0"
             },
+            "abandoned": true,
             "time": "2021-06-18T19:08:09+00:00"
         },
         {
@@ -594,6 +598,7 @@
                 "issues": "https://github.com/pmmp/Math/issues",
                 "source": "https://github.com/pmmp/Math/tree/1.0.0"
             },
+            "abandoned": true,
             "time": "2023-08-03T12:56:33+00:00"
         },
         {
@@ -637,6 +642,7 @@
                 "issues": "https://github.com/pmmp/NBT/issues",
                 "source": "https://github.com/pmmp/NBT/tree/1.2.0"
             },
+            "abandoned": true,
             "time": "2025-09-19T18:09:30+00:00"
         },
         {
@@ -721,6 +727,7 @@
                 "issues": "https://github.com/pmmp/RakLibIpc/issues",
                 "source": "https://github.com/pmmp/RakLibIpc/tree/1.0.1"
             },
+            "abandoned": true,
             "time": "2024-03-01T15:55:05+00:00"
         },
         {
@@ -919,16 +926,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v6.4.43",
+            "version": "v6.4.44",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "9ff03da12d67649fbd1f34ca95951554624d0a16"
+                "reference": "e84ffb3e77e3a7144727a0d0735d0d9cc0ca77a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/9ff03da12d67649fbd1f34ca95951554624d0a16",
-                "reference": "9ff03da12d67649fbd1f34ca95951554624d0a16",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/e84ffb3e77e3a7144727a0d0735d0d9cc0ca77a7",
+                "reference": "e84ffb3e77e3a7144727a0d0735d0d9cc0ca77a7",
                 "shasum": ""
             },
             "require": {
@@ -965,7 +972,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v6.4.43"
+                "source": "https://github.com/symfony/filesystem/tree/v6.4.44"
             },
             "funding": [
                 {
@@ -985,7 +992,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-27T10:13:35+00:00"
+            "time": "2026-08-20T20:21:47+00:00"
         }
     ],
     "packages-dev": [
