@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\utils\BedrockRandomOffset;
+use pocketmine\block\utils\RandomOffsetGenerator;
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\data\runtime\RuntimeDataDescriber;
@@ -54,9 +54,8 @@ class Bamboo extends Transparent{
 	public const SMALL_LEAVES = 1;
 	public const LARGE_LEAVES = 2;
 
-	//minecraft:random_offset (XZ) parameters for bamboo, as of 1.21.80+.
-	private const OFFSET_MIN = -0.25;
-	private const OFFSET_MAX = 0.25;
+	private const OFFSET_MIN = -4 / 16;
+	private const OFFSET_MAX = 4 / 16;
 	private const OFFSET_STEPS = 16;
 
 	protected bool $thick = false; //age in PC, but this is 0/1
@@ -125,7 +124,7 @@ class Bamboo extends Transparent{
 	}
 
 	public function getModelPositionOffset() : ?Vector3{
-		[$offsetX, $offsetZ] = BedrockRandomOffset::horizontal(
+		[$offsetX, $offsetZ] = RandomOffsetGenerator::horizontal(
 			$this->position->getFloorX(),
 			$this->position->getFloorZ(),
 			self::OFFSET_MIN,
