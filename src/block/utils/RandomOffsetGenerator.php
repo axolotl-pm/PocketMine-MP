@@ -88,7 +88,7 @@ final class RandomOffsetGenerator{
 	 * Hashes a block position down to the 64-bit seed the generator is built from.
 	 *
 	 * X is read as unsigned and Z as signed, which is not symmetrical but is what the game does, so it has to be
-	 * reproduced rather than tidied up. The result is fed to Xoroshiro128PlusPlus::fromSeed(), which applies the
+	 * reproduced rather than tidied up. The result is fed to Xoroshiro128PP::fromSeed(), which applies the
 	 * silver ratio mix that completes the hash.
 	 */
 	private static function positionHash(int $x, int $z) : int{
