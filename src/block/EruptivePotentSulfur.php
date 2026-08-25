@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\event\block\GeyserEruptionPulseEvent;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\player\Player;
@@ -48,7 +49,16 @@ abstract class EruptivePotentSulfur extends WetPotentSulfur{
 		parent::onGeyserHeartbeat($outlet);
 
 		if($outlet !== null && $this->isErupting()){
-			$this->pulseEruption($outlet);
+			$cancelled = false;
+			if(GeyserEruptionPulseEvent::hasHandlers()){
+				$ev = new GeyserEruptionPulseEvent($this, $outlet);
+				$ev->call();
+				$cancelled = $ev->isCancelled();
+			}
+
+			if(!$cancelled){
+				$this->pulseEruption($outlet);
+			}
 		}
 	}
 
