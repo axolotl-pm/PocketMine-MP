@@ -67,7 +67,6 @@ use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
-use pocketmine\math\VoxelRayTrace;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\convert\TypeConverter;
@@ -2124,23 +2123,6 @@ class World implements ChunkManager{
 		}
 
 		return $orbs;
-	}
-
-	/**
-	 * Returns whether the path between two points is unobstructed by block collision boxes.
-	 * Entities are not considered, and blocks without collision boxes (such as water or grass) do not obstruct.
-	 */
-	public function hasLineOfSight(Vector3 $from, Vector3 $to) : bool{
-		foreach(VoxelRayTrace::betweenPoints($from, $to) as $blockPos){
-			$block = $this->getBlockAt($blockPos->getFloorX(), $blockPos->getFloorY(), $blockPos->getFloorZ());
-			foreach($block->getCollisionBoxes() as $bb){
-				if($bb->calculateIntercept($from, $to) !== null){
-					return false;
-				}
-			}
-		}
-
-		return true;
 	}
 
 	/**

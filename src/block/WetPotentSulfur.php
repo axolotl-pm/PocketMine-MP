@@ -30,6 +30,7 @@ use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
+use pocketmine\math\VoxelRayTrace;
 use function count;
 
 class WetPotentSulfur extends PotentSulfur{
@@ -138,6 +139,16 @@ class WetPotentSulfur extends PotentSulfur{
 			return false;
 		}
 
-		return $world->hasLineOfSight($outlet->position->add(0.5, -0.5, 0.5), $feetPos);
+		$center = $outlet->position->add(0.5, -0.5, 0.5);
+		foreach(VoxelRayTrace::betweenPoints($center, $feetPos) as $blockPos){
+			$block = $world->getBlockAt($blockPos->getFloorX(), $blockPos->getFloorY(), $blockPos->getFloorZ());
+			foreach($block->getCollisionBoxes() as $bb){
+				if($bb->calculateIntercept($center, $feetPos) !== null){
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }
