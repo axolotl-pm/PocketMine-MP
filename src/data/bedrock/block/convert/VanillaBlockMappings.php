@@ -1721,7 +1721,9 @@ final class VanillaBlockMappings{
 				self::deserializeAsymmetric($wallModel, $in));
 		}
 
-		//potent sulfure
+		//potent sulfur - splitting them into separate variants here lets each isolate its
+		//own behaviour (dry does not erupt, cycling alternates phases, continuous erupts forever)
+		//on PM's side
 		$dryPotentSulfurModel = Model::create(Blocks::POTENT_SULFUR(), Ids::POTENT_SULFUR)->properties([
 			new DummyProperty(StateNames::POTENT_SULFUR_STATE, StringValues::POTENT_SULFUR_STATE_DRY)
 		]);
