@@ -24,12 +24,15 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\handler;
 
 use pocketmine\block\inventory\EnchantInventory;
+use pocketmine\block\inventory\GrindstoneInventory;
+use pocketmine\block\utils\GrindstoneHelper;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\transaction\action\CreateItemAction;
 use pocketmine\inventory\transaction\action\DestroyItemAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\CraftingTransaction;
 use pocketmine\inventory\transaction\EnchantingTransaction;
+use pocketmine\inventory\transaction\GrindstoneTransaction;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionBuilder;
 use pocketmine\inventory\transaction\TransactionBuilderInventory;
@@ -47,6 +50,7 @@ use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\CreativeCreate
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DeprecatedCraftingResultsStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DestroyStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\DropStackRequestAction;
+use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\GrindstoneStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequest;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequestAction;
 use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequestSlotInfo;
@@ -262,6 +266,30 @@ class ItemStackRequestExecutor{
 		}
 	}
 
+	protected function beginGrindstone(GrindstoneStackRequestAction $action) : void{
+		if($this->specialTransaction !== null){
+			throw new ItemStackRequestProcessException("Another special transaction is already in progress");
+		}
+		if($action->getRepetitions() < 1){
+			throw new ItemStackRequestProcessException("Cannot use a grindstone less than 1 time");
+		}
+		if($action->getRepetitions() > 256){
+			throw new ItemStackRequestProcessException("Cannot use a grindstone more than 256 times");
+		}
+
+		$window = $this->player->getCurrentWindow();
+		if(!$window instanceof GrindstoneInventory){
+			throw new ItemStackRequestProcessException("A grindstone transaction requires a grindstone inventory");
+		}
+		$result = GrindstoneHelper::calculateResult($window->getItem(GrindstoneInventory::SLOT_INPUT), $window->getItem(GrindstoneInventory::SLOT_ADDITIONAL));
+		if($result === null){
+			throw new ItemStackRequestProcessException("The grindstone inputs cannot be processed");
+		}
+
+		$this->specialTransaction = new GrindstoneTransaction($this->player, $window, $result);
+		$this->setNextCreatedItem($result->getOutput());
+	}
+
 	/**
 	 * @throws ItemStackRequestProcessException
 	 */
@@ -295,7 +323,7 @@ class ItemStackRequestExecutor{
 	 * @throws ItemStackRequestProcessException
 	 */
 	private function assertDoingCrafting() : void{
-		if(!$this->specialTransaction instanceof CraftingTransaction && !$this->specialTransaction instanceof EnchantingTransaction){
+		if(!$this->specialTransaction instanceof CraftingTransaction && !$this->specialTransaction instanceof EnchantingTransaction && !$this->specialTransaction instanceof GrindstoneTransaction){
 			if($this->specialTransaction === null){
 				throw new ItemStackRequestProcessException("Expected CraftRecipe or CraftRecipeAuto action to precede this action");
 			}else{
@@ -325,6 +353,9 @@ class ItemStackRequestExecutor{
 			$inventory1->setItem($slot1, $item2);
 			$inventory2->setItem($slot2, $item1);
 		}elseif($action instanceof DropStackRequestAction){
+			if($this->specialTransaction instanceof GrindstoneTransaction && ($action->getSource()->getContainerName()->getContainerId() !== ContainerUIIds::CREATED_OUTPUT || $action->getSource()->getSlotId() !== UIInventorySlotOffset::CREATED_ITEM_OUTPUT)){
+				throw new ItemStackRequestProcessException("A grindstone result can only be dropped from the created output slot");
+			}
 			//TODO: this action has a "randomly" field, I have no idea what it's used for
 			$dropped = $this->removeItemFromSlot($action->getSource(), $action->getCount());
 			$this->builder->addAction(new DropItemAction($dropped));
@@ -340,6 +371,8 @@ class ItemStackRequestExecutor{
 			}
 
 			$this->setNextCreatedItem($item, true);
+		}elseif($action instanceof GrindstoneStackRequestAction){
+			$this->beginGrindstone($action);
 		}elseif($action instanceof CraftRecipeStackRequestAction){
 			$window = $this->player->getCurrentWindow();
 			if($window instanceof EnchantInventory){
@@ -359,6 +392,9 @@ class ItemStackRequestExecutor{
 
 		}elseif($action instanceof CraftingCreateSpecificResultStackRequestAction){
 			$this->assertDoingCrafting();
+			if($this->specialTransaction instanceof GrindstoneTransaction){
+				throw new ItemStackRequestProcessException("Grindstone transactions do not support multiple crafting results");
+			}
 
 			$nextResultItem = $this->craftingResults[$action->getResultIndex()] ?? null;
 			if($nextResultItem === null){

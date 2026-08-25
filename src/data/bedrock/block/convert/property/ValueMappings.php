@@ -29,6 +29,7 @@ use pocketmine\block\utils\DirtType;
 use pocketmine\block\utils\DripleafState;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\utils\FroglightType;
+use pocketmine\block\utils\GrindstoneAttachmentType;
 use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\MobHeadType;
 use pocketmine\block\utils\MushroomBlockType;
@@ -57,6 +58,8 @@ final class ValueMappings{
 	public readonly EnumFromRawStateMap $dripleafState;
 	/** @phpstan-var EnumFromRawStateMap<BellAttachmentType, string> */
 	public readonly EnumFromRawStateMap $bellAttachmentType;
+	/** @phpstan-var EnumFromRawStateMap<GrindstoneAttachmentType, string> */
+	public readonly EnumFromRawStateMap $grindstoneAttachmentType;
 	/** @phpstan-var EnumFromRawStateMap<LeverFacing, string> */
 	public readonly EnumFromRawStateMap $leverFacing;
 
@@ -157,6 +160,12 @@ final class ValueMappings{
 			BellAttachmentType::CEILING => StringValues::ATTACHMENT_HANGING,
 			BellAttachmentType::ONE_WALL => StringValues::ATTACHMENT_SIDE,
 			BellAttachmentType::TWO_WALLS => StringValues::ATTACHMENT_MULTIPLE,
+		});
+		$this->grindstoneAttachmentType = EnumFromRawStateMap::string(GrindstoneAttachmentType::class, fn(GrindstoneAttachmentType $case) => match ($case) {
+			GrindstoneAttachmentType::FLOOR => StringValues::ATTACHMENT_STANDING,
+			GrindstoneAttachmentType::CEILING => StringValues::ATTACHMENT_HANGING,
+			GrindstoneAttachmentType::ONE_WALL => StringValues::ATTACHMENT_SIDE,
+			GrindstoneAttachmentType::MULTIPLE => StringValues::ATTACHMENT_MULTIPLE,
 		});
 		$this->leverFacing = EnumFromRawStateMap::string(LeverFacing::class, fn(LeverFacing $case) => match ($case) {
 			LeverFacing::DOWN_AXIS_Z => StringValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH,
