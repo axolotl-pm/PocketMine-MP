@@ -66,6 +66,9 @@ class WetPotentSulfur extends PotentSulfur{
 		}
 	}
 
+	/**
+	 * Returns whether the given block can be pushed through by the geyser plume.
+	 */
 	protected function isGeyserPassable(Block $block) : bool{
 		return count($block->getCollisionBoxes()) === 0;
 	}
@@ -97,6 +100,12 @@ class WetPotentSulfur extends PotentSulfur{
 		return null;
 	}
 
+	/**
+	 * Applies the nausea gas effect to living entities near the geyser outlet.
+	 *
+	 * Only affects entities whose eye position is within range of the outlet, exposed
+	 * to the gas (no blocking block overhead), and standing in source water.
+	 */
 	private function pulseGas(Block $outlet) : void{
 		$world = $this->position->getWorld();
 		$bb = AxisAlignedBB::one()
