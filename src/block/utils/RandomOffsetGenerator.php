@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\utils;
 
-use pocketmine\xoroshiro\Xoroshiro128PP;
+use pocketmine\xoroshiro128pp\Xoroshiro128PP;
 use function gmp_add;
 use function gmp_and;
 use function gmp_cmp;

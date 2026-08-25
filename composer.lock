@@ -196,12 +196,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/Xoroshiro128PP.git",
-                "reference": "bf2c11c939cb82c770692e12f9795893c660d891"
+                "reference": "02e3fb6bbfa53e0025c08b08e5e83b092cdef3eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/Xoroshiro128PP/zipball/bf2c11c939cb82c770692e12f9795893c660d891",
-                "reference": "bf2c11c939cb82c770692e12f9795893c660d891",
+                "url": "https://api.github.com/repos/axolotl-pm/Xoroshiro128PP/zipball/02e3fb6bbfa53e0025c08b08e5e83b092cdef3eb",
+                "reference": "02e3fb6bbfa53e0025c08b08e5e83b092cdef3eb",
                 "shasum": ""
             },
             "require": {
@@ -210,7 +210,7 @@
                 "php-64bit": "*"
             },
             "require-dev": {
-                "phpstan/phpstan": "2.1.46",
+                "phpstan/phpstan": "2.2.8",
                 "phpstan/phpstan-phpunit": "^2.0.0",
                 "phpstan/phpstan-strict-rules": "^2.0.0",
                 "phpunit/phpunit": "^10.5.24"
@@ -218,7 +218,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "pocketmine\\xoroshiro\\": "src/"
+                    "pocketmine\\xoroshiro128pp\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -230,7 +230,7 @@
                 "issues": "https://github.com/axolotl-pm/Xoroshiro128PP/issues",
                 "source": "https://github.com/axolotl-pm/Xoroshiro128PP/tree/0.1.0"
             },
-            "time": "2026-08-24T05:25:19+00:00"
+            "time": "2026-08-25T14:15:14+00:00"
         },
         {
             "name": "brick/math",
@@ -385,6 +385,7 @@
                 "issues": "https://github.com/pmmp/BinaryUtils/issues",
                 "source": "https://github.com/pmmp/BinaryUtils/tree/0.2.7"
             },
+            "abandoned": true,
             "time": "2025-12-24T04:20:35+00:00"
         },
         {
