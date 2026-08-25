@@ -855,8 +855,20 @@ final class BlockTypeIds{
 	public const AZALEA = 10825;
 	public const FLOWERING_AZALEA = 10826;
 	public const HEAVY_CORE = 10827;
+	public const ACACIA_SHELF = 10828;
+	public const BAMBOO_SHELF = 10829;
+	public const BIRCH_SHELF = 10830;
+	public const CHERRY_SHELF = 10831;
+	public const CRIMSON_SHELF = 10832;
+	public const DARK_OAK_SHELF = 10833;
+	public const JUNGLE_SHELF = 10834;
+	public const MANGROVE_SHELF = 10835;
+	public const OAK_SHELF = 10836;
+	public const PALE_OAK_SHELF = 10837;
+	public const SPRUCE_SHELF = 10838;
+	public const WARPED_SHELF = 10839;
 
-	public const FIRST_UNUSED_BLOCK_ID = 10828;
+	public const FIRST_UNUSED_BLOCK_ID = 10840;
 
 	private static int $nextDynamicId = self::FIRST_UNUSED_BLOCK_ID;
 
