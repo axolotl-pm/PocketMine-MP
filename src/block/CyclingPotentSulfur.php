@@ -33,12 +33,12 @@ use function mt_rand;
 
 final class CyclingPotentSulfur extends EruptivePotentSulfur{
 
-	private const DORMANT_MIN_HEARTBEATS = 30; //15 seconds
-	private const DORMANT_MAX_HEARTBEATS = 60; //30 seconds
+	private const DORMANT_MIN_BASE_HEARTBEATS = 30; //15 seconds
+	private const DORMANT_MAX_BASE_HEARTBEATS = 60; //30 seconds
 	private const DORMANT_HEARTBEATS_PER_EXTRA_LENGTH = 20; //10 seconds
 
-	private const ERUPTING_MIN_HEARTBEATS = 2; //1 second
-	private const ERUPTING_MAX_HEARTBEATS = 4; //2 seconds
+	private const ERUPTING_MIN_BASE_HEARTBEATS = 2; //1 second
+	private const ERUPTING_MAX_BASE_HEARTBEATS = 4; //2 seconds
 	private const ERUPTING_HEARTBEATS_PER_EXTRA_LENGTH = 2; //1 second
 
 	private bool $erupting = false;
@@ -95,7 +95,7 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		}
 
 		$this->shiftPhase($outlet);
-		$this->heartbeatsUntilPhaseShift = $this->getPhaseHeartbeats($outlet);
+		$this->heartbeatsUntilPhaseShift = $this->getCurrentPhaseHeartbeats($outlet);
 		$this->position->getWorld()->setBlock($this->position, $this);
 
 		return true;
@@ -115,7 +115,7 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		if($this->heartbeatsUntilPhaseShift <= 0){
 			//Set budget before countdown to prevent an instant shift on the first heartbeat,
 			//and to avoid immediate eruptions the moment a blocked outlet reopens.
-			$this->heartbeatsUntilPhaseShift = $this->getPhaseHeartbeats($outlet);
+			$this->heartbeatsUntilPhaseShift = $this->getCurrentPhaseHeartbeats($outlet);
 		}
 
 		if(--$this->heartbeatsUntilPhaseShift <= 0 && $outlet !== null){
@@ -134,19 +134,22 @@ final class CyclingPotentSulfur extends EruptivePotentSulfur{
 		}
 	}
 
-	private function getPhaseHeartbeats(?Block $outlet) : int{
-		$extraLength = $outlet !== null ? max(0, $this->getWaterColumnLength($outlet) - 1) : 0;
+	private function getCurrentPhaseHeartbeats(?Block $outlet) : int{
+		$columnLength = $outlet !== null ? max(0, $this->getWaterColumnLength($outlet) - 1) : 0;
 
-		if($this->erupting){
-			$min = self::ERUPTING_MIN_HEARTBEATS;
-			$max = self::ERUPTING_MAX_HEARTBEATS;
-			$extra = self::ERUPTING_HEARTBEATS_PER_EXTRA_LENGTH;
-		}else{
-			$min = self::DORMANT_MIN_HEARTBEATS;
-			$max = self::DORMANT_MAX_HEARTBEATS;
-			$extra = self::DORMANT_HEARTBEATS_PER_EXTRA_LENGTH;
-		}
+		[$min, $max, $extra] = match($this->erupting){
+			true => [
+				self::ERUPTING_MIN_BASE_HEARTBEATS,
+				self::ERUPTING_MAX_BASE_HEARTBEATS,
+				self::ERUPTING_HEARTBEATS_PER_EXTRA_LENGTH,
+			],
+			false => [
+				self::DORMANT_MIN_BASE_HEARTBEATS,
+				self::DORMANT_MAX_BASE_HEARTBEATS,
+				self::DORMANT_HEARTBEATS_PER_EXTRA_LENGTH,
+			]
+		};
 
-		return mt_rand($min, $max) + ($extra * $extraLength);
+		return mt_rand($min, $max) + ($columnLength * $extra);
 	}
 }
