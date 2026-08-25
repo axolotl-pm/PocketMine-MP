@@ -23,10 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\player;
 
-use BadMethodCallException;
-use InvalidArgumentException;
-use Logger;
-use LogicException;
 use pocketmine\block\BaseBed;
 use pocketmine\block\BaseSign;
 use pocketmine\block\Bed;
@@ -149,7 +145,6 @@ use pocketmine\world\sound\RespawnAnchorDepleteSound;
 use pocketmine\world\sound\Sound;
 use pocketmine\world\World;
 use pocketmine\YmlServerProperties;
-use PrefixedLogger;
 use Ramsey\Uuid\UuidInterface;
 use function abs;
 use function array_filter;
@@ -320,13 +315,13 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	/** @var Form[] */
 	protected array $forms = [];
 
-	protected Logger $logger;
+	protected \Logger $logger;
 
 	protected ?SurvivalBlockBreakHandler $blockBreakHandler = null;
 
 	public function __construct(Server $server, NetworkSession $session, PlayerInfo $playerInfo, bool $authenticated, Location $spawnLocation, ?CompoundTag $namedtag){
 		$username = TextFormat::clean($playerInfo->getUsername());
-		$this->logger = new PrefixedLogger($server->getLogger(), "Player: $username");
+		$this->logger = new \PrefixedLogger($server->getLogger(), "Player: $username");
 
 		$this->server = $server;
 		$this->networkSession = $session;
@@ -597,7 +592,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 	public function setScreenLineHeight(?int $height) : void{
 		if($height !== null && $height < 1){
-			throw new InvalidArgumentException("Line height must be at least 1");
+			throw new \InvalidArgumentException("Line height must be at least 1");
 		}
 		$this->lineHeight = $height;
 	}
@@ -670,7 +665,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 	public function getNetworkSession() : NetworkSession{
 		if($this->networkSession === null){
-			throw new LogicException("Player is not connected");
+			throw new \LogicException("Player is not connected");
 		}
 		return $this->networkSession;
 	}
@@ -1170,7 +1165,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	public function sleepOn(Vector3 $pos) : bool{
 		$pos = $pos->floor();
 		$b = $this->getWorld()->getBlock($pos);
-		$shouldSetRespawn = false;
 
 		$ev = new PlayerBedEnterEvent($this, $b);
 		$ev->call();
@@ -2293,7 +2287,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	/**
 	 * Sends a Form to the player, or queue to send it if a form is already open.
 	 *
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	public function sendForm(Form $form) : void{
 		$id = $this->formIdCounter++;
@@ -2413,7 +2407,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	 */
 	public function onPostDisconnect(Translatable|string $reason, Translatable|string|null $quitMessage) : void{
 		if($this->isConnected()){
-			throw new LogicException("Player is still connected");
+			throw new \LogicException("Player is still connected");
 		}
 
 		//prevent the player receiving their own disconnect message
@@ -2496,7 +2490,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	}
 
 	public function setCanSaveWithChunk(bool $value) : void{
-		throw new BadMethodCallException("Players can't be saved with chunks");
+		throw new \BadMethodCallException("Players can't be saved with chunks");
 	}
 
 	public function getSaveData() : CompoundTag{
@@ -2865,7 +2859,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 		$this->removeCurrentWindow();
 
 		if(($inventoryManager = $this->getNetworkSession()->getInvManager()) === null){
-			throw new InvalidArgumentException("Player cannot open inventories in this state");
+			throw new \InvalidArgumentException("Player cannot open inventories in this state");
 		}
 		$this->logger->debug("Opening inventory " . get_class($inventory) . "#" . spl_object_id($inventory));
 		$inventoryManager->onCurrentWindowChange($inventory);
@@ -2911,7 +2905,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 			$this->getWorld()->setBlock($position, $block->setEditorEntityRuntimeId($this->getId()));
 			$this->getNetworkSession()->onOpenSignEditor($position, $frontFace);
 		}else{
-			throw new InvalidArgumentException("Block at this position is not a sign");
+			throw new \InvalidArgumentException("Block at this position is not a sign");
 		}
 	}
 
