@@ -23,11 +23,12 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\CyclingPotentSulfur;
 use pocketmine\nbt\tag\CompoundTag;
 
 /**
- * This tile serves no purpose on bedrock (stuff are done in client-side), while Java saves the countdown for the block
- * to erupt in the tile entity.
+ * Holds the phase-shift countdown at runtime only ({@see CyclingPotentSulfur});
+ * unlike Java Edition, this is not persisted to disk on Bedrock.
  */
 final class PotentSulfur extends Tile{
 
