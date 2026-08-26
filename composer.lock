@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ea76b285f625765b24212697dfadbcaa",
+    "content-hash": "610d13d420aed82a355a87c58c6a4deb",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -66,17 +66,95 @@
             "time": "2022-10-02T11:22:07+00:00"
         },
         {
-            "name": "axolotl-pm/bedrock-protocol",
-            "version": "58.0.1+bedrock-1.26.30",
+            "name": "axolotl-pm/bedrock-block-upgrade-schema",
+            "version": "5.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "8eb5a390a8d913ee54b97ac71f42899ecbb5c419"
+                "url": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema.git",
+                "reference": "e8e01b5a80192ca8d05ca257fe300cfb5b8df3da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/8eb5a390a8d913ee54b97ac71f42899ecbb5c419",
-                "reference": "8eb5a390a8d913ee54b97ac71f42899ecbb5c419",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/e8e01b5a80192ca8d05ca257fe300cfb5b8df3da",
+                "reference": "e8e01b5a80192ca8d05ca257fe300cfb5b8df3da",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC0-1.0"
+            ],
+            "description": "Schemas describing how to upgrade saved block data in older Minecraft: Bedrock Edition world saves",
+            "support": {
+                "issues": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/issues",
+                "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/5.3.0"
+            },
+            "time": "2026-08-24T11:38:43+00:00"
+        },
+        {
+            "name": "axolotl-pm/bedrock-data",
+            "version": "6.8.0+bedrock-1.26.40",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/axolotl-pm/BedrockData.git",
+                "reference": "7db37fe48e4fcc18f6dd5e7ac97c9b0a9d160c2f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockData/zipball/7db37fe48e4fcc18f6dd5e7ac97c9b0a9d160c2f",
+                "reference": "7db37fe48e4fcc18f6dd5e7ac97c9b0a9d160c2f",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC0-1.0"
+            ],
+            "description": "Blobs of data generated from Minecraft: Bedrock Edition, used by PocketMine-MP",
+            "support": {
+                "issues": "https://github.com/axolotl-pm/BedrockData/issues",
+                "source": "https://github.com/axolotl-pm/BedrockData/tree/bedrock-1.26.40"
+            },
+            "time": "2026-08-07T18:32:09+00:00"
+        },
+        {
+            "name": "axolotl-pm/bedrock-item-upgrade-schema",
+            "version": "1.18.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema.git",
+                "reference": "75cb9b91e0fc816416d5d56c92642baabeb65bb1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockItemUpgradeSchema/zipball/75cb9b91e0fc816416d5d56c92642baabeb65bb1",
+                "reference": "75cb9b91e0fc816416d5d56c92642baabeb65bb1",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC0-1.0"
+            ],
+            "description": "JSON schemas for upgrading items found in older Minecraft: Bedrock world saves",
+            "support": {
+                "issues": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/issues",
+                "source": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/tree/1.18.0"
+            },
+            "time": "2026-08-07T19:17:02+00:00"
+        },
+        {
+            "name": "axolotl-pm/bedrock-protocol",
+            "version": "60.0.0+bedrock-1.26.44",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
+                "reference": "0a50f503f08a3f80adcf6b6dd625a83c5c23c60a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/0a50f503f08a3f80adcf6b6dd625a83c5c23c60a",
+                "reference": "0a50f503f08a3f80adcf6b6dd625a83c5c23c60a",
                 "shasum": ""
             },
             "require": {
@@ -108,9 +186,51 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
-                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/58.0.1+bedrock-1.26.30"
+                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/60.0.0+bedrock-1.26.44"
             },
-            "time": "2026-07-05T17:46:09+00:00"
+            "time": "2026-08-15T00:32:48+00:00"
+        },
+        {
+            "name": "axolotl-pm/xoroshiro128pp",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/axolotl-pm/Xoroshiro128PP.git",
+                "reference": "02e3fb6bbfa53e0025c08b08e5e83b092cdef3eb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/axolotl-pm/Xoroshiro128PP/zipball/02e3fb6bbfa53e0025c08b08e5e83b092cdef3eb",
+                "reference": "02e3fb6bbfa53e0025c08b08e5e83b092cdef3eb",
+                "shasum": ""
+            },
+            "require": {
+                "ext-gmp": "*",
+                "php": "^8.1",
+                "php-64bit": "*"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "2.2.8",
+                "phpstan/phpstan-phpunit": "^2.0.0",
+                "phpstan/phpstan-strict-rules": "^2.0.0",
+                "phpunit/phpunit": "^10.5.24"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "pocketmine\\xoroshiro128pp\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0"
+            ],
+            "description": "Xoroshiro128++ random number generator for PocketMine-MP",
+            "support": {
+                "issues": "https://github.com/axolotl-pm/Xoroshiro128PP/issues",
+                "source": "https://github.com/axolotl-pm/Xoroshiro128PP/tree/0.1.0"
+            },
+            "time": "2026-08-25T14:15:14+00:00"
         },
         {
             "name": "brick/math",
@@ -226,84 +346,6 @@
             "time": "2026-06-29T16:03:16+00:00"
         },
         {
-            "name": "pocketmine/bedrock-block-upgrade-schema",
-            "version": "5.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pmmp/BedrockBlockUpgradeSchema.git",
-                "reference": "5d7889c9a1cdf9e3cd814d2a104ad69b75116ec7"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pmmp/BedrockBlockUpgradeSchema/zipball/5d7889c9a1cdf9e3cd814d2a104ad69b75116ec7",
-                "reference": "5d7889c9a1cdf9e3cd814d2a104ad69b75116ec7",
-                "shasum": ""
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "CC0-1.0"
-            ],
-            "description": "Schemas describing how to upgrade saved block data in older Minecraft: Bedrock Edition world saves",
-            "support": {
-                "issues": "https://github.com/pmmp/BedrockBlockUpgradeSchema/issues",
-                "source": "https://github.com/pmmp/BedrockBlockUpgradeSchema/tree/5.2.0"
-            },
-            "time": "2025-10-02T13:22:10+00:00"
-        },
-        {
-            "name": "pocketmine/bedrock-data",
-            "version": "6.7.0+bedrock-1.26.30",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pmmp/BedrockData.git",
-                "reference": "bdb44a48fb6beffb6e9f6864f06d2232eb62b6a3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pmmp/BedrockData/zipball/bdb44a48fb6beffb6e9f6864f06d2232eb62b6a3",
-                "reference": "bdb44a48fb6beffb6e9f6864f06d2232eb62b6a3",
-                "shasum": ""
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "CC0-1.0"
-            ],
-            "description": "Blobs of data generated from Minecraft: Bedrock Edition, used by PocketMine-MP",
-            "support": {
-                "issues": "https://github.com/pmmp/BedrockData/issues",
-                "source": "https://github.com/pmmp/BedrockData/tree/bedrock-1.26.30"
-            },
-            "time": "2026-06-22T19:41:55+00:00"
-        },
-        {
-            "name": "pocketmine/bedrock-item-upgrade-schema",
-            "version": "1.17.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pmmp/BedrockItemUpgradeSchema.git",
-                "reference": "e19685d2e7e76eb7446115c556df34e5d627d072"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pmmp/BedrockItemUpgradeSchema/zipball/e19685d2e7e76eb7446115c556df34e5d627d072",
-                "reference": "e19685d2e7e76eb7446115c556df34e5d627d072",
-                "shasum": ""
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "CC0-1.0"
-            ],
-            "description": "JSON schemas for upgrading items found in older Minecraft: Bedrock world saves",
-            "support": {
-                "issues": "https://github.com/pmmp/BedrockItemUpgradeSchema/issues",
-                "source": "https://github.com/pmmp/BedrockItemUpgradeSchema/tree/1.17.0"
-            },
-            "time": "2026-05-06T13:12:04+00:00"
-        },
-        {
             "name": "pocketmine/binaryutils",
             "version": "0.2.7",
             "source": {
@@ -343,6 +385,7 @@
                 "issues": "https://github.com/pmmp/BinaryUtils/issues",
                 "source": "https://github.com/pmmp/BinaryUtils/tree/0.2.7"
             },
+            "abandoned": true,
             "time": "2025-12-24T04:20:35+00:00"
         },
         {
@@ -393,6 +436,7 @@
                 "issues": "https://github.com/pmmp/CallbackValidator/issues",
                 "source": "https://github.com/pmmp/CallbackValidator/tree/1.0.4"
             },
+            "abandoned": true,
             "time": "2025-12-24T01:25:05+00:00"
         },
         {
@@ -431,6 +475,7 @@
                 "issues": "https://github.com/pmmp/Color/issues",
                 "source": "https://github.com/pmmp/Color/tree/0.3.1"
             },
+            "abandoned": true,
             "time": "2023-04-10T11:38:05+00:00"
         },
         {
@@ -470,6 +515,7 @@
                 "issues": "https://github.com/pmmp/ErrorHandler/issues",
                 "source": "https://github.com/pmmp/ErrorHandler/tree/0.7.1"
             },
+            "abandoned": true,
             "time": "2025-12-24T02:26:52+00:00"
         },
         {
@@ -511,6 +557,7 @@
                 "issues": "https://github.com/pmmp/Log/issues",
                 "source": "https://github.com/pmmp/Log/tree/0.4.0"
             },
+            "abandoned": true,
             "time": "2021-06-18T19:08:09+00:00"
         },
         {
@@ -552,6 +599,7 @@
                 "issues": "https://github.com/pmmp/Math/issues",
                 "source": "https://github.com/pmmp/Math/tree/1.0.0"
             },
+            "abandoned": true,
             "time": "2023-08-03T12:56:33+00:00"
         },
         {
@@ -595,6 +643,7 @@
                 "issues": "https://github.com/pmmp/NBT/issues",
                 "source": "https://github.com/pmmp/NBT/tree/1.2.0"
             },
+            "abandoned": true,
             "time": "2025-09-19T18:09:30+00:00"
         },
         {
@@ -679,6 +728,7 @@
                 "issues": "https://github.com/pmmp/RakLibIpc/issues",
                 "source": "https://github.com/pmmp/RakLibIpc/tree/1.0.1"
             },
+            "abandoned": true,
             "time": "2024-03-01T15:55:05+00:00"
         },
         {
@@ -877,16 +927,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v6.4.39",
+            "version": "v6.4.44",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "c507b077756b4e3e09adbbe7975fac81cd3722ca"
+                "reference": "e84ffb3e77e3a7144727a0d0735d0d9cc0ca77a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/c507b077756b4e3e09adbbe7975fac81cd3722ca",
-                "reference": "c507b077756b4e3e09adbbe7975fac81cd3722ca",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/e84ffb3e77e3a7144727a0d0735d0d9cc0ca77a7",
+                "reference": "e84ffb3e77e3a7144727a0d0735d0d9cc0ca77a7",
                 "shasum": ""
             },
             "require": {
@@ -923,7 +973,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v6.4.39"
+                "source": "https://github.com/symfony/filesystem/tree/v6.4.44"
             },
             "funding": [
                 {
@@ -943,26 +993,26 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-07T13:11:42+00:00"
+            "time": "2026-08-20T20:21:47+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "myclabs/deep-copy",
-            "version": "1.13.4",
+            "version": "1.14.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a"
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/07d290f0c47959fd5eed98c95ee5602db07e0b6a",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1 || ^8.0"
+                "php": "^8.0"
             },
             "conflict": {
                 "doctrine/collections": "<1.6.8",
@@ -997,15 +1047,15 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.4"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.14.0"
             },
             "funding": [
                 {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
-                    "type": "tidelift"
+                    "url": "https://github.com/mnapoli",
+                    "type": "github"
                 }
             ],
-            "time": "2025-08-01T08:46:24+00:00"
+            "time": "2026-08-11T10:17:44+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -2526,16 +2576,16 @@
         },
         {
             "name": "sebastian/recursion-context",
-            "version": "5.0.1",
+            "version": "5.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/recursion-context.git",
-                "reference": "47e34210757a2f37a97dcd207d032e1b01e64c7a"
+                "reference": "5d32fe257a9b39cb63146924d6b4e32a22d4502a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/recursion-context/zipball/47e34210757a2f37a97dcd207d032e1b01e64c7a",
-                "reference": "47e34210757a2f37a97dcd207d032e1b01e64c7a",
+                "url": "https://api.github.com/repos/sebastianbergmann/recursion-context/zipball/5d32fe257a9b39cb63146924d6b4e32a22d4502a",
+                "reference": "5d32fe257a9b39cb63146924d6b4e32a22d4502a",
                 "shasum": ""
             },
             "require": {
@@ -2578,7 +2628,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/recursion-context/issues",
                 "security": "https://github.com/sebastianbergmann/recursion-context/security/policy",
-                "source": "https://github.com/sebastianbergmann/recursion-context/tree/5.0.1"
+                "source": "https://github.com/sebastianbergmann/recursion-context/tree/5.0.2"
             },
             "funding": [
                 {
@@ -2598,7 +2648,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-10T07:50:56+00:00"
+            "time": "2026-08-11T05:27:39+00:00"
         },
         {
             "name": "sebastian/type",

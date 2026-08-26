@@ -21,33 +21,20 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\updater;
+namespace pocketmine\world\sound;
 
-/**
- * Model class for JsonMapper to represent the information returned from the updater API.
- * @link https://update.axolotl-pm.org/api
- */
-final class UpdateInfo{
-	/** @required */
-	public string $php_version;
-	/** @required */
-	public string $base_version;
-	/** @required */
-	public bool $is_dev;
-	/** @required */
-	public string $channel;
-	/** @required */
-	public string $git_commit;
-	/** @required */
-	public string $mcpe_version;
-	/** @required */
-	public int $build;
-	/** @required */
-	public int $date;
-	/** @required */
-	public string $details_url;
-	/** @required */
-	public string $download_url;
-	/** @required */
-	public string $source_url;
+use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+
+final class GeyserContinuousEruptionBurstSound implements Sound{
+
+	public function encode(Vector3 $pos) : array{
+		return [LevelSoundEventPacket::nonActorSound(
+			LevelSoundEvent::GEYSER_CONTINUOUS_ERUPTION_ACTIVE,
+			$pos,
+			false,
+			-1
+		)];
+	}
 }
