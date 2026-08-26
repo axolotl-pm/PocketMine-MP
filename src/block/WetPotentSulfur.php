@@ -110,8 +110,8 @@ class WetPotentSulfur extends PotentSulfur{
 	private function pulseGas(Block $outlet) : void{
 		$world = $this->position->getWorld();
 		$bb = AxisAlignedBB::one()
-			->offset($outlet->position->x, $outlet->position->y, $outlet->position->z)
-			->expand(2.5, 0.0, 2.5);
+			->offsetCopy($outlet->position->x, $outlet->position->y, $outlet->position->z)
+			->expandedCopy(2.5, 0.0, 2.5);
 
 		foreach($world->getCollidingEntities($bb) as $entity){
 			if(!$entity instanceof Living){

@@ -99,8 +99,8 @@ abstract class EruptivePotentSulfur extends WetPotentSulfur{
 		}
 
 		$bb = AxisAlignedBB::one()
-			->offset($this->position->x, $this->position->y + 1, $this->position->z)
-			->extend(Facing::UP, $plumeHeight - 1);
+			->offsetCopy($this->position->x, $this->position->y + 1, $this->position->z)
+			->extendedCopy(Facing::UP, $plumeHeight - 1);
 		$maxSpeed = self::BASE_LAUNCH_SPEED + $columnLength * 0.1;
 
 		foreach($this->position->getWorld()->getCollidingEntities($bb) as $entity){
