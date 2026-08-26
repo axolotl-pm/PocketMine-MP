@@ -25,7 +25,7 @@ namespace pocketmine\updater;
 
 /**
  * Model class for JsonMapper to represent the information returned from the updater API.
- * @link https://update.axolotl-pm.org/api
+ * @link https://update.pmmp.io/api
  */
 final class UpdateInfo{
 	/** @required */

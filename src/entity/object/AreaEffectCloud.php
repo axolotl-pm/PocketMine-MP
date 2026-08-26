@@ -212,7 +212,7 @@ class AreaEffectCloud extends Entity{
 	/**
 	 * Sets the current radius (in blocks).
 	 */
-	public function setRadius(float $radius) : void{
+	protected function setRadius(float $radius) : void{
 		$this->radius = $radius;
 		$this->setSize($this->getInitialSizeInfo());
 		$this->networkPropertiesDirty = true;

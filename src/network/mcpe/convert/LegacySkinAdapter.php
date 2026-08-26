@@ -44,19 +44,13 @@ class LegacySkinAdapter implements SkinAdapter{
 		if($geometryName === ""){
 			$geometryName = "geometry.humanoid.custom";
 		}
-		$geometryData = $skin->getGeometryData();
-		if($geometryData === ""){
-			//the client drops the connection if it receives an empty geometry string
-			$geometryData = SkinData::GEOMETRY_DATA_NONE;
-		}
 		return new SkinData(
 			$skin->getSkinId(),
 			"", //TODO: playfab ID
 			json_encode(["geometry" => ["default" => $geometryName]], JSON_THROW_ON_ERROR),
-			SkinImage::fromLegacy($skin->getSkinData()),
-			[],
+			SkinImage::fromLegacy($skin->getSkinData()), [],
 			$capeImage,
-			$geometryData
+			$skin->getGeometryData()
 		);
 	}
 
@@ -74,6 +68,6 @@ class LegacySkinAdapter implements SkinAdapter{
 			throw new InvalidSkinException("Missing geometry name field");
 		}
 
-		return new Skin($data->getSkinId(), $data->getSkinImage()->getData(), $capeData, $geometryName, $data->getGeometryDataJson());
+		return new Skin($data->getSkinId(), $data->getSkinImage()->getData(), $capeData, $geometryName, $data->getGeometryData());
 	}
 }
