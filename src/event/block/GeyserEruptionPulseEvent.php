@@ -21,33 +21,26 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\updater;
+namespace pocketmine\event\block;
+
+use pocketmine\block\Block;
+use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
 
 /**
- * Model class for JsonMapper to represent the information returned from the updater API.
- * @link https://update.axolotl-pm.org/api
+ * Called when an erupting geyser block processes an eruption pulse.
  */
-final class UpdateInfo{
-	/** @required */
-	public string $php_version;
-	/** @required */
-	public string $base_version;
-	/** @required */
-	public bool $is_dev;
-	/** @required */
-	public string $channel;
-	/** @required */
-	public string $git_commit;
-	/** @required */
-	public string $mcpe_version;
-	/** @required */
-	public int $build;
-	/** @required */
-	public int $date;
-	/** @required */
-	public string $details_url;
-	/** @required */
-	public string $download_url;
-	/** @required */
-	public string $source_url;
+class GeyserEruptionPulseEvent extends BlockEvent implements Cancellable{
+	use CancellableTrait;
+
+	public function __construct(
+		Block $block,
+		private Block $outlet
+	){
+		parent::__construct($block);
+	}
+
+	public function getOutlet() : Block{
+		return $this->outlet;
+	}
 }

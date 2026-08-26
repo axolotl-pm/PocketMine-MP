@@ -33,11 +33,12 @@
       "ext-zlib": ">=1.2.11",
       "composer-runtime-api": "^2.0",
       "adhocore/json-comment": "~1.2.0",
+      "axolotl-pm/bedrock-block-upgrade-schema": "~5.3.0+bedrock-1.26.30",
+      "axolotl-pm/bedrock-data": "6.8.0+bedrock-1.26.40",
+      "axolotl-pm/bedrock-item-upgrade-schema": "1.18.0+bedrock-1.26.40",
+      "axolotl-pm/bedrock-protocol": "60.0.0+bedrock-1.26.44",
+      "axolotl-pm/xoroshiro128pp": "^0.1.0",
       "netresearch/jsonmapper": "~v6.0.0",
-      "pocketmine/bedrock-block-upgrade-schema": "~5.2.0+bedrock-1.21.110",
-      "pocketmine/bedrock-data": "~6.7.0+bedrock-1.26.30",
-      "pocketmine/bedrock-item-upgrade-schema": "~1.17.0+bedrock-1.26.20",
-      "axolotl-pm/bedrock-protocol": "~58.0.0+bedrock-1.26.30",
       "pocketmine/binaryutils": "^0.2.1",
       "pocketmine/callback-validator": "~1.0.4",
       "pocketmine/color": "^0.3.0",
@@ -58,6 +59,7 @@
       "phpunit/phpunit": "^10.5.24"
    },
    "replace": {
+      "pocketmine/pocketmine-mp": "*",
       "symfony/polyfill-ctype": "*",
       "symfony/polyfill-mbstring": "*"
    },
@@ -93,8 +95,8 @@
       "update-codegen": [
          "@php build/codegen/bedrockdata-path-consts.php",
          "@php build/codegen/biome-ids.php",
-         "@php build/codegen/block-serializer-consts.php vendor/pocketmine/bedrock-data/canonical_block_states.nbt",
-         "@php build/codegen/item-type-names.php vendor/pocketmine/bedrock-data/required_item_list.json",
+         "@php build/codegen/block-serializer-consts.php vendor/axolotl-pm/bedrock-data/canonical_block_states.nbt",
+         "@php build/codegen/item-type-names.php vendor/axolotl-pm/bedrock-data/required_item_list.json",
          "@php build/codegen/known-translation-apis.php",
          "@php build/codegen/pocketmine-yml-property-consts.php",
          "@php build/codegen/registry-interface.php src generated"

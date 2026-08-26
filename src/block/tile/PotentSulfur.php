@@ -21,33 +21,30 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\updater;
+namespace pocketmine\block\tile;
+
+use pocketmine\block\CyclingPotentSulfur;
+use pocketmine\nbt\tag\CompoundTag;
 
 /**
- * Model class for JsonMapper to represent the information returned from the updater API.
- * @link https://update.axolotl-pm.org/api
+ * Holds the phase-shift countdown at runtime only ({@see CyclingPotentSulfur});
+ * unlike Java Edition, this is not persisted to disk on Bedrock.
  */
-final class UpdateInfo{
-	/** @required */
-	public string $php_version;
-	/** @required */
-	public string $base_version;
-	/** @required */
-	public bool $is_dev;
-	/** @required */
-	public string $channel;
-	/** @required */
-	public string $git_commit;
-	/** @required */
-	public string $mcpe_version;
-	/** @required */
-	public int $build;
-	/** @required */
-	public int $date;
-	/** @required */
-	public string $details_url;
-	/** @required */
-	public string $download_url;
-	/** @required */
-	public string $source_url;
+final class PotentSulfur extends Tile{
+
+	private int $heartbeatsUntilPhaseShift = 0;
+
+	public function readSaveData(CompoundTag $nbt) : void{
+		//NOOP
+	}
+
+	protected function writeSaveData(CompoundTag $nbt) : void{
+		//NOOP
+	}
+
+	public function getHeartbeatsUntilPhaseShift() : int{ return $this->heartbeatsUntilPhaseShift; }
+
+	public function setHeartbeatsUntilPhaseShift(int $heartbeats) : void{
+		$this->heartbeatsUntilPhaseShift = $heartbeats;
+	}
 }
