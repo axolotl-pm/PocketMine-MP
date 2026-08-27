@@ -30,15 +30,10 @@ use pocketmine\world\generator\object\TreeType;
 final class BiomeRegistry{
 	use SingletonTrait;
 
-	/**
-	 * @var Biome[]|\SplFixedArray
-	 * @phpstan-var \SplFixedArray<Biome>
-	 */
-	private \SplFixedArray $biomes;
+	/** @var array<int, Biome> */
+	private array $biomes = [];
 
 	public function __construct(){
-		$this->biomes = new \SplFixedArray(Biome::MAX_BIOMES);
-
 		$this->register(BiomeIds::OCEAN, new OceanBiome());
 		$this->register(BiomeIds::PLAINS, new PlainBiome());
 		$this->register(BiomeIds::DESERT, new DesertBiome());
@@ -58,12 +53,20 @@ final class BiomeRegistry{
 	}
 
 	public function register(int $id, Biome $biome) : void{
+		if($id < 0 || $id >= Biome::MAX_BIOMES){
+			throw new \InvalidArgumentException("Biome id must be in the range 0-" . (Biome::MAX_BIOMES - 1));
+		}
+
 		$this->biomes[$id] = $biome;
 		$biome->setId($id);
 	}
 
 	public function getBiome(int $id) : Biome{
-		if($this->biomes[$id] === null){
+		if($id < 0 || $id >= Biome::MAX_BIOMES){
+			throw new \InvalidArgumentException("Biome id must be in the range 0-" . (Biome::MAX_BIOMES - 1));
+		}
+
+		if(!isset($this->biomes[$id])){
 			$this->register($id, new UnknownBiome());
 		}
 

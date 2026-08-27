@@ -30,7 +30,11 @@ use pocketmine\world\generator\populator\Populator;
 
 abstract class Biome{
 
-	public const MAX_BIOMES = 256;
+	/**
+	 * The number of possible biome IDs, matching the 32-bit unsigned integers
+	 * stored in the PalettedBlockArray palette
+	 */
+	public const MAX_BIOMES = 2 ** 32;
 
 	private int $id;
 	private bool $registered = false;
@@ -68,6 +72,9 @@ abstract class Biome{
 		return $this->populators;
 	}
 
+	/**
+	 * @internal
+	 */
 	public function setId(int $id) : void{
 		if(!$this->registered){
 			$this->registered = true;

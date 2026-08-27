@@ -1303,12 +1303,6 @@ parameters:
 			path: ../../../src/world/World.php
 
 		-
-			message: '#^Method pocketmine\\world\\biome\\BiomeRegistry\:\:getBiome\(\) should return pocketmine\\world\\biome\\Biome but returns pocketmine\\world\\biome\\Biome\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: ../../../src/world/biome/BiomeRegistry.php
-
-		-
 			message: '#^Method pocketmine\\world\\format\\Chunk\:\:getSubChunk\(\) should return pocketmine\\world\\format\\SubChunk but returns pocketmine\\world\\format\\SubChunk\|null\.$#'
 			identifier: return.type
 			count: 1
