@@ -703,9 +703,32 @@ abstract class Living extends Entity{
 			$this->attackTime -= $tickDiff;
 		}
 
+		$this->syncDirtyAttributes();
+
 		Timings::$livingEntityBaseTick->stopTiming();
 
 		return $hasUpdate;
+	}
+
+	/**
+	 * Broadcasts dirty attribute changes to viewers.
+	 */
+	private function syncDirtyAttributes() : void{
+		if($this instanceof Player){
+			return;
+		}
+		$dirty = $this->attributeMap->needSend();
+		if(count($dirty) === 0){
+			return;
+		}
+
+		NetworkBroadcastUtils::broadcastEntityEvent(
+			$this->getViewers(),
+			fn(EntityEventBroadcaster $broadcaster, array $recipients) => $broadcaster->syncAttributes($recipients, $this, $dirty)
+		);
+		foreach($dirty as $attribute){
+			$attribute->markSynchronized();
+		}
 	}
 
 	protected function move(float $dx, float $dy, float $dz) : void{

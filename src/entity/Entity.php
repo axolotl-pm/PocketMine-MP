@@ -29,6 +29,7 @@ namespace pocketmine\entity;
 use pocketmine\block\Block;
 use pocketmine\block\Water;
 use pocketmine\entity\animation\Animation;
+use pocketmine\entity\riding\Mountable;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityDespawnEvent;
 use pocketmine\event\entity\EntityExtinguishEvent;
@@ -185,6 +186,7 @@ abstract class Entity{
 
 	protected ?int $ownerId = null;
 	protected ?int $targetId = null;
+	protected ?int $vehicleId = null;
 
 	private bool $constructorCalled = false;
 
@@ -462,6 +464,142 @@ abstract class Entity{
 	}
 
 	/**
+	 * Returns the entity ID of the entity this entity is riding, or null if it isn't riding anything.
+	 */
+	public function getVehicleId() : ?int{
+		return $this->vehicleId;
+	}
+
+	/**
+	 * Returns the entity this entity is riding, or null if it isn't riding anything or the vehicle was not found.
+	 *
+	 * @phpstan-return (Mountable&Entity)|null
+	 */
+	public function getVehicle() : ?Mountable{
+		if($this->vehicleId === null){
+			return null;
+		}
+		$vehicle = $this->getWorld()->getEntity($this->vehicleId);
+		return $vehicle instanceof Mountable ? $vehicle : null;
+	}
+
+	public function isRiding() : bool{
+		return $this->vehicleId !== null;
+	}
+
+	/**
+	 * Returns how far above a seat this entity sits when riding.
+	 */
+	public function getRidingHeight() : float{
+		return 1.22;
+	}
+
+	/**
+	 * @internal Use {@link LinkManager::addPassenger()} to seat an entity and {@link Entity::dismount()} to remove it.
+	 *
+	 * @param int $seatIndex Seat being taken, or the one being left when the vehicle is null.
+	 *
+	 * @throws \InvalidArgumentException if the supplied entity is not valid
+	 */
+	public function setRidingVehicle(?Entity $vehicle, int $seatIndex = 0) : void{
+		if($vehicle === null){
+			$current = $this->getVehicle();
+			//Clear vehicleId before removing from LinkManager to prevent re-entrant calls
+			$this->vehicleId = null;
+			$current?->getLinkManager()->removePassenger($this);
+
+			if($current !== null){
+				$this->onDismounted($current, $seatIndex);
+				$current->onPassengerDismounted($this, $seatIndex);
+			}
+		}elseif($vehicle->closed){
+			throw new \InvalidArgumentException("Supplied vehicle entity is garbage and cannot be used");
+		}else{
+			$this->vehicleId = $vehicle->getId();
+
+			if($vehicle instanceof Mountable){
+				$this->onMounted($vehicle, $seatIndex);
+				$vehicle->onPassengerMounted($this, $seatIndex);
+			}
+		}
+	}
+
+	/**
+	 * Called on the rider when it successfully mounts a vehicle.
+	 *
+	 * @param int $seatIndex The seat index occupied on the vehicle.
+	 */
+	protected function onMounted(Mountable $vehicle, int $seatIndex) : void{
+
+	}
+
+	/**
+	 * Called on the rider when it dismounts from a vehicle.
+	 *
+	 * @param int $seatIndex The seat index that was occupied before dismounting.
+	 */
+	protected function onDismounted(Mountable $vehicle, int $seatIndex) : void{
+
+	}
+
+	/**
+	 * Called on the vehicle when a passenger mounts it.
+	 *
+	 * @param int $seatIndex The seat index occupied by the passenger.
+	 */
+	protected function onPassengerMounted(Entity $passenger, int $seatIndex) : void{
+
+	}
+
+	/**
+	 * Called on the vehicle when a passenger dismounts from it.
+	 *
+	 * @param int $seatIndex The seat index vacated by the passenger.
+	 */
+	protected function onPassengerDismounted(Entity $passenger, int $seatIndex) : void{
+
+	}
+
+	/**
+	 * Removes this entity from whatever it is riding, returning whether it was riding anything.
+	 *
+	 * @param bool $causedByRider Whether this entity left voluntarily, as opposed to being forcibly removed.
+	 * @param bool $immediate     Whether to skip client-side exit animation and dismount positioning (e.g. when teleporting or despawning).
+	 */
+	public function dismount(bool $causedByRider = true, bool $immediate = false) : bool{
+		$vehicle = $this->getVehicle();
+		if($vehicle === null){
+			$this->vehicleId = null;
+			return false;
+		}
+		$linkManager = $vehicle->getLinkManager();
+		$linkManager->removePassenger($this, $causedByRider, $immediate);
+
+		if(!$immediate){
+			$landing = $linkManager->getDismountPosition($this);
+			if($landing !== null){
+				$this->setPosition($landing);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Moves this entity to the seat it occupies on its vehicle. Called every tick while riding.
+	 */
+	protected function updateRidingPosition() : void{
+		$vehicle = $this->getVehicle();
+		if($vehicle === null){
+			$this->vehicleId = null;
+			return;
+		}
+		$position = $vehicle->getLinkManager()->getPassengerPosition($this);
+		if($position !== null){
+			$this->setPosition($position);
+		}
+	}
+
+	/**
 	 * Returns whether this entity will be saved when its chunk is unloaded.
 	 */
 	public function canSaveWithChunk() : bool{
@@ -640,7 +778,12 @@ abstract class Entity{
 	}
 
 	protected function entityBaseTick(int $tickDiff = 1) : bool{
-		//TODO: check vehicles
+		if($this->vehicleId !== null){
+			$this->updateRidingPosition();
+		}
+		if($this instanceof Mountable){
+			$this->getLinkManager()->tick();
+		}
 
 		if($this->justCreated){
 			$this->justCreated = false;
@@ -788,11 +931,18 @@ abstract class Entity{
 			$this->broadcastMovement($teleport);
 		}
 
-		if($diffMotion > 0.0025 || $wasStill !== $still){ //0.05 ** 2
+		//Vanilla does not send velocity updates for steered vehicles. Where the controlling client predicts movement
+		//locally it would be applying a second velocity on top of its own; where it does not, it follows the positions
+		//the server sends anyway, so nothing is lost either way.
+		if(($diffMotion > 0.0025 || $wasStill !== $still) && !$this->isBeingSteered()){ //0.05 ** 2
 			$this->lastMotion = clone $this->motion;
 
 			$this->broadcastMotion();
 		}
+	}
+
+	private function isBeingSteered() : bool{
+		return $this instanceof Mountable && $this->getLinkManager()->getControllingPassenger() !== null;
 	}
 
 	public function getOffsetPosition(Vector3 $vector3) : Vector3{
@@ -1460,6 +1610,9 @@ abstract class Entity{
 	}
 
 	/**
+	 * Teleports the entity to the given position.
+	 *
+	 * Note that teleporting an entity will dismount it from any vehicle it is riding, and will also leave any passengers behind.
 	 * @param Vector3|Position|Location $pos
 	 */
 	public function teleport(Vector3 $pos, ?float $yaw = null, ?float $pitch = null) : bool{
@@ -1484,6 +1637,11 @@ abstract class Entity{
 		}
 		$this->ySize = 0;
 		$pos = $ev->getTo();
+
+		$this->dismount(causedByRider: true, immediate: true);
+		if($this instanceof Mountable){
+			$this->getLinkManager()->removeAllPassengers();
+		}
 
 		$this->setMotion(new Vector3(0, 0, 0));
 		if($this->setPositionAndRotation($pos, $yaw ?? $this->location->yaw, $pitch ?? $this->location->pitch)){
@@ -1530,7 +1688,7 @@ abstract class Entity{
 			}, array_values($this->attributeMap->getAll())),
 			$this->getAllNetworkData(),
 			new PropertySyncData([], []),
-			[] //TODO: entity links
+			$this instanceof Mountable ? $this->getLinkManager()->buildLinks() : []
 		));
 	}
 
@@ -1640,6 +1798,10 @@ abstract class Entity{
 	 * because it may be needed by descendent classes.
 	 */
 	protected function onDispose() : void{
+		$this->dismount(causedByRider: true, immediate: true);
+		if($this instanceof Mountable){
+			$this->getLinkManager()->removeAllPassengers();
+		}
 		$this->despawnFromAll();
 		if($this->location->isValid()){
 			$this->getWorld()->removeEntity($this);

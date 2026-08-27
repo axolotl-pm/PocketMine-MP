@@ -29,6 +29,9 @@ use pocketmine\entity\animation\TotemUseAnimation;
 use pocketmine\entity\effect\EffectInstance;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\entity\projectile\ProjectileSource;
+use pocketmine\entity\riding\LinkManager;
+use pocketmine\entity\riding\Mountable;
+use pocketmine\entity\riding\Seat;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\inventory\CallbackInventoryListener;
@@ -77,7 +80,7 @@ use function array_merge;
 use function array_values;
 use function min;
 
-class Human extends Living implements ProjectileSource, InventoryHolder{
+class Human extends Living implements ProjectileSource, InventoryHolder, Mountable{
 
 	private const TAG_INVENTORY = "Inventory"; //TAG_List<TAG_Compound>
 	private const TAG_OFF_HAND_ITEM = "OffHandItem"; //TAG_Compound
@@ -110,6 +113,7 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 
 	protected HungerManager $hungerManager;
 	protected ExperienceManager $xpManager;
+	private LinkManager $linkManager;
 
 	protected int $xpSeed;
 
@@ -187,6 +191,10 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 
 	public function getHungerManager() : HungerManager{
 		return $this->hungerManager;
+	}
+
+	public function getLinkManager() : LinkManager{
+		return $this->linkManager;
 	}
 
 	/**
@@ -273,6 +281,10 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 
 	protected function initEntity(CompoundTag $nbt) : void{
 		parent::initEntity($nbt);
+
+		//Provide a default seat at zero offset; an empty seat list would cause updateRidingPosition() to fail to position passengers.
+		//Subclasses or plugins can adjust the seat configuration via LinkManager::setSeats().
+		$this->linkManager = new LinkManager($this, seatCount: 1, seats: [new Seat(Vector3::zero())]);
 
 		$this->hungerManager = new HungerManager($this);
 		$this->xpManager = new ExperienceManager($this);
@@ -521,7 +533,7 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 					0.0
 				)
 			]),
-			[], //TODO: entity links
+			$this->linkManager->buildLinks(),
 			"", //device ID (we intentionally don't send this - secvuln)
 			DeviceOS::UNKNOWN //we intentionally don't send this (secvuln)
 		));

@@ -29,6 +29,8 @@ use pocketmine\block\tile\Sign;
 use pocketmine\block\utils\SignText;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\InvalidSkinException;
+use pocketmine\entity\riding\ChargingState;
+use pocketmine\entity\riding\Controllable;
 use pocketmine\event\player\PlayerEditBookEvent;
 use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\InventoryTransaction;
@@ -100,6 +102,7 @@ use pocketmine\utils\Utils;
 use pocketmine\world\format\Chunk;
 use function array_push;
 use function count;
+use function floor;
 use function fmod;
 use function get_debug_type;
 use function implode;
@@ -142,6 +145,9 @@ class InGamePacketHandler extends PacketHandler{
 	protected ?float $lastPlayerAuthInputYaw = null;
 	protected ?float $lastPlayerAuthInputPitch = null;
 	protected ?BitSet $lastPlayerAuthInputFlags = null;
+
+	private ?int $jumpChargeStartTick = null;
+	private int $lastJumpChargeTick = -1;
 
 	protected ?BlockPosition $lastBlockAttacked = null;
 
@@ -213,6 +219,9 @@ class InGamePacketHandler extends PacketHandler{
 			$this->forceMoveSync = false;
 		}
 
+		$vehicle = $this->player->getVehicle();
+		$drivenVehicle = $vehicle instanceof Controllable && $vehicle->getLinkManager()->isControlledBy($this->player) ? $vehicle : null;
+
 		$inputFlags = $packet->getInputFlags();
 		if($this->lastPlayerAuthInputFlags === null || !$inputFlags->equals($this->lastPlayerAuthInputFlags)){
 			$this->lastPlayerAuthInputFlags = $inputFlags;
@@ -234,7 +243,7 @@ class InGamePacketHandler extends PacketHandler{
 				$this->player->sendData([$this->player]);
 			}
 
-			if($inputFlags->get(PlayerAuthInputFlags::START_JUMPING)){
+			if($inputFlags->get(PlayerAuthInputFlags::START_JUMPING) && !$this->player->isRiding()){
 				$this->player->jump();
 			}
 			if($inputFlags->get(PlayerAuthInputFlags::MISSED_SWING)){
@@ -242,10 +251,34 @@ class InGamePacketHandler extends PacketHandler{
 			}
 		}
 
+		$this->handleVehicleJump($drivenVehicle, $inputFlags->get(PlayerAuthInputFlags::JUMPING), $packet->getTick());
+
+		if($drivenVehicle !== null){
+			$vehicleInfo = $packet->getVehicleInfo();
+			//Client seems to send null vehicle info, for whatever reason even if they're riding a vehicle.
+			//Since we hold vehicle info ourselves, we can just ignore vehicle info from the client if not present
+			if($vehicleInfo === null || $vehicleInfo->getPredictedVehicleActorUniqueId() === $drivenVehicle->getId()){
+				$strafe = $packet->getMoveVecX();
+				$forward = $packet->getMoveVecZ();
+				if(
+					($strafe > 1 || $strafe < -1) ||
+					($forward > 1 || $forward < -1)
+				){
+					throw new PacketHandlingException("Invalid movement input from rider, strafe=$strafe, forward=$forward");
+				}
+				$drivenVehicle->getLinkManager()->setRiderInput($this->player, $strafe, $forward);
+			}
+
+			$drivenVehicle->setForceMovementUpdate();
+			$drivenVehicle->scheduleUpdate();
+		}
+
 		if(!$this->forceMoveSync && $hasMoved){
 			$this->lastPlayerAuthInputPosition = $rawPos;
-			//TODO: this packet has WAYYYYY more useful information that we're not using
-			$this->player->handleMovement($newPos);
+			if(!$this->player->isRiding()){
+				//TODO: this packet has WAYYYYY more useful information that we're not using
+				$this->player->handleMovement($newPos);
+			}
 		}
 
 		$packetHandled = true;
@@ -296,6 +329,40 @@ class InGamePacketHandler extends PacketHandler{
 		}
 
 		return $packetHandled;
+	}
+
+	private function handleVehicleJump(?Controllable $vehicle, bool $jumpHeld, int $clientTick) : void{
+		if($jumpHeld){
+			$startTick = $this->jumpChargeStartTick ??= $clientTick;
+			if($clientTick !== $this->lastJumpChargeTick){
+				$this->lastJumpChargeTick = $clientTick;
+				$this->reportJump($vehicle, $clientTick - $startTick, ChargingState::CHARGING);
+			}
+			return;
+		}
+
+		$startTick = $this->jumpChargeStartTick;
+		$this->jumpChargeStartTick = null;
+		$this->lastJumpChargeTick = -1;
+		if($startTick !== null){
+			$this->reportJump($vehicle, $clientTick - $startTick, ChargingState::RELEASED);
+		}
+	}
+
+	private function reportJump(?Controllable $vehicle, int $heldTicks, ChargingState $state) : void{
+		if($vehicle === null || $vehicle->getJumpStrength() <= 0.0){
+			return;
+		}
+		$vehicle->onRiderJump($this->player, self::jumpCharge(max(1, $heldTicks)), $state);
+	}
+
+	/**
+	 * Calculates jump charge (0.4444 to 1.0) from held ticks.
+	 */
+	private static function jumpCharge(int $heldTicks) : float{
+		$scale = $heldTicks <= 9 ? $heldTicks * 0.1 : ((2.0 / ($heldTicks - 9)) * 0.1) + 0.8;
+		$latched = (int) floor($scale * 100);
+		return $latched > 89 ? 1.0 : (($latched * 0.4) / 90.0) + 0.4;
 	}
 
 	public function handleInventoryTransaction(InventoryTransactionPacket $packet) : bool{
@@ -651,6 +718,12 @@ class InGamePacketHandler extends PacketHandler{
 		}
 		if($packet->action === InteractPacket::ACTION_OPEN_INVENTORY && $target === $this->player){
 			$this->inventoryManager->onClientOpenMainInventory();
+			return true;
+		}
+		if($packet->action === InteractPacket::ACTION_LEAVE_VEHICLE){
+			if($target === $this->player->getVehicle()){
+				$this->player->dismount();
+			}
 			return true;
 		}
 		return false; //TODO
