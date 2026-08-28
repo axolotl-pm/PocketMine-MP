@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fa70d2229ee5d45885d01d6ab82c4c3d",
+    "content-hash": "0804b2bc8b966a1f1a45b77fe7882140",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -67,16 +67,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-block-upgrade-schema",
-            "version": "5.2.0",
+            "version": "5.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema.git",
-                "reference": "5d7889c9a1cdf9e3cd814d2a104ad69b75116ec7"
+                "reference": "e8e01b5a80192ca8d05ca257fe300cfb5b8df3da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/5d7889c9a1cdf9e3cd814d2a104ad69b75116ec7",
-                "reference": "5d7889c9a1cdf9e3cd814d2a104ad69b75116ec7",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/e8e01b5a80192ca8d05ca257fe300cfb5b8df3da",
+                "reference": "e8e01b5a80192ca8d05ca257fe300cfb5b8df3da",
                 "shasum": ""
             },
             "type": "library",
@@ -87,9 +87,9 @@
             "description": "Schemas describing how to upgrade saved block data in older Minecraft: Bedrock Edition world saves",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/issues",
-                "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/5.2.0"
+                "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/5.3.0"
             },
-            "time": "2025-10-02T13:22:10+00:00"
+            "time": "2026-08-24T11:38:43+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-data",
