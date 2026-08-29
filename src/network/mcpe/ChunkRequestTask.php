@@ -40,7 +40,6 @@ use function chr;
 
 class ChunkRequestTask extends AsyncTask{
 	private const TLS_KEY_PROMISE = "promise";
-	private static ?TypeConverter $typeConverter = null;
 
 	protected string $chunk;
 	protected int $chunkX;
@@ -71,9 +70,9 @@ class ChunkRequestTask extends AsyncTask{
 		$dimensionId = $this->dimensionId;
 
 		$subCount = ChunkSerializer::getSubChunkCount($chunk, $dimensionId);
-		$converter = self::$typeConverter;
-		if($converter === null || $converter->blockNetworkIdsAreHashes() !== $this->blockNetworkIdsAreHashes){
-			self::$typeConverter = $converter = new TypeConverter($this->blockNetworkIdsAreHashes);
+		$converter = TypeConverter::getInstance();
+		if($converter->getBlockTranslator()->networkIdsAreHashes() !== $this->blockNetworkIdsAreHashes){
+			TypeConverter::setInstance($converter = new TypeConverter($this->blockNetworkIdsAreHashes));
 		}
 		$payload = ChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getBlockTranslator(), $this->tiles);
 

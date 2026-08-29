@@ -29,6 +29,9 @@ use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
 
 class BlockStateDictionaryTest extends TestCase{
+	/** Known canonical hashes used to detect changes to Mojang's block-state hashing format. */
+	private const CYAN_TERRACOTTA_NETWORK_ID_HASH = 973836165;
+	private const BLUE_CANDLE_NETWORK_ID_HASH = 1088625327;
 
 	public function testSequentialNetworkIdsRemainSupported() : void{
 		$entry = new BlockStateDictionaryEntry("minecraft:cyan_terracotta", [], 0);
@@ -44,9 +47,9 @@ class BlockStateDictionaryTest extends TestCase{
 		$dictionary = new BlockStateDictionary([$entry], true);
 
 		self::assertTrue($dictionary->networkIdsAreHashes());
-		self::assertSame(973836165, $entry->getNetworkIdHash());
-		self::assertSame(973836165, $dictionary->lookupStateIdFromData(BlockStateData::current("minecraft:cyan_terracotta", [])));
-		self::assertSame("minecraft:cyan_terracotta", $dictionary->generateDataFromStateId(973836165)?->getName());
+		self::assertSame(self::CYAN_TERRACOTTA_NETWORK_ID_HASH, $entry->getNetworkIdHash());
+		self::assertSame(self::CYAN_TERRACOTTA_NETWORK_ID_HASH, $dictionary->lookupStateIdFromData(BlockStateData::current("minecraft:cyan_terracotta", [])));
+		self::assertSame("minecraft:cyan_terracotta", $dictionary->generateDataFromStateId(self::CYAN_TERRACOTTA_NETWORK_ID_HASH)?->getName());
 		self::assertNull($dictionary->generateDataFromStateId(0));
 	}
 
@@ -56,7 +59,7 @@ class BlockStateDictionaryTest extends TestCase{
 			"candles" => new IntTag(0)
 		], 0);
 
-		self::assertSame(1088625327, $entry->getNetworkIdHash());
+		self::assertSame(self::BLUE_CANDLE_NETWORK_ID_HASH, $entry->getNetworkIdHash());
 	}
 
 	public function testUnknownBlockUsesReservedHash() : void{
