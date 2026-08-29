@@ -105,8 +105,6 @@ class TypeConverter{
 
 	public function getBlockTranslator() : BlockTranslator{ return $this->blockTranslator; }
 
-	public function blockNetworkIdsAreHashes() : bool{ return $this->blockTranslator->networkIdsAreHashes(); }
-
 	public function getItemTypeDictionary() : ItemTypeDictionary{ return $this->itemTypeDictionary; }
 
 	public function getItemTranslator() : ItemTranslator{ return $this->itemTranslator; }
