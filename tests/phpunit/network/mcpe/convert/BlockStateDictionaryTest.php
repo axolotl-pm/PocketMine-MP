@@ -32,6 +32,7 @@ class BlockStateDictionaryTest extends TestCase{
 	/** Known canonical hashes used to detect changes to Mojang's block-state hashing format. */
 	private const CYAN_TERRACOTTA_NETWORK_ID_HASH = 973836165;
 	private const BLUE_CANDLE_NETWORK_ID_HASH = 1088625327;
+	private const MINECRAFT_UNKNOWN_NETWORK_ID_HASH = -2;
 
 	public function testSequentialNetworkIdsRemainSupported() : void{
 		$entry = new BlockStateDictionaryEntry("minecraft:cyan_terracotta", [], 0);
@@ -66,8 +67,8 @@ class BlockStateDictionaryTest extends TestCase{
 		$entry = new BlockStateDictionaryEntry("minecraft:unknown", [], 0);
 		$dictionary = new BlockStateDictionary([$entry], true);
 
-		self::assertSame(-2, $entry->getNetworkIdHash());
-		self::assertSame(-2, $dictionary->lookupStateIdFromData(BlockStateData::current("minecraft:unknown", [])));
+		self::assertSame(self::MINECRAFT_UNKNOWN_NETWORK_ID_HASH, $entry->getNetworkIdHash());
+		self::assertSame(self::MINECRAFT_UNKNOWN_NETWORK_ID_HASH, $dictionary->lookupStateIdFromData(BlockStateData::current("minecraft:unknown", [])));
 		self::assertSame("minecraft:unknown", $dictionary->generateDataFromStateId(-2)?->getName());
 	}
 }
