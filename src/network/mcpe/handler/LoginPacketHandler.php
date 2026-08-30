@@ -46,7 +46,6 @@ use pocketmine\player\PlayerInfo;
 use pocketmine\player\XboxLivePlayerInfo;
 use pocketmine\Server;
 use pocketmine\utils\Utils;
-use pocketmine\utils\VersionString;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use function base64_decode;
@@ -146,17 +145,6 @@ class LoginPacketHandler extends PacketHandler{
 		}
 
 		$clientData = $this->parseClientData($packet->clientDataJwt);
-		//TODO: HACK! Remove this check after protocol version 2168.
-		//This is a temporary measure because Mojang made breaking protocol changes in v26.44
-		try{
-			$version = new VersionString($clientData->GameVersion);
-		}catch(\InvalidArgumentException $e){
-			throw PacketHandlingException::wrap($e);
-		}
-		if($version->getPatch() < 44){
-			$this->session->disconnectWithError(KnownTranslationFactory::disconnectionScreen_outdatedClient());
-			return null;
-		}
 
 		try{
 			$skin = $this->session->getTypeConverter()->getSkinAdapter()->fromSkinData(ClientDataToSkinDataHelper::fromClientData($clientData));

@@ -145,16 +145,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-protocol",
-            "version": "60.0.0+bedrock-1.26.44",
+            "version": "61.0.0+bedrock-1.26.45",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "0a50f503f08a3f80adcf6b6dd625a83c5c23c60a"
+                "reference": "504ce1ae196f38772d1dbe02cd05e9cbc6b01420"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/0a50f503f08a3f80adcf6b6dd625a83c5c23c60a",
-                "reference": "0a50f503f08a3f80adcf6b6dd625a83c5c23c60a",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/504ce1ae196f38772d1dbe02cd05e9cbc6b01420",
+                "reference": "504ce1ae196f38772d1dbe02cd05e9cbc6b01420",
                 "shasum": ""
             },
             "require": {
@@ -186,9 +186,9 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
-                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/60.0.0+bedrock-1.26.44"
+                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/61.0.0+bedrock-1.26.45"
             },
-            "time": "2026-08-15T00:32:48+00:00"
+            "time": "2026-08-28T22:22:13+00:00"
         },
         {
             "name": "axolotl-pm/xoroshiro128pp",
