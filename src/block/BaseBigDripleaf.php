@@ -77,7 +77,10 @@ abstract class BaseBigDripleaf extends Transparent implements HorizontalFacing, 
 			$this->facing = $block->facing;
 			$tx->addBlock($block->position, VanillaBlocks::BIG_DRIPLEAF_STEM()->setFacing($this->facing));
 		}
-		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{

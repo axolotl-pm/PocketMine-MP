@@ -65,17 +65,26 @@ trait WaterloggableTrait{
 		return $this->containedWater !== null ? $this->containedWater : null;
 	}
 
+	/**
+	 * @see Block::onInteract()
+	 */
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		if($blockReplace instanceof Water && ($this->hasTypeTag(BlockTypeTags::NON_SOURCE_WATERLOGGABLE) || $blockReplace->isSource())){
 			$this->containedWater = clone $blockReplace;
 		}
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return true;
 	}
 
+	/**
+	 * @see Block::hasEntityCollision()
+	 */
 	public function hasEntityCollision() : bool{
 		return true;
 	}
 
+	/**
+	 * @see Block::readStateFromWorld()
+	 */
 	public function readStateFromWorld() : Block{
 		$world = $this->position->getWorld();
 		$chunk = $world->getOrLoadChunkAtPosition($this->position);
@@ -95,6 +104,9 @@ trait WaterloggableTrait{
 		return $this;
 	}
 
+	/**
+	 * @see Block::addVelocityToEntity()
+	 */
 	public function addVelocityToEntity(Entity $entity) : ?Vector3{
 		if($this->containedWater !== null && $entity->canBeMovedByCurrents()){
 			return $this->containedWater->getFlowVector();
@@ -102,11 +114,17 @@ trait WaterloggableTrait{
 		return null;
 	}
 
+	/**
+	 * @see Block::onEntityInside()
+	 */
 	public function onEntityInside(Entity $entity) : bool{
 		$this->containedWater?->onEntityInside($entity);
 		return true;
 	}
 
+	/**
+	 * @see Block::onNearbyBlockChange()
+	 */
 	public function onNearbyBlockChange() : void{
 		if($this->containedWater !== null){
 			$this->position->getWorld()->delayDisplacedBlockUpdate($this->position, $this->containedWater->tickRate());

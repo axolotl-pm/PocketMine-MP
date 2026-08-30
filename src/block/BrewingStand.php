@@ -35,11 +35,21 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use function array_key_exists;
 use function spl_object_id;
 
 class BrewingStand extends Transparent implements Waterloggable{
-	use WaterloggableTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
 
 	/**
 	 * @var BrewingStandSlot[]

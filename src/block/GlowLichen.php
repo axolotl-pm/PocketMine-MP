@@ -42,6 +42,7 @@ use function shuffle;
 class GlowLichen extends Transparent implements MultiAnyFacing, Waterloggable{
 	use MultiAnySupportTrait, WaterloggableTrait{
 		WaterloggableTrait::place insteadof MultiAnySupportTrait;
+		WaterloggableTrait::place as waterPlace;
 		MultiAnySupportTrait::place as supportPlace;
 		WaterloggableTrait::onNearbyBlockChange insteadof MultiAnySupportTrait;
 		MultiAnySupportTrait::onNearbyBlockChange as onSupportBlockChange;
@@ -49,8 +50,8 @@ class GlowLichen extends Transparent implements MultiAnyFacing, Waterloggable{
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
-		if($blockReplace instanceof Water && ($this->hasTypeTag(BlockTypeTags::NON_SOURCE_WATERLOGGABLE) || $blockReplace->isSource())){
-			$this->containedWater = clone $blockReplace;
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
 		}
 		return $this->supportPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}

@@ -33,6 +33,7 @@ use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\player\GameMode;
 use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use pocketmine\world\particle\DragonEggTeleportParticle;
 use pocketmine\world\World;
 use function max;
@@ -41,9 +42,17 @@ use function mt_rand;
 
 class DragonEgg extends Transparent implements Fallable, Waterloggable{
 	use FallableTrait, WaterloggableTrait{
+		WaterloggableTrait::place as waterPlace;
 		WaterloggableTrait::onNearbyBlockChange insteadof FallableTrait;
 		FallableTrait::onNearbyBlockChange as onFallableBlockChange;
 		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onNearbyBlockChange() : void{

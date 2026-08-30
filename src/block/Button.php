@@ -62,7 +62,10 @@ abstract class Button extends Transparent implements AnyFacing, Waterloggable{
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		if($this->canBeSupportedAt($blockReplace, $face)){
 			$this->facing = $face;
-			return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+			if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+				return false;
+			}
+			return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 		}
 		return false;
 	}

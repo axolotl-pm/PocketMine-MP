@@ -112,7 +112,10 @@ final class Bell extends Transparent implements HorizontalFacing, Waterloggable{
 					BellAttachmentType::ONE_WALL
 			);
 		}
-		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onNearbyBlockChange() : void{

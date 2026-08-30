@@ -33,8 +33,12 @@ use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use function mt_rand;
 
 class Cactus extends Transparent implements Ageable, Waterloggable{
@@ -43,8 +47,16 @@ class Cactus extends Transparent implements Ageable, Waterloggable{
 		StaticSupportTrait::onNearbyBlockChange as onSupportBlockChange;
 	}
 	use WaterloggableTrait{
+		place as waterPlace;
 		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
 		onEntityInside as onWaterEntityInside;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public const MAX_AGE = 15;

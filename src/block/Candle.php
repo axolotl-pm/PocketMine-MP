@@ -122,7 +122,10 @@ class Candle extends Transparent implements Lightable, Waterloggable{
 			$this->count = $existing->count + 1;
 			$this->lit = $existing->lit;
 		}
-		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function getDropsForCompatibleTool(Item $item) : array{

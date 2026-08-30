@@ -103,7 +103,10 @@ class Anvil extends Transparent implements Fallable, HorizontalFacing, Waterlogg
 		if($player !== null){
 			$this->facing = Facing::rotateY($player->getHorizontalFacing(), false);
 		}
-		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onHitGround(FallingBlock $blockEntity) : bool{

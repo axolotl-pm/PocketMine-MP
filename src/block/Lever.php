@@ -88,7 +88,10 @@ class Lever extends WaterloggableFlowable implements Waterloggable{
 			default => throw new AssumptionFailedError("Bad facing value"),
 		};
 
-		return $this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onNearbyBlockChange() : void{
