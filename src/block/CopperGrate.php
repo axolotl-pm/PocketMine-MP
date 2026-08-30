@@ -25,9 +25,10 @@ namespace pocketmine\block;
 
 use pocketmine\block\utils\CopperMaterial;
 use pocketmine\block\utils\CopperTrait;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 
-class CopperGrate extends Transparent implements CopperMaterial{
+class CopperGrate extends Transparent implements CopperMaterial, Waterloggable{
 	use CopperTrait;
-
-	//TODO: waterlogging!
+	use WaterloggableTrait;
 }

@@ -23,12 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 
-final class HeavyCore extends Transparent{
-	//TODO: Waterlogging!
+final class HeavyCore extends Transparent implements Waterloggable{
+	use WaterloggableTrait;
 
 	protected function recalculateCollisionBoxes() : array{
 		return [AxisAlignedBB::one()
