@@ -61,8 +61,11 @@ trait WaterloggableTrait{
 		return true;
 	}
 
+	/**
+	 * @see Block::getDisplacedBlock()
+	 */
 	public function getDisplacedBlock() : ?Block{
-		return $this->containedWater !== null ? $this->containedWater : null;
+		return $this->containedWater;
 	}
 
 	/**
