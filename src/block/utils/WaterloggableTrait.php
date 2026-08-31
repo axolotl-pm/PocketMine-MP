@@ -69,8 +69,9 @@ trait WaterloggableTrait{
 	 * @see Block::onInteract()
 	 */
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
-		if($blockReplace instanceof Water && ($this->hasTypeTag(BlockTypeTags::NON_SOURCE_WATERLOGGABLE) || $blockReplace->isSource())){
-			$this->containedWater = clone $blockReplace;
+		$water = WaterHelper::getWater($blockReplace);
+		if($water !== null && ($this->hasTypeTag(BlockTypeTags::NON_SOURCE_WATERLOGGABLE) || $water->isSource())){
+			$this->containedWater = clone $water;
 		}
 		return true;
 	}
