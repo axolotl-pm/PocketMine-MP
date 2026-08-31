@@ -167,7 +167,7 @@ final class BlockStateDictionary{
 	 */
 	public function getStates() : array{ return $this->states; }
 
-	public function networkIdsAreHashes() : bool{ return $this->networkIdsAreHashes; }
+	public function useBlockNetworkIdsHashes() : bool{ return $this->networkIdsAreHashes; }
 
 	/**
 	 * @return BlockStateData[]

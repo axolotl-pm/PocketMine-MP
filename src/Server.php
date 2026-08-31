@@ -357,7 +357,7 @@ class Server{
 		return $this->onlineMode;
 	}
 
-	public function isBlockNetworkIdsAreHashes() : bool{
+	public function useBlockNetworkIdsHashes() : bool{
 		return $this->configGroup->getPropertyBool(Yml::NETWORK_BLOCK_NETWORK_IDS_ARE_HASHES, false);
 	}
 
@@ -849,7 +849,7 @@ class Server{
 					ServerProperties::LANGUAGE => "eng"
 				])
 			);
-			TypeConverter::setInstance(new TypeConverter($this->isBlockNetworkIdsAreHashes()));
+			TypeConverter::setInstance(new TypeConverter($this->useBlockNetworkIdsHashes()));
 
 			$debugLogLevel = $this->configGroup->getPropertyInt(Yml::DEBUG_LEVEL, 1);
 			if($this->logger instanceof MainLogger){

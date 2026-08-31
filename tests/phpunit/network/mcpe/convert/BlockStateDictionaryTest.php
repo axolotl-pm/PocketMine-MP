@@ -38,7 +38,7 @@ class BlockStateDictionaryTest extends TestCase{
 		$entry = new BlockStateDictionaryEntry("minecraft:cyan_terracotta", [], 0);
 		$dictionary = new BlockStateDictionary([$entry]);
 
-		self::assertFalse($dictionary->networkIdsAreHashes());
+		self::assertFalse($dictionary->useBlockNetworkIdsHashes());
 		self::assertSame(0, $dictionary->lookupStateIdFromData(BlockStateData::current("minecraft:cyan_terracotta", [])));
 		self::assertSame("minecraft:cyan_terracotta", $dictionary->generateDataFromStateId(0)?->getName());
 	}
@@ -47,7 +47,7 @@ class BlockStateDictionaryTest extends TestCase{
 		$entry = new BlockStateDictionaryEntry("minecraft:cyan_terracotta", [], 0);
 		$dictionary = new BlockStateDictionary([$entry], true);
 
-		self::assertTrue($dictionary->networkIdsAreHashes());
+		self::assertTrue($dictionary->useBlockNetworkIdsHashes());
 		self::assertSame(self::CYAN_TERRACOTTA_NETWORK_ID_HASH, $entry->getNetworkIdHash());
 		self::assertSame(self::CYAN_TERRACOTTA_NETWORK_ID_HASH, $dictionary->lookupStateIdFromData(BlockStateData::current("minecraft:cyan_terracotta", [])));
 		self::assertSame("minecraft:cyan_terracotta", $dictionary->generateDataFromStateId(self::CYAN_TERRACOTTA_NETWORK_ID_HASH)?->getName());
@@ -69,6 +69,6 @@ class BlockStateDictionaryTest extends TestCase{
 
 		self::assertSame(self::MINECRAFT_UNKNOWN_NETWORK_ID_HASH, $entry->getNetworkIdHash());
 		self::assertSame(self::MINECRAFT_UNKNOWN_NETWORK_ID_HASH, $dictionary->lookupStateIdFromData(BlockStateData::current("minecraft:unknown", [])));
-		self::assertSame("minecraft:unknown", $dictionary->generateDataFromStateId(-2)?->getName());
+		self::assertSame("minecraft:unknown", $dictionary->generateDataFromStateId(self::MINECRAFT_UNKNOWN_NETWORK_ID_HASH)?->getName());
 	}
 }
