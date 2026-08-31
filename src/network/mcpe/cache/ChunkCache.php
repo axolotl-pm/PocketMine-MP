@@ -118,7 +118,7 @@ class ChunkCache implements ChunkListener{
 					$chunk,
 					$promise,
 					$this->compressor,
-					Server::getInstance()->isBlockNetworkIdsAreHashes()
+					Server::getInstance()->useBlockNetworkIdsHashes()
 				)
 			);
 			$this->caches[$chunkHash] = $promise;

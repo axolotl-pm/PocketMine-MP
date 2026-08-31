@@ -71,7 +71,7 @@ class ChunkRequestTask extends AsyncTask{
 
 		$subCount = ChunkSerializer::getSubChunkCount($chunk, $dimensionId);
 		$converter = TypeConverter::getInstance();
-		if($converter->getBlockTranslator()->networkIdsAreHashes() !== $this->blockNetworkIdsAreHashes){
+		if($converter->getBlockTranslator()->useBlockNetworkIdsHashes() !== $this->blockNetworkIdsAreHashes){
 			TypeConverter::setInstance($converter = new TypeConverter($this->blockNetworkIdsAreHashes));
 		}
 		$payload = ChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getBlockTranslator(), $this->tiles);

@@ -30,7 +30,7 @@ class BlockTranslatorTest extends TestCase{
 
 	public function testAllBlockStatesSerializeWithSequentialIds() : void{
 		$blockTranslator = (new TypeConverter(false))->getBlockTranslator();
-		self::assertFalse($blockTranslator->networkIdsAreHashes());
+		self::assertFalse($blockTranslator->useBlockNetworkIdsHashes());
 		foreach(RuntimeBlockStateRegistry::getInstance()->getAllKnownStates() as $state){
 			$blockTranslator->internalIdToNetworkId($state->getStateId());
 		}
@@ -38,7 +38,7 @@ class BlockTranslatorTest extends TestCase{
 
 	public function testAllBlockStatesSerializeWithHashedIds() : void{
 		$blockTranslator = (new TypeConverter(true))->getBlockTranslator();
-		self::assertTrue($blockTranslator->networkIdsAreHashes());
+		self::assertTrue($blockTranslator->useBlockNetworkIdsHashes());
 		foreach(RuntimeBlockStateRegistry::getInstance()->getAllKnownStates() as $state){
 			$blockTranslator->internalIdToNetworkId($state->getStateId());
 		}
