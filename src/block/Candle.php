@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\utils\CandleTrait;
 use pocketmine\block\utils\Lightable;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\Axis;
@@ -36,10 +38,13 @@ use pocketmine\player\Player;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\world\BlockTransaction;
 
-class Candle extends Transparent implements Lightable{
+class Candle extends Transparent implements Lightable, Waterloggable{
 	use CandleTrait {
 		describeBlockOnlyState as encodeLitState;
 		getLightLevel as getBaseLightLevel;
+	}
+	use WaterloggableTrait{
+		place as waterPlace;
 	}
 
 	public const MIN_COUNT = 1;
@@ -116,6 +121,9 @@ class Candle extends Transparent implements Lightable{
 
 			$this->count = $existing->count + 1;
 			$this->lit = $existing->lit;
+		}
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
 		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}

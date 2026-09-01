@@ -25,6 +25,8 @@ namespace pocketmine\block;
 
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\entity\effect\EffectInstance;
 use pocketmine\entity\FoodSource;
 use pocketmine\entity\Living;
@@ -32,9 +34,28 @@ use pocketmine\item\Item;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 
-abstract class BaseCake extends Transparent implements FoodSource{
-	use StaticSupportTrait;
+abstract class BaseCake extends Transparent implements FoodSource, Waterloggable{
+	use StaticSupportTrait{
+		StaticSupportTrait::onNearbyBlockChange as onSupportBlockChange;
+	}
+	use WaterloggableTrait{
+		place as waterPlace;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onSupportBlockChange();
+	}
 
 	public function getSupportType(int $facing) : SupportType{
 		return SupportType::NONE;

@@ -28,16 +28,36 @@ use pocketmine\block\utils\AgeableTrait;
 use pocketmine\block\utils\BlockEventHelper;
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use function mt_rand;
 
-class Cactus extends Transparent implements Ageable{
+class Cactus extends Transparent implements Ageable, Waterloggable{
 	use AgeableTrait;
-	use StaticSupportTrait;
+	use StaticSupportTrait{
+		StaticSupportTrait::onNearbyBlockChange as onSupportBlockChange;
+	}
+	use WaterloggableTrait{
+		place as waterPlace;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+		onEntityInside as onWaterEntityInside;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
 
 	public const MAX_AGE = 15;
 	public const MAX_HEIGHT = 3;
@@ -56,9 +76,16 @@ class Cactus extends Transparent implements Ageable{
 	}
 
 	public function onEntityInside(Entity $entity) : bool{
+		$this->onWaterEntityInside($entity);
+
 		$ev = new EntityDamageByBlockEvent($this, $entity, EntityDamageEvent::CAUSE_CONTACT, 1);
 		$entity->attack($ev);
 		return true;
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onSupportBlockChange();
 	}
 
 	private function canBeSupportedAt(Block $block) : bool{

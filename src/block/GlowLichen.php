@@ -27,17 +27,39 @@ use pocketmine\block\utils\BlockEventHelper;
 use pocketmine\block\utils\MultiAnyFacing;
 use pocketmine\block\utils\MultiAnySupportTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Fertilizer;
 use pocketmine\item\Item;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use pocketmine\world\World;
 use function count;
 use function shuffle;
 
-class GlowLichen extends Transparent implements MultiAnyFacing{
-	use MultiAnySupportTrait;
+class GlowLichen extends Transparent implements MultiAnyFacing, Waterloggable{
+	use MultiAnySupportTrait, WaterloggableTrait{
+		WaterloggableTrait::place insteadof MultiAnySupportTrait;
+		WaterloggableTrait::place as waterPlace;
+		MultiAnySupportTrait::place as supportPlace;
+		WaterloggableTrait::onNearbyBlockChange insteadof MultiAnySupportTrait;
+		MultiAnySupportTrait::onNearbyBlockChange as onSupportBlockChange;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return $this->supportPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onSupportBlockChange();
+	}
 
 	public function getLightLevel() : int{
 		return 7;

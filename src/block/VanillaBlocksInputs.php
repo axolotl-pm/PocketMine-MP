@@ -153,7 +153,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("ominous_banner", fn(BID $id) => new OminousFloorBanner($id, "Ominous Banner", $bannerBreakInfo), TileBanner::class);
 		self::register("ominous_wall_banner", fn(BID $id) => new OminousWallBanner($id, "Ominous Wall Banner", $bannerBreakInfo), TileBanner::class);
 		self::register("barrel", fn(BID $id) => new Barrel($id, "Barrel", new Info(BreakInfo::axe(2.5))), TileBarrel::class);
-		self::register("barrier", fn(BID $id) => new Transparent($id, "Barrier", new Info(BreakInfo::indestructible())));
+		self::register("barrier", fn(BID $id) => new Barrier($id, "Barrier", new Info(BreakInfo::indestructible())));
 		self::register("beacon", fn(BID $id) => new Beacon($id, "Beacon", new Info(new BreakInfo(3.0))), TileBeacon::class);
 		self::register("bed", fn(BID $id) => new Bed($id, "Bed Block", new Info(new BreakInfo(0.2))), TileBed::class);
 		self::register("bedrock", fn(BID $id) => new Bedrock($id, "Bedrock", new Info(BreakInfo::indestructible(18000000.0))));
@@ -215,7 +215,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("emerald", fn(BID $id) => new Opaque($id, "Emerald Block", new Info(BreakInfo::pickaxe(5.0, ToolTier::IRON, 30.0))));
 		self::register("enchanting_table", fn(BID $id) => new EnchantingTable($id, "Enchanting Table", new Info(BreakInfo::pickaxe(5.0, ToolTier::WOOD, 6000.0))), TileEnchantingTable::class);
 		self::register("end_portal_frame", fn(BID $id) => new EndPortalFrame($id, "End Portal Frame", new Info(BreakInfo::indestructible(18000000.0))));
-		self::register("end_rod", fn(BID $id) => new EndRod($id, "End Rod", new Info(BreakInfo::instant())));
+		self::register("end_rod", fn(BID $id) => new EndRod($id, "End Rod", new Info(BreakInfo::instant(), [Tags::NON_SOURCE_WATERLOGGABLE])));
 		self::register("end_stone", fn(BID $id) => new Opaque($id, "End Stone", new Info(BreakInfo::pickaxe(3.0, ToolTier::WOOD, 45.0))));
 
 		$endBrickBreakInfo = new Info(BreakInfo::pickaxe(3.0, ToolTier::WOOD, 45.0));
@@ -297,7 +297,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("lapis_lazuli", fn(BID $id) => new Opaque($id, "Lapis Lazuli Block", new Info(BreakInfo::pickaxe(3.0, ToolTier::STONE))));
 		self::register("lava", fn(BID $id) => new Lava($id, "Lava", new Info(BreakInfo::indestructible(500.0))));
 		self::register("lectern", fn(BID $id) => new Lectern($id, "Lectern", new Info(BreakInfo::axe(2.5))), TileLectern::class);
-		self::register("lever", fn(BID $id) => new Lever($id, "Lever", new Info(new BreakInfo(0.5))));
+		self::register("lever", fn(BID $id) => new Lever($id, "Lever", new Info(new BreakInfo(0.5), [Tags::NON_SOURCE_WATERLOGGABLE])));
 		self::register("magma", fn(BID $id) => new Magma($id, "Magma Block", new Info(BreakInfo::pickaxe(0.5, ToolTier::WOOD))));
 		self::register("melon", fn(BID $id) => new Melon($id, "Melon Block", new Info(BreakInfo::axe(1.0))));
 		self::register("melon_stem", fn(BID $id) => new MelonStem($id, "Melon Stem", new Info(BreakInfo::instant())));
@@ -359,9 +359,9 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("rail", fn(BID $id) => new Rail($id, "Rail", $railBreakInfo));
 		self::register("red_mushroom", fn(BID $id) => new RedMushroom($id, "Red Mushroom", new Info(BreakInfo::instant(), [Tags::POTTABLE_PLANTS])));
 		self::register("redstone", fn(BID $id) => new Redstone($id, "Redstone Block", new Info(BreakInfo::pickaxe(5.0, ToolTier::WOOD, 30.0))));
-		self::register("redstone_comparator", fn(BID $id) => new RedstoneComparator($id, "Redstone Comparator", new Info(BreakInfo::instant())), TileComparator::class);
+		self::register("redstone_comparator", fn(BID $id) => new RedstoneComparator($id, "Redstone Comparator", new Info(BreakInfo::instant(), [Tags::NON_SOURCE_WATERLOGGABLE])), TileComparator::class);
 		self::register("redstone_lamp", fn(BID $id) => new RedstoneLamp($id, "Redstone Lamp", new Info(new BreakInfo(0.3))));
-		self::register("redstone_repeater", fn(BID $id) => new RedstoneRepeater($id, "Redstone Repeater", new Info(BreakInfo::instant())));
+		self::register("redstone_repeater", fn(BID $id) => new RedstoneRepeater($id, "Redstone Repeater", new Info(BreakInfo::instant(), [Tags::NON_SOURCE_WATERLOGGABLE])));
 		self::register("redstone_torch", fn(BID $id) => new RedstoneTorch($id, "Redstone Torch", new Info(BreakInfo::instant())));
 		self::register("redstone_wire", fn(BID $id) => new RedstoneWire($id, "Redstone", new Info(BreakInfo::instant())));
 		self::register("reserved6", fn(BID $id) => new Reserved6($id, "reserved6", new Info(BreakInfo::instant())));
@@ -478,8 +478,8 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("torch", fn(BID $id) => new Torch($id, "Torch", new Info(BreakInfo::instant())));
 
 		self::register("trapped_chest", fn(BID $id) => new TrappedChest($id, "Trapped Chest", $chestBreakInfo), TileChest::class);
-		self::register("tripwire", fn(BID $id) => new Tripwire($id, "Tripwire", new Info(BreakInfo::instant())));
-		self::register("tripwire_hook", fn(BID $id) => new TripwireHook($id, "Tripwire Hook", new Info(BreakInfo::instant())));
+		self::register("tripwire", fn(BID $id) => new Tripwire($id, "Tripwire", new Info(BreakInfo::instant(), [Tags::NON_SOURCE_WATERLOGGABLE])));
+		self::register("tripwire_hook", fn(BID $id) => new TripwireHook($id, "Tripwire Hook", new Info(BreakInfo::instant(), [Tags::NON_SOURCE_WATERLOGGABLE])));
 		self::register("underwater_torch", fn(BID $id) => new UnderwaterTorch($id, "Underwater Torch", new Info(BreakInfo::instant())));
 		self::register("vines", fn(BID $id) => new Vine($id, "Vines", new Info(BreakInfo::axe(0.2))));
 		self::register("water", fn(BID $id) => new Water($id, "Water", new Info(BreakInfo::indestructible(500.0))));
@@ -582,10 +582,10 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::registerElements();
 
 		$chemistryTableBreakInfo = new Info(BreakInfo::pickaxe(2.5, ToolTier::WOOD));
-		self::register("compound_creator", fn(BID $id) => new ChemistryTable($id, "Compound Creator", $chemistryTableBreakInfo));
-		self::register("element_constructor", fn(BID $id) => new ChemistryTable($id, "Element Constructor", $chemistryTableBreakInfo));
-		self::register("lab_table", fn(BID $id) => new ChemistryTable($id, "Lab Table", $chemistryTableBreakInfo));
-		self::register("material_reducer", fn(BID $id) => new ChemistryTable($id, "Material Reducer", $chemistryTableBreakInfo));
+		self::register("compound_creator", fn(BID $id) => new ChemistryTable($id, "Compound Creator", new Info($chemistryTableBreakInfo->getBreakInfo(), [Tags::NON_SOURCE_WATERLOGGABLE])));
+		self::register("element_constructor", fn(BID $id) => new ChemistryTable($id, "Element Constructor", new Info($chemistryTableBreakInfo->getBreakInfo(), [Tags::NON_SOURCE_WATERLOGGABLE])));
+		self::register("lab_table", fn(BID $id) => new ChemistryTable($id, "Lab Table", new Info($chemistryTableBreakInfo->getBreakInfo(), [Tags::NON_SOURCE_WATERLOGGABLE])));
+		self::register("material_reducer", fn(BID $id) => new ChemistryTable($id, "Material Reducer", new Info($chemistryTableBreakInfo->getBreakInfo(), [Tags::NON_SOURCE_WATERLOGGABLE])));
 
 		self::register("chemical_heat", fn(BID $id) => new ChemicalHeat($id, "Heat Block", $chemistryTableBreakInfo));
 
@@ -943,7 +943,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 	}
 
 	private function registerBlocksR13() : void{
-		self::register("light", fn(BID $id) => new Light($id, "Light Block", new Info(BreakInfo::indestructible())));
+		self::register("light", fn(BID $id) => new Light($id, "Light Block", new Info(BreakInfo::indestructible(), [Tags::NON_SOURCE_WATERLOGGABLE])));
 		self::register("structure_void", fn(BID $id) => new StructureVoid($id, "Structure Void", new Info(BreakInfo::instant())));
 		self::register("wither_rose", fn(BID $id) => new WitherRose($id, "Wither Rose", new Info(BreakInfo::instant(), [Tags::POTTABLE_PLANTS])));
 	}
@@ -1116,8 +1116,8 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("cave_vines", fn(BID $id) => new CaveVines($id, "Cave Vines", new Info(BreakInfo::instant())));
 
 		self::register("small_dripleaf", fn(BID $id) => new SmallDripleaf($id, "Small Dripleaf", new Info(BreakInfo::instant(ToolType::SHEARS, toolHarvestLevel: 1))));
-		self::register("big_dripleaf_head", fn(BID $id) => new BigDripleafHead($id, "Big Dripleaf", new Info(new BreakInfo(0.1))));
-		self::register("big_dripleaf_stem", fn(BID $id) => new BigDripleafStem($id, "Big Dripleaf Stem", new Info(new BreakInfo(0.1))));
+		self::register("big_dripleaf_head", fn(BID $id) => new BigDripleafHead($id, "Big Dripleaf", new Info(new BreakInfo(0.1), [Tags::NON_SOURCE_WATERLOGGABLE])));
+		self::register("big_dripleaf_stem", fn(BID $id) => new BigDripleafStem($id, "Big Dripleaf Stem", new Info(new BreakInfo(0.1), [Tags::NON_SOURCE_WATERLOGGABLE])));
 
 		self::register("infested_deepslate", fn(BID $id) => new InfestedPillar($id, "Infested Deepslate", new Info(BreakInfo::pickaxe(1.5, blastResistance: 3.75)), $deepslate));
 	}

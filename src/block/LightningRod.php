@@ -27,6 +27,8 @@ use pocketmine\block\utils\AnyFacing;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\block\utils\CopperMaterial;
 use pocketmine\block\utils\CopperTrait;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
@@ -35,9 +37,12 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-final class LightningRod extends Transparent implements AnyFacing, CopperMaterial{
+final class LightningRod extends Transparent implements AnyFacing, CopperMaterial, Waterloggable{
 	use CopperTrait;
 	use AnyFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+	}
 
 	protected function recalculateCollisionBoxes() : array{
 		$myAxis = Facing::axis($this->facing);
@@ -54,6 +59,9 @@ final class LightningRod extends Transparent implements AnyFacing, CopperMateria
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		$this->facing = $face;
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 }
