@@ -108,5 +108,9 @@ final class YmlServerProperties{
 	public const TICKS_PER_AUTOSAVE = 'ticks-per.autosave';
 	public const TIMINGS = 'timings';
 	public const TIMINGS_HOST = 'timings.host';
+	public const TRANSPORT = 'transport';
+	public const TRANSPORT_NAME = 'transport.name';
+	public const TRANSPORT_NETHERNET = 'transport.nethernet';
+	public const TRANSPORT_NETHERNET_KEY_FILE = 'transport.nethernet.key-file';
 	public const WORLDS = 'worlds';
 }

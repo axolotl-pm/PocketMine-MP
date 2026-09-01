@@ -32,11 +32,10 @@ use pocketmine\network\mcpe\EntityEventBroadcaster;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\PacketBroadcaster;
 use pocketmine\network\mcpe\protocol\PacketPool;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\ServerPongData;
 use pocketmine\network\Network;
 use pocketmine\network\NetworkInterfaceStartException;
 use pocketmine\network\PacketHandlingException;
-use pocketmine\player\GameMode;
 use pocketmine\Server;
 use pocketmine\thread\ThreadCrashException;
 use pocketmine\timings\Timings;
@@ -50,14 +49,15 @@ use raklib\server\ipc\RakLibToUserThreadMessageReceiver;
 use raklib\server\ipc\UserToRakLibThreadMessageSender;
 use raklib\server\ServerEventListener;
 use raklib\utils\InternetAddress;
-use function addcslashes;
 use function base64_encode;
 use function implode;
 use function mt_rand;
-use function rtrim;
 use function substr;
 use const PHP_INT_MAX;
 
+/**
+ * @deprecated RakNet has been deprecated as of 1.26.50
+ */
 class RakLibInterface implements ServerEventListener, AdvancedNetworkInterface{
 	/**
 	 * Sometimes this gets changed when the MCPE-layer protocol gets broken to the point where old and new can't
@@ -66,9 +66,6 @@ class RakLibInterface implements ServerEventListener, AdvancedNetworkInterface{
 	private const MCPE_RAKNET_PROTOCOL_VERSION = 11;
 
 	private const MCPE_RAKNET_PACKET_ID = "\xfe";
-
-	private const SERVER_NAME_FLAG_TRUE = "1";
-	private const SERVER_NAME_FLAG_FALSE = "0";
 
 	private Server $server;
 	private Network $network;
@@ -261,33 +258,7 @@ class RakLibInterface implements ServerEventListener, AdvancedNetworkInterface{
 	}
 
 	public function setName(string $name) : void{
-		$info = $this->server->getQueryInformation();
-
-		$this->interface->setName(implode(";",
-			[
-				"MCPE",
-				rtrim(addcslashes($name, ";"), '\\'),
-				ProtocolInfo::CURRENT_PROTOCOL,
-				ProtocolInfo::MINECRAFT_VERSION_NETWORK,
-				$info->getPlayerCount(),
-				$info->getMaxPlayerCount(),
-				$this->rakServerId,
-				$this->server->getName(),
-				match($this->server->getGamemode()){
-					GameMode::SURVIVAL => "Survival",
-					GameMode::ADVENTURE => "Adventure",
-					default => "Creative"
-				},
-				self::SERVER_NAME_FLAG_TRUE, //isJoinableThroughServerScreen
-				(string) $this->server->getPort(),
-				(string) $this->server->getPortV6(),
-				self::SERVER_NAME_FLAG_FALSE, //isEditorWorld
-				//if the server can actually reach Xbox services
-				($isOnline = $this->server->getOnlineMode()) ? self::SERVER_NAME_FLAG_TRUE : self::SERVER_NAME_FLAG_FALSE,
-				//inverse of online-mode
-				!$isOnline ? self::SERVER_NAME_FLAG_TRUE : self::SERVER_NAME_FLAG_FALSE,
-			]) . ";"
-		);
+		$this->interface->setName(ServerPongData::build($this->server, $name, $this->rakServerId));
 	}
 
 	public function setPortCheck(bool $name) : void{

@@ -83,6 +83,16 @@ network:
   #DO NOT DISABLE THIS unless you understand the risks involved.
   enable-encryption: true
 
+transport:
+  #Which network transport(s) to accept players over.
+  #Options: raknet, nethernet, or both. A comma-separated list works too, e.g. raknet,nethernet
+  name: nethernet
+  #Settings for the NetherNet (WebRTC) transport, used only when it is enabled above.
+  nethernet:
+    #Path to the persistent identity key, relative to the data directory.
+    #Client trusts this key on first join, changing key file will result players getting re-prompted on join.
+    key-file: nethernet.key
+
 debug:
   #If > 1, it will show debug messages in the console
   level: 1
