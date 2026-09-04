@@ -131,7 +131,7 @@ auto-report:
   send-settings: true
   send-phpinfo: false
   use-https: true
-  host: crash.pmmp.io
+  host: crash.axolotl-pm.org
 
 anonymous-statistics:
   #Sends anonymous statistics for data aggregation, plugin usage tracking
@@ -150,7 +150,7 @@ auto-updater:
 
 timings:
   #Choose the host to use for viewing your timings results.
-  host: timings.pmmp.io
+  host: timings.axolotl-pm.org
 
 console:
   #Whether to accept commands via the console. If disabled, anything typed on the console will be ignored.
