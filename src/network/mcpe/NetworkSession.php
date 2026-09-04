@@ -128,6 +128,8 @@ use function base64_encode;
 use function bin2hex;
 use function count;
 use function get_class;
+use function hash;
+use function hash_equals;
 use function implode;
 use function in_array;
 use function is_string;
@@ -221,7 +223,7 @@ class NetworkSession{
 		private TypeConverter $typeConverter,
 		private string $ip,
 		private int $port,
-		private bool $forceDisableEncryption = false
+		private ?string $netherNetIdentityKey = null
 	){
 		$this->logger = new \PrefixedLogger($this->server->getLogger(), $this->getLogPrefix());
 
@@ -912,6 +914,19 @@ class NetworkSession{
 			}
 		}
 
+		if($authRequired){
+			if($clientPubKey === null){
+				$error = "Missing client public key";
+			}elseif($this->netherNetIdentityKey === null){
+				$error = "Missing NetherNet identity key";
+			}else{
+				$loginDigest = hash("sha256", $clientPubKey, binary: true);
+				if(!hash_equals($this->netherNetIdentityKey, $loginDigest)){
+					$error = "Client public key does not match NetherNet identity key";
+				}
+			}
+		}
+
 		if($error !== null){
 			$this->disconnectWithError(
 				reason: KnownTranslationFactory::pocketmine_disconnect_invalidSession($error),
@@ -982,7 +997,7 @@ class NetworkSession{
 			}
 		}
 
-		if(EncryptionContext::$ENABLED && !$this->forceDisableEncryption){
+		if(EncryptionContext::$ENABLED && $this->netherNetIdentityKey === null){
 			$this->server->getAsyncPool()->submitTask(new PrepareEncryptionTask($clientPubKey, function(string $encryptionKey, string $handshakeJwt) : void{
 				if(!$this->connected){
 					return;

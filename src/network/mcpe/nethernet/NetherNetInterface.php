@@ -276,12 +276,11 @@ class NetherNetInterface implements NetworkInterface{
 			$this->typeConverter,
 			$address,
 			$port,
-			true //NetherNet does not use encryption
+			$publicKeyDigest
 		);
 		$this->sessions[$sessionId] = $session;
 
 		if($publicKeyDigest !== ""){
-			//TODO: verify this key digest against the client's public key in the LoginPacket
 			$session->getLogger()->debug("NetherNet identity key " . bin2hex($publicKeyDigest));
 		}
 	}
