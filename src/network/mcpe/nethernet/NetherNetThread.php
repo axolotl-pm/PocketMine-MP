@@ -200,7 +200,7 @@ class NetherNetThread extends Thread{
 
 			$sessionId = VarInt::readUnsignedInt($reader);
 			if($type === NetherNetIpc::M2T_CLOSE_SESSION){
-				$listener->close($sessionId, "closed by the server");
+				$listener->close($sessionId);
 				continue;
 			}
 

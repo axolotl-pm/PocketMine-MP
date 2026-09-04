@@ -27,9 +27,11 @@ use pmmp\encoding\ByteBufferReader;
 use pmmp\encoding\VarInt;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\lang\KnownTranslationFactory;
+use pocketmine\lang\Translatable;
 use pocketmine\nethernet\crypto\CryptoException;
 use pocketmine\nethernet\discovery\LanSignaling;
 use pocketmine\nethernet\identity\ServerIdentity;
+use pocketmine\nethernet\session\DisconnectReason;
 use pocketmine\network\mcpe\compression\ZlibCompressor;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\EntityEventBroadcaster;
@@ -61,9 +63,6 @@ use function umask;
 use function unpack;
 use const PHP_INT_MAX;
 
-/**
- * TODO: Translations
- */
 class NetherNetInterface implements NetworkInterface{
 
 	private const TLS_CERT_FILE = "nethernet-cert.pem";
@@ -242,10 +241,10 @@ class NetherNetInterface implements NetworkInterface{
 				break;
 
 			case NetherNetIpc::T2M_SESSION_CLOSE:
-				$reason = $reader->readByteArray($reader->getUnreadLength());
+				$reason = DisconnectReason::tryFrom(VarInt::readUnsignedInt($reader));
 				$session = $this->sessions[$sessionId] ?? null;
 				unset($this->sessions[$sessionId]);
-				$session?->onClientDisconnect($reason === "" ? KnownTranslationFactory::pocketmine_disconnect_clientDisconnect() : "NetherNet: $reason");
+				$session?->onClientDisconnect(self::disconnectReason($reason));
 				break;
 
 			case NetherNetIpc::T2M_RECEIPT:
@@ -254,6 +253,15 @@ class NetherNetInterface implements NetworkInterface{
 		}
 
 		return true;
+	}
+
+	private static function disconnectReason(?DisconnectReason $reason) : Translatable|string{
+		return match($reason){
+			DisconnectReason::PEER_DISCONNECT => KnownTranslationFactory::pocketmine_disconnect_clientDisconnect(),
+			DisconnectReason::BAD_DATA => KnownTranslationFactory::pocketmine_disconnect_error_badPacket(),
+			null => "Unknown NetherNet disconnect reason",
+			default => "NetherNet: " . $reason->getMessage()
+		};
 	}
 
 	private function openSession(int $sessionId, string $address, int $port, string $publicKeyDigest) : void{

@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\nethernet;
 
 use pocketmine\nethernet\ServerEventListener;
+use pocketmine\nethernet\session\DisconnectReason;
 use pocketmine\nethernet\session\Reliability;
 use pocketmine\nethernet\session\Session;
 use pocketmine\nethernet\session\SessionException;
@@ -74,11 +75,11 @@ final class NetherNetSessionListener implements ServerEventListener{
 		$this->out->write(NetherNetIpc::packet($session->getId(), $payload));
 	}
 
-	public function onSessionClose(Session $session, ?string $reason) : void{
+	public function onSessionClose(Session $session, DisconnectReason $reason) : void{
 		$id = $session->getId();
 		unset($this->sessions[$id], $this->queuedBytes[$id], $this->pendingReceipts[$id]);
 
-		$this->out->write(NetherNetIpc::sessionClose($id, $reason ?? ""));
+		$this->out->write(NetherNetIpc::sessionClose($id, $reason->value));
 	}
 
 	public function send(int $sessionId, string $payload, ?int $receiptId) : void{
@@ -90,7 +91,7 @@ final class NetherNetSessionListener implements ServerEventListener{
 		try{
 			$session->send($payload);
 		}catch(SessionException $e){
-			$session->close($e->getMessage());
+			$session->close(DisconnectReason::SEND_FAILED);
 
 			return;
 		}
@@ -101,7 +102,7 @@ final class NetherNetSessionListener implements ServerEventListener{
 		}
 	}
 
-	public function close(int $sessionId, ?string $reason = null) : void{
+	public function close(int $sessionId, DisconnectReason $reason = DisconnectReason::SERVER_DISCONNECT) : void{
 		($this->sessions[$sessionId] ?? null)?->close($reason);
 	}
 

@@ -74,11 +74,11 @@ final class NetherNetIpc{
 		return $out->getData();
 	}
 
-	public static function sessionClose(int $sessionId, string $reason) : string{
+	public static function sessionClose(int $sessionId, int $reason) : string{
 		$out = new ByteBufferWriter();
 		$out->writeByteArray(chr(self::T2M_SESSION_CLOSE));
 		VarInt::writeUnsignedInt($out, $sessionId);
-		$out->writeByteArray($reason);
+		VarInt::writeUnsignedInt($out, $reason);
 
 		return $out->getData();
 	}
