@@ -138,13 +138,18 @@ class LoginPacketHandler extends PacketHandler{
 	}
 
 	private function processLoginCommon(LoginPacket $packet, string $username, UuidInterface $legacyUuid, string $xuid) : ?bool{
+		$clientData = $this->parseClientData($packet->clientDataJwt);
+
+		if(!$this->server->getOnlineMode() && $username === ""){ //workaround for player name being empty in offline mode as of 1.26.40+
+			$username = $clientData->ThirdPartyName;
+		}
+
 		if(!Player::isValidUserName($username)){
 			$this->session->disconnectWithError(KnownTranslationFactory::disconnectionScreen_invalidName());
 
 			return null;
 		}
 
-		$clientData = $this->parseClientData($packet->clientDataJwt);
 
 		try{
 			$skin = $this->session->getTypeConverter()->getSkinAdapter()->fromSkinData(ClientDataToSkinDataHelper::fromClientData($clientData));
