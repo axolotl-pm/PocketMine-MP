@@ -28,8 +28,10 @@ use pocketmine\nbt\LittleEndianNbtSerializer;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\Tag;
 use pocketmine\nbt\TreeRoot;
+use pocketmine\utils\Binary;
 use pocketmine\utils\Utils;
 use function count;
+use function hash;
 use function ksort;
 use const SORT_STRING;
 
@@ -41,6 +43,7 @@ final class BlockStateDictionaryEntry{
 	private static array $uniqueRawStates = [];
 
 	private string $rawStateProperties;
+	private ?int $networkIdHash = null;
 
 	/**
 	 * @param Tag[] $stateProperties
@@ -68,6 +71,36 @@ final class BlockStateDictionaryEntry{
 	}
 
 	public function getMeta() : int{ return $this->meta; }
+
+	public function getNetworkIdHash() : int{
+		return $this->networkIdHash ??= self::calculateNetworkIdHash(
+			$this->stateName,
+			self::decodeStateProperties($this->rawStateProperties)
+		);
+	}
+
+	/**
+	 * @param Tag[] $stateProperties
+	 * @phpstan-param array<string, Tag> $stateProperties
+	 */
+	private static function calculateNetworkIdHash(string $stateName, array $stateProperties) : int{
+		if($stateName === "minecraft:unknown"){
+			return -2;
+		}
+
+		ksort($stateProperties, SORT_STRING);
+		$statesTag = CompoundTag::create();
+		foreach(Utils::stringifyKeys($stateProperties) as $name => $value){
+			$statesTag->setTag($name, $value);
+		}
+
+		$stateNbt = CompoundTag::create()
+			->setString(BlockStateData::TAG_NAME, $stateName)
+			->setTag(BlockStateData::TAG_STATES, $statesTag);
+		$encodedState = (new LittleEndianNbtSerializer())->write(new TreeRoot($stateNbt));
+
+		return Binary::readInt(hash('fnv1a32', $encodedState, binary: true));
+	}
 
 	/**
 	 * @return Tag[]
