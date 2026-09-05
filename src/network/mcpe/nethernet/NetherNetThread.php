@@ -44,13 +44,18 @@ use pocketmine\snooze\SleeperHandlerEntry;
 use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\thread\Thread;
 use pocketmine\thread\ThreadCrashException;
+use function microtime;
 use function ord;
-use function usleep;
+use function time_sleep_until;
 
 class NetherNetThread extends Thread{
 
-	/** Sleep interval in microseconds between poll loops (5ms). */
-	private const POLL_INTERVAL_US = 5000;
+	/** Target tick rate, matching RakLib's. */
+	private const TPS = 100;
+	private const TIME_PER_TICK = 1 / self::TPS;
+
+	/** How long shutdown waits for disconnecting sessions to flush, in seconds. */
+	private const SHUTDOWN_DRAIN_TIMEOUT = 3.0;
 
 	protected bool $ready = false;
 
@@ -140,12 +145,24 @@ class NetherNetThread extends Thread{
 		});
 
 		while(!$this->isKilled){
+			$start = microtime(true);
+
 			$server->tick();
 
 			$this->handleInbound($in, $listener, $advert, $status);
 			$listener->flushReceipts();
 
-			usleep(self::POLL_INTERVAL_US);
+			self::sleepUntilNextTick($start);
+		}
+		$this->handleInbound($in, $listener, $advert, $status);
+
+		$deadline = microtime(true) + self::SHUTDOWN_DRAIN_TIMEOUT;
+		while($server->getSessionManager()->count() > 0 && microtime(true) < $deadline){
+			$start = microtime(true);
+
+			$server->tick();
+
+			self::sleepUntilNextTick($start);
 		}
 
 		$server->shutdown();
@@ -181,6 +198,12 @@ class NetherNetThread extends Thread{
 		}
 
 		return $server;
+	}
+
+	private static function sleepUntilNextTick(float $start) : void{
+		if(microtime(true) - $start < self::TIME_PER_TICK){
+			@time_sleep_until($start + self::TIME_PER_TICK);
+		}
 	}
 
 	private function handleInbound(NetherNetChannel $in, NetherNetSessionListener $listener, MutableServerDataProvider $advert, MutableServerStatusProvider $status) : void{

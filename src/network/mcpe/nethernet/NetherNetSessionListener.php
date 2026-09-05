@@ -103,7 +103,7 @@ final class NetherNetSessionListener implements ServerEventListener{
 	}
 
 	public function close(int $sessionId, DisconnectReason $reason = DisconnectReason::SERVER_DISCONNECT) : void{
-		($this->sessions[$sessionId] ?? null)?->close($reason);
+		($this->sessions[$sessionId] ?? null)?->initiateDisconnect($reason);
 	}
 
 	/**
