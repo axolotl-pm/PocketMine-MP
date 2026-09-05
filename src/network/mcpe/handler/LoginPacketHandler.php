@@ -150,7 +150,6 @@ class LoginPacketHandler extends PacketHandler{
 			return null;
 		}
 
-
 		try{
 			$skin = $this->session->getTypeConverter()->getSkinAdapter()->fromSkinData(ClientDataToSkinDataHelper::fromClientData($clientData));
 		}catch(\InvalidArgumentException | InvalidSkinException $e){
