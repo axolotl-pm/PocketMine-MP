@@ -142,7 +142,6 @@ final class NetherNetSessionListener implements ServerEventListener{
 			return ["0.0.0.0", 0];
 		}
 
-		// Find the last colon to separate host and port (handles IPv6 addresses)
 		$separator = strrpos($address, ":");
 		if($separator === false){
 			return [$address, 0];

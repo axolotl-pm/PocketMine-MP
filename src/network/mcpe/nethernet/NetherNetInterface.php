@@ -45,13 +45,12 @@ use pocketmine\network\PacketHandlingException;
 use pocketmine\Server;
 use pocketmine\thread\ThreadCrashException;
 use pocketmine\timings\Timings;
+use pocketmine\utils\Filesystem;
 use pocketmine\utils\Utils;
 use Symfony\Component\Filesystem\Path;
 use function bin2hex;
 use function chmod;
 use function dirname;
-use function file_get_contents;
-use function file_put_contents;
 use function hash;
 use function implode;
 use function is_dir;
@@ -112,6 +111,9 @@ class NetherNetInterface implements NetworkInterface{
 		$this->fromThread = new NetherNetChannel($threadToMain);
 
 		[$certificate, $key] = $this->findTlsFiles();
+		if($certificate !== null && $key !== null){
+			$this->server->getLogger()->notice("NetherNet signaling over TLS is enabled. We recommend using a reverse proxy for production use.");
+		}
 
 		$identityPem = $this->loadOrCreateIdentityPem();
 		$this->networkId = self::networkIdOf($identityPem);
@@ -125,7 +127,7 @@ class NetherNetInterface implements NetworkInterface{
 			$identityPem,
 			$certificate,
 			$key,
-			LanSignaling::DEFAULT_PORT,
+			LanSignaling::DEFAULT_PORT, //TODO: should this be configurable?
 			$this->networkId,
 			!$this->server->getOnlineMode(),
 			$sleeperEntry
@@ -147,16 +149,12 @@ class NetherNetInterface implements NetworkInterface{
 		$path = Path::makeAbsolute($this->identityKeyFile, $this->server->getDataPath());
 
 		if(is_file($path)){
-			$pem = file_get_contents($path);
-			if($pem === false){
-				throw new NetworkInterfaceStartException("The NetherNet identity key at $path exists but could not be read");
-			}
+			$pem = Filesystem::fileGetContents($path);
 			try{
 				ServerIdentity::fromPrivateKeyPem($pem);
 			}catch(CryptoException $e){
 				throw new NetworkInterfaceStartException(
-					"The NetherNet identity key at $path is not a valid private key: " . $e->getMessage() .
-					". Fix or remove the file; removing it generates a fresh identity, which prompts returning players to trust this server again.",
+					"NetherNet identity key $path is invalid",
 					0,
 					$e
 				);
@@ -178,15 +176,13 @@ class NetherNetInterface implements NetworkInterface{
 
 		$previousUmask = umask(0077);
 		try{
-			$written = file_put_contents($path, $pem);
+			Filesystem::safeFilePutContents($path, $pem);
+		}catch(\RuntimeException $e){
+			$this->server->getLogger()->warning("Could not save the NetherNet identity key to $path; players will be prompted again after a restart.");
 		}finally{
 			umask($previousUmask);
 		}
-		if($written === false){
-			$this->server->getLogger()->warning("Could not save the NetherNet identity key to $path; players will be prompted again after a restart");
-		}else{
-			@chmod($path, 0600);
-		}
+		@chmod($path, 0600);
 
 		return $pem;
 	}
@@ -201,7 +197,7 @@ class NetherNetInterface implements NetworkInterface{
 		$key = Path::join($this->server->getDataPath(), self::TLS_KEY_FILE);
 
 		if(!is_file($certificate) || !is_file($key)){
-			$this->server->getLogger()->notice("Serving NetherNet signaling over plain HTTP; drop a CA-signed " . self::TLS_CERT_FILE . " and " . self::TLS_KEY_FILE . " into the data directory to use HTTPS");
+			$this->server->getLogger()->notice("NetherNet signaling is being served over plain HTTP. Consider configuring TLS certificate and key files.");
 			return [null, null];
 		}
 

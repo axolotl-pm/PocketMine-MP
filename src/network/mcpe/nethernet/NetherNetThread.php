@@ -50,11 +50,9 @@ use function time_sleep_until;
 
 class NetherNetThread extends Thread{
 
-	/** Target tick rate, matching RakLib's. */
 	private const TPS = 100;
 	private const TIME_PER_TICK = 1 / self::TPS;
 
-	/** How long shutdown waits for disconnecting sessions to flush, in seconds. */
 	private const SHUTDOWN_DRAIN_TIMEOUT = 3.0;
 
 	protected bool $ready = false;
@@ -124,8 +122,7 @@ class NetherNetThread extends Thread{
 					throw $e;
 				}
 
-				// LAN discovery port may conflict with a local Minecraft client; continue without LAN discovery
-				$this->logger->warning("LAN discovery could not start (" . $e->getMessage() . "); continuing without it");
+				$this->logger->warning("Unable to start LAN discovery"); //TODO: Translations
 				$server = $this->createServer($listener, $advert, $status, null);
 				$server->start();
 			}

@@ -997,7 +997,7 @@ class NetworkSession{
 			}
 		}
 
-		if(EncryptionContext::$ENABLED && $this->netherNetIdentityKey === null){
+		if(EncryptionContext::$ENABLED && $this->netherNetIdentityKey === null){ //NetherNet has their own encryption in their transport level
 			$this->server->getAsyncPool()->submitTask(new PrepareEncryptionTask($clientPubKey, function(string $encryptionKey, string $handshakeJwt) : void{
 				if(!$this->connected){
 					return;

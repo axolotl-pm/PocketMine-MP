@@ -1257,7 +1257,7 @@ class Server{
 		return !$anyWorldFailedToLoad;
 	}
 
-	private function startupPrepareConnectableNetworkInterfaces(
+	private function startupPrepareRakNetInterface(
 		string $ip,
 		int $port,
 		bool $ipV6,
@@ -1280,7 +1280,7 @@ class Server{
 				)));
 				return false;
 			}
-			$this->getLogger()->warning("RakNet has been deprecated, consider switching to NetherNet"); //TODO: Translations
+			$this->getLogger()->warning("RakNet has been deprecated, consider switching over NetherNet"); //TODO: Translations
 		}
 		if($rakLibRegistered){
 			$this->logger->info($this->language->translate(KnownTranslationFactory::pocketmine_server_networkStart($prettyIp, (string) $port)));
@@ -1302,7 +1302,7 @@ class Server{
 		TypeConverter $typeConverter
 	) : bool{
 		if(!extension_loaded("webrtc")){
-			$this->logger->emergency("The \"nethernet\" transport needs ext-webrtc, which is not loaded"); //TODO: Translations
+			$this->logger->emergency("NetherNet transport requires the ext-webrtc extension"); //TODO: Translations
 			return false;
 		}
 
@@ -1344,17 +1344,15 @@ class Server{
 
 		$useRakLib = in_array(Transport::RAKNET, $transports, true);
 		if(
-			!$this->startupPrepareConnectableNetworkInterfaces($this->getIp(), $this->getPort(), false, $useQuery, $useRakLib, $packetBroadcaster, $entityEventBroadcaster, $typeConverter) ||
+			!$this->startupPrepareRakNetInterface($this->getIp(), $this->getPort(), false, $useQuery, $useRakLib, $packetBroadcaster, $entityEventBroadcaster, $typeConverter) ||
 			(
 				$this->configGroup->getConfigBool(ServerProperties::ENABLE_IPV6, true) &&
-				!$this->startupPrepareConnectableNetworkInterfaces($this->getIpV6(), $this->getPortV6(), true, $useQuery, $useRakLib, $packetBroadcaster, $entityEventBroadcaster, $typeConverter)
+				!$this->startupPrepareRakNetInterface($this->getIpV6(), $this->getPortV6(), true, $useQuery, $useRakLib, $packetBroadcaster, $entityEventBroadcaster, $typeConverter)
 			)
 		){
 			return false;
 		}
 
-		//NetherNet signals over TCP, so it can share the RakNet port number, and it is
-		//registered once rather than per address family
 		if(in_array(Transport::NETHERNET, $transports, true) && !$this->startupPrepareNetherNetInterface($packetBroadcaster, $entityEventBroadcaster, $typeConverter)){
 			return false;
 		}
