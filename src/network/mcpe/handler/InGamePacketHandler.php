@@ -465,6 +465,7 @@ class InGamePacketHandler extends PacketHandler{
 					$this->lastRightClickData->getBlockPosition()->equals($data->getBlockPosition()) &&
 					$this->lastRightClickData->getClickPosition()->distanceSquared($clickPos) < 0.00001 //signature spam bug has 0 distance, but allow some error
 				);
+
 				//get rid of continued spam if the player clicks and holds right-click
 				$this->lastRightClickData = $data;
 				$this->lastRightClickTime = microtime(true);
@@ -477,35 +478,62 @@ class InGamePacketHandler extends PacketHandler{
 
 				$blockPos = $data->getBlockPosition();
 				$vBlockPos = new Vector3($blockPos->getX(), $blockPos->getY(), $blockPos->getZ());
-				$this->player->interactBlock($vBlockPos, $data->getFace(), $clickPos);
-				if($data->getClientInteractPrediction() === PredictedResult::SUCCESS){
-					//If the item has an associated blockstate ID, this means it will only place one block.
-					//We can avoid syncing the adjacent blocks of the place position in this case, since that's only
-					//necessary if there might be multiple blocks around the placement location affected.
-					//Adjacents of the clicked block are still always synced, since it's too complicated to figure out
-					//if the client might've predicted something in this case. However, since the clicked block is always
-					//"behind" the placed block, this shouldn't affect bridging or fast placement.
-					//This would be much easier if the client would just tell us which blocks it thinks changed...
-					$syncAdjacentFace = null;
-					if($data->getItemInHand()->getItemStack()->getBlockRuntimeId() === ItemTranslator::NO_BLOCK_RUNTIME_ID){
-						$this->session->getLogger()->debug("Placing held item might place multiple blocks client-side; doing full adjacent sync");
-						$syncAdjacentFace = $data->getFace();
+
+				if($vBlockPos->distanceSquared($this->player->getLocation()) < 10000){
+					$block = $this->player->getWorld()->getBlock($vBlockPos);
+					$blockTranslator = $this->session->getTypeConverter()->getBlockTranslator();
+					$clientRuntimeId = $data->getBlockRuntimeId();
+					$interactDisplacedBlock = false;
+
+					if(
+						($displacedBlock = $block->getDisplacedBlock()) !== null &&
+						$blockTranslator->internalIdToNetworkId($displacedBlock->getStateId()) === $clientRuntimeId
+					){
+						$interactDisplacedBlock = true;
+					}elseif($blockTranslator->internalIdToNetworkId($block->getStateId()) !== $clientRuntimeId){
+						$this->syncBlocksNearby($vBlockPos, $data->getFace());
+						return true;
 					}
-					$this->syncBlocksNearby($vBlockPos, $syncAdjacentFace);
+
+					$this->player->interactBlock(
+						$vBlockPos,
+						$data->getFace(),
+						$clickPos,
+						$interactDisplacedBlock
+					);
+
+					if($data->getClientInteractPrediction() === PredictedResult::SUCCESS){
+						//If the item has an associated blockstate ID, this means it will only place one block.
+						//We can avoid syncing the adjacent blocks of the place position in this case, since that's only
+						//necessary if there might be multiple blocks around the placement location affected.
+						//Adjacents of the clicked block are still always synced.
+						$syncAdjacentFace = null;
+						if($data->getItemInHand()->getItemStack()->getBlockRuntimeId() === ItemTranslator::NO_BLOCK_RUNTIME_ID){
+							$this->session->getLogger()->debug(
+								"Placing held item might place multiple blocks client-side; doing full adjacent sync"
+							);
+							$syncAdjacentFace = $data->getFace();
+						}
+						$this->syncBlocksNearby($vBlockPos, $syncAdjacentFace);
+					}
 				}
+
 				return true;
+
 			case UseItemTransactionData::ACTION_CLICK_AIR:
 				if($this->player->isUsingItem()){
 					if(!$this->player->consumeHeldItem()){
 						$hungerAttr = $this->player->getAttributeMap()->get(Attribute::HUNGER) ?? throw new AssumptionFailedError();
 						$hungerAttr->markSynchronized(false);
 					}
+
 					//TODO: workaround goat horns getting stuck in the "using item" state
 					//this timed-trigger behaviour is also used for other items apart from food
 					//in the future we'll generalise this logic and add proper hooks for it
 					$this->player->setUsingItem(false);
 					return true;
 				}
+
 				$this->player->useHeldItem();
 				return true;
 		}

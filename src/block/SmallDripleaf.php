@@ -26,6 +26,8 @@ namespace pocketmine\block;
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\event\block\StructureGrowEvent;
 use pocketmine\item\Fertilizer;
@@ -37,8 +39,12 @@ use pocketmine\world\BlockTransaction;
 use pocketmine\world\Position;
 use function mt_rand;
 
-class SmallDripleaf extends Transparent implements HorizontalFacing{
+class SmallDripleaf extends Transparent implements HorizontalFacing, Waterloggable{
 	use HorizontalFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	protected bool $top = false;
 
@@ -65,6 +71,8 @@ class SmallDripleaf extends Transparent implements HorizontalFacing{
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if(!$this->top && !$this->canBeSupportedBy($this->getSide(Facing::DOWN))){
 			$this->position->getWorld()->useBreakOn($this->position);
 			return;
@@ -88,6 +96,9 @@ class SmallDripleaf extends Transparent implements HorizontalFacing{
 			->setFacing($this->facing)
 			->setTop(true)
 		);
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 

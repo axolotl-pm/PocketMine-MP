@@ -34,7 +34,7 @@ use pocketmine\world\BlockTransaction;
 use function array_intersect_key;
 use function count;
 
-class Vine extends Flowable{
+class Vine extends WaterloggableFlowable{
 
 	/** @var int[] */
 	protected array $faces = [];
@@ -113,6 +113,8 @@ class Vine extends Flowable{
 	}
 
 	public function onNearbyBlockChange() : void{
+		parent::onNearbyBlockChange();
+
 		$changed = false;
 
 		$up = $this->getSide(Facing::UP);

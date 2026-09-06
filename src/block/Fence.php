@@ -24,12 +24,30 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
+use pocketmine\item\Item;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use function count;
 
-class Fence extends Transparent{
+class Fence extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		place as waterPlace;
+		readStateFromWorld as readWaterStateFromWorld;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
+
 	/** @var bool[] facing => dummy */
 	protected array $connections = [];
 
@@ -39,6 +57,8 @@ class Fence extends Transparent{
 
 	public function readStateFromWorld() : Block{
 		parent::readStateFromWorld();
+
+		$this->readWaterStateFromWorld();
 
 		$this->collisionBoxes = null;
 

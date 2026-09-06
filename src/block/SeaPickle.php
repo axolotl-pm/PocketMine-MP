@@ -24,13 +24,19 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class SeaPickle extends Transparent{
+class SeaPickle extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		place as waterPlace;
+	}
+
 	public const MIN_COUNT = 1;
 	public const MAX_COUNT = 4;
 
@@ -83,11 +89,13 @@ class SeaPickle extends Transparent{
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
-		$this->underwater = false; //TODO: implement this once we have new water logic in place
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		$this->underwater = $this->containedWater !== null;
 		if($blockReplace instanceof SeaPickle && $blockReplace->count < self::MAX_COUNT){
 			$this->count = $blockReplace->count + 1;
 		}
-
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 

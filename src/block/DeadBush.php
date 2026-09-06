@@ -29,7 +29,7 @@ use pocketmine\item\VanillaItems;
 use pocketmine\math\Facing;
 use function mt_rand;
 
-class DeadBush extends Flowable{
+class DeadBush extends WaterloggableFlowable{
 	use StaticSupportTrait;
 
 	public function getDropsForIncompatibleTool(Item $item) : array{

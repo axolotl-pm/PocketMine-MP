@@ -28,6 +28,8 @@ use pocketmine\block\utils\BannerPatternLayer;
 use pocketmine\block\utils\Colored;
 use pocketmine\block\utils\ColoredTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Banner as ItemBanner;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
@@ -37,8 +39,13 @@ use pocketmine\world\BlockTransaction;
 use function assert;
 use function count;
 
-abstract class BaseBanner extends Transparent implements Colored{
+abstract class BaseBanner extends Transparent implements Colored, Waterloggable{
 	use ColoredTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		readStateFromWorld as readWaterStateFromWorld;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	/**
 	 * @var BannerPatternLayer[]
@@ -48,6 +55,8 @@ abstract class BaseBanner extends Transparent implements Colored{
 
 	public function readStateFromWorld() : Block{
 		parent::readStateFromWorld();
+		$this->readWaterStateFromWorld();
+
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TileBanner){
 			if($tile->getType() === TileBanner::TYPE_OMINOUS){
@@ -129,12 +138,17 @@ abstract class BaseBanner extends Transparent implements Colored{
 			$this->setPatterns($item->getPatterns());
 		}
 
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	abstract protected function getSupportingFace() : int;
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if(!$this->canBeSupportedBy($this->getSide($this->getSupportingFace()))){
 			$this->position->getWorld()->useBreakOn($this->position);
 		}

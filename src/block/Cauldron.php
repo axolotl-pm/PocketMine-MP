@@ -25,6 +25,9 @@ namespace pocketmine\block;
 
 use pocketmine\block\tile\Cauldron as TileCauldron;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\WaterHelper;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\Potion;
@@ -35,9 +38,21 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use function assert;
 
-final class Cauldron extends Transparent{
+final class Cauldron extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		place as waterPlace;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
 
 	public function writeStateToWorld() : void{
 		parent::writeStateToWorld();
@@ -94,8 +109,11 @@ final class Cauldron extends Transparent{
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		$world = $this->position->getWorld();
-		if($world->getBlock($this->position->up())->getTypeId() === BlockTypeIds::WATER){
+		$block = $world->getBlock($this->position->up());
+		if(WaterHelper::isWater($block)){
 			$cauldron = VanillaBlocks::WATER_CAULDRON()->setFillLevel(FillableCauldron::MAX_FILL_LEVEL);
 			$world->setBlock($this->position, $cauldron);
 			$world->addSound($this->position->add(0.5, 0.5, 0.5), $cauldron->getFillSound());
