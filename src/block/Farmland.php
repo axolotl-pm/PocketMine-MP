@@ -101,7 +101,7 @@ class Farmland extends Transparent{
 
 	public function getSupportType(int $facing) : SupportType{
 		return match($facing){
-			Facing::UP => SupportType::EDGE,
+			Facing::UP => SupportType::NONE,
 			Facing::DOWN => SupportType::FULL,
 			default => SupportType::NONE,
 		};
