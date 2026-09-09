@@ -125,7 +125,7 @@ class LoginPacketHandler extends PacketHandler{
 				throw new PacketHandlingException("Invalid self-signed key");
 			}
 
-			if($username === ""){ //workaround for player name being empty in offline mode as of 1.26.40+
+			if($username === ""){ //TODO: workaround for player name being empty in offline mode as of 1.26.40+
 				$username = $clientData->ThirdPartyName;
 			}
 
