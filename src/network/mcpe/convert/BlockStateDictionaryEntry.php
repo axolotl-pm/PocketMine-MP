@@ -36,6 +36,9 @@ use function ksort;
 use const SORT_STRING;
 
 final class BlockStateDictionaryEntry{
+	// network ID for minecraft:unknown.
+	private const MINECRAFT_UNKNOWN = -2;
+
 	/**
 	 * @var string[]
 	 * @phpstan-var array<string, string>
@@ -85,7 +88,7 @@ final class BlockStateDictionaryEntry{
 	 */
 	private static function calculateNetworkIdHash(string $stateName, array $stateProperties) : int{
 		if($stateName === "minecraft:unknown"){
-			return -2;
+			return self::MINECRAFT_UNKNOWN;
 		}
 
 		ksort($stateProperties, SORT_STRING);
