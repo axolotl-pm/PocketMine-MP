@@ -21,21 +21,25 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\crafting;
 
-use pocketmine\inventory\SimpleInventory;
-use pocketmine\inventory\TemporaryInventory;
-use pocketmine\world\Position;
+use pocketmine\item\Item;
 
-final class SmithingTableInventory extends SimpleInventory implements BlockInventory, TemporaryInventory{
-	use BlockInventoryTrait;
+/**
+ * Recipe usable in a smithing table. Consumes exactly one item from each of the template, input and addition slots
+ * and produces exactly one output item.
+ */
+interface SmithingRecipe{
 
-	public const SLOT_INPUT = 0;
-	public const SLOT_ADDITION = 1;
-	public const SLOT_TEMPLATE = 2;
+	public function getTemplate() : RecipeIngredient;
 
-	public function __construct(Position $holder){
-		$this->holder = $holder;
-		parent::__construct(3);
-	}
+	public function getInput() : RecipeIngredient;
+
+	public function getAddition() : RecipeIngredient;
+
+	/**
+	 * Returns the item produced for the given items, or null if they don't satisfy the recipe's ingredients.
+	 * Counts of the given items are ignored.
+	 */
+	public function getResultFor(Item $template, Item $input, Item $addition) : ?Item;
 }

@@ -28,7 +28,10 @@ use pocketmine\crafting\FurnaceType;
 use pocketmine\crafting\ShapedRecipe;
 use pocketmine\crafting\ShapelessRecipe;
 use pocketmine\crafting\ShapelessRecipeType;
+use pocketmine\crafting\SmithingTransformRecipe;
+use pocketmine\crafting\SmithingTrimRecipe;
 use pocketmine\network\mcpe\convert\TypeConverter;
+use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\types\recipe\CraftingRecipeBlockName;
 use pocketmine\network\mcpe\protocol\types\recipe\FurnaceRecipeBlockName;
@@ -38,6 +41,8 @@ use pocketmine\network\mcpe\protocol\types\recipe\RecipeUnlockingContext;
 use pocketmine\network\mcpe\protocol\types\recipe\RecipeUnlockingRequirement;
 use pocketmine\network\mcpe\protocol\types\recipe\ShapedRecipe as ProtocolShapedRecipe;
 use pocketmine\network\mcpe\protocol\types\recipe\ShapelessRecipe as ProtocolShapelessRecipe;
+use pocketmine\network\mcpe\protocol\types\recipe\SmithingTransformRecipe as ProtocolSmithingTransformRecipe;
+use pocketmine\network\mcpe\protocol\types\recipe\SmithingTrimRecipe as ProtocolSmithingTrimRecipe;
 use pocketmine\network\mcpe\protocol\types\recipe\StringIdMetaItemDescriptor;
 use pocketmine\timings\Timings;
 use pocketmine\utils\AssumptionFailedError;
@@ -158,6 +163,34 @@ final class CraftingDataCache{
 			}
 		}
 
+		$smithingTransformRecipes = [];
+		$smithingTrimRecipes = [];
+		foreach($manager->getSmithingRecipes() as $index => $recipe){
+			//smithing recipes are looked up by index when the client sends a CraftRecipe action, so the network ID
+			//must be derived from the index in the same way as ItemStackRequestExecutor expects
+			$recipeNetId = $index + InventoryManager::SMITHING_RECIPE_NETWORK_OFFSET;
+			if($recipe instanceof SmithingTransformRecipe){
+				$smithingTransformRecipes[] = new ProtocolSmithingTransformRecipe(
+					Uuid::uuid4()->toString(),
+					$converter->coreRecipeIngredientToNet($recipe->getTemplate()),
+					$converter->coreRecipeIngredientToNet($recipe->getInput()),
+					$converter->coreRecipeIngredientToNet($recipe->getAddition()),
+					$converter->coreItemStackToNet($recipe->getResult()),
+					CraftingRecipeBlockName::SMITHING_TABLE,
+					$recipeNetId
+				);
+			}elseif($recipe instanceof SmithingTrimRecipe){
+				$smithingTrimRecipes[] = new ProtocolSmithingTrimRecipe(
+					Uuid::uuid4()->toString(),
+					$converter->coreRecipeIngredientToNet($recipe->getTemplate()),
+					$converter->coreRecipeIngredientToNet($recipe->getInput()),
+					$converter->coreRecipeIngredientToNet($recipe->getAddition()),
+					CraftingRecipeBlockName::SMITHING_TABLE,
+					$recipeNetId
+				);
+			}
+		}
+
 		$potionTypeRecipes = [];
 		$itemTypeDictionary = $converter->getItemTypeDictionary();
 		foreach($manager->getPotionTypeRecipes() as $recipe){
@@ -200,8 +233,8 @@ final class CraftingDataCache{
 			[],
 			[],
 			[],
-			[],
-			[],
+			$smithingTransformRecipes,
+			$smithingTrimRecipes,
 			$potionTypeRecipes,
 			$potionContainerChangeRecipes,
 			[],

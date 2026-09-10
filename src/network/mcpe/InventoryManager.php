@@ -115,11 +115,14 @@ class InventoryManager{
 
 	private bool $fullSyncRequested = false;
 
+	//TODO: HACK! In Bedrock these indexes go together with regular crafting recipes,
+	//so we make offsets to prevent conflicts.
+	public const ENCHANTING_OPTION_NETWORK_OFFSET = 100000;
+	public const SMITHING_RECIPE_NETWORK_OFFSET = 200000;
+
 	/** @var int[] network recipe ID => enchanting table option index */
 	private array $enchantingTableOptions = [];
-	//TODO: this should be based on the total number of crafting recipes - if there are ever 100k recipes, this will
-	//conflict with regular recipes
-	private int $nextEnchantingTableOptionId = 100000;
+	private int $nextEnchantingTableOptionId = self::ENCHANTING_OPTION_NETWORK_OFFSET;
 
 	public function __construct(
 		private Player $player,
