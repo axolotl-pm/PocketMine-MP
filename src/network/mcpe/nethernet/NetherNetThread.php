@@ -59,6 +59,8 @@ class NetherNetThread extends Thread{
 
 	protected ?string $startupError = null;
 
+	protected int $consumedBytes = 0;
+
 	/**
 	 * @param string   $identityPem    Server identity private key in PEM format.
 	 * @param int|null $lanPort        UDP port for LAN discovery, or null to disable it.
@@ -103,6 +105,14 @@ class NetherNetThread extends Thread{
 		}
 	}
 
+	/**
+	 * Reports how many bytes the main thread has read from the outgoing channel, so that this thread can
+	 * tell how far behind the main thread is and stop reading packets while it catches up.
+	 */
+	public function setConsumedBytes(int $bytes) : void{
+		$this->consumedBytes = $bytes;
+	}
+
 	protected function onRun() : void{
 		\GlobalLogger::set($this->logger);
 
@@ -144,6 +154,7 @@ class NetherNetThread extends Thread{
 		while(!$this->isKilled){
 			$start = microtime(true);
 
+			$listener->setConsumedBytes($this->consumedBytes);
 			$server->tick();
 
 			$this->handleInbound($in, $listener, $advert, $status);

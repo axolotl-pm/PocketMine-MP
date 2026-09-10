@@ -25,8 +25,11 @@ namespace pocketmine\network\mcpe\nethernet;
 
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\snooze\SleeperNotifier;
+use function strlen;
 
 final class NetherNetChannel{
+
+	private int $totalBytes = 0;
 
 	/**
 	 * @phpstan-param ThreadSafeArray<int, string> $buffer
@@ -37,11 +40,31 @@ final class NetherNetChannel{
 	){}
 
 	public function read() : ?string{
-		return $this->buffer->shift();
+		$message = $this->buffer->shift();
+		if($message !== null){
+			$this->totalBytes += strlen($message);
+		}
+
+		return $message;
 	}
 
 	public function write(string $message) : void{
+		$this->totalBytes += strlen($message);
 		$this->buffer[] = $message;
 		$this->notifier?->wakeupSleeper();
+	}
+
+	public function count() : int{
+		return $this->buffer->count();
+	}
+
+	/**
+	 * Total bytes that have passed through this end of the channel.
+	 *
+	 * Each thread holds its own instance over the shared buffer, so neither end can measure the buffer's
+	 * depth in bytes alone. Subtracting the reading end's total from the writing end's gives it.
+	 */
+	public function getTotalBytes() : int{
+		return $this->totalBytes;
 	}
 }

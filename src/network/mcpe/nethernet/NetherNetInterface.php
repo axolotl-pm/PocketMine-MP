@@ -67,6 +67,11 @@ class NetherNetInterface implements NetworkInterface{
 	private const TLS_CERT_FILE = "nethernet-cert.pem";
 	private const TLS_KEY_FILE = "nethernet-key.pem";
 
+	/**
+	 * Messages read between reports of how much of the channel this thread has consumed.
+	 */
+	private const CONSUMPTION_REPORT_INTERVAL = 1024;
+
 	private NetherNetThread $thread;
 
 	private NetherNetChannel $toThread;
@@ -95,7 +100,16 @@ class NetherNetInterface implements NetworkInterface{
 		$sleeperEntry = $this->server->getTickSleeper()->addNotifier(function() : void{
 			Timings::$connection->startTiming();
 			try{
-				while($this->handleMessage());
+				$handled = 0;
+				while($this->handleMessage()){
+					/* Reported mid-drain as well as at the end, because clearing a large backlog can take
+					 * long enough that a total left over from before it started reads as a backlog of its
+					 * own and closes the thread's gate while the queue is in fact draining. */
+					if(++$handled % self::CONSUMPTION_REPORT_INTERVAL === 0){
+						$this->thread->setConsumedBytes($this->fromThread->getTotalBytes());
+					}
+				}
+				$this->thread->setConsumedBytes($this->fromThread->getTotalBytes());
 			}finally{
 				Timings::$connection->stopTiming();
 			}

@@ -35,6 +35,16 @@ use function substr;
 
 final class NetherNetSessionListener implements ServerEventListener{
 
+	/**
+	 * Maximum bytes waiting for the main thread before packets stop being read from sessions.
+	 */
+	private const MAX_BACKLOG_SIZE = 4 * 1024 * 1024;
+
+	/**
+	 * Maximum messages waiting for the main thread before packets stop being read from sessions.
+	 */
+	private const MAX_BACKLOG_MESSAGES = 32768;
+
 	/** @var array<int, Session> */
 	private array $sessions = [];
 
@@ -51,6 +61,8 @@ final class NetherNetSessionListener implements ServerEventListener{
 	 * @var array<int, list<array{int, int}>>
 	 */
 	private array $pendingReceipts = [];
+
+	private int $consumedBytes = 0;
 
 	public function __construct(
 		private readonly NetherNetChannel $out
@@ -69,6 +81,19 @@ final class NetherNetSessionListener implements ServerEventListener{
 			$port,
 			$session->getIdentity()?->publicKey->getDigest() ?? ""
 		));
+	}
+
+	public function canAcceptPackets() : bool{
+		return $this->out->count() < self::MAX_BACKLOG_MESSAGES
+			&& $this->out->getTotalBytes() - $this->consumedBytes < self::MAX_BACKLOG_SIZE;
+	}
+
+	/**
+	 * Reports how much of the channel the main thread has consumed, which is the half of the backlog this
+	 * thread cannot measure on its own.
+	 */
+	public function setConsumedBytes(int $bytes) : void{
+		$this->consumedBytes = $bytes;
 	}
 
 	public function onPacketReceive(Session $session, string $payload, Reliability $reliability) : void{
