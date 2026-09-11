@@ -125,6 +125,19 @@ transport:
       #  username: <username for the TURN server>
       #  password: <password for the TURN server>
 
+    #Enable this when signaling connections arrive through a reverse proxy (nginx, Caddy, Cloudflare).
+    #The server will use the client's actual IP from proxy headers (X-Forwarded-For, X-Real-IP, etc.).
+    #Without this, features requiring the client's real IP (such as TURN relays) will fail.
+    reverse-proxy:
+      enabled: false
+      #Addresses of proxies whose headers are trusted. Spoofed headers from unlisted IPs are ignored.
+      #Leave empty to trust all connections. Only safe if the signaling port is blocked from the outside.
+      #CIDR notation is supported.
+      trusted-ips:
+      #Example:
+      #- 127.0.0.1
+      #- 192.168.0.0/16
+
 debug:
   #If > 1, it will show debug messages in the console
   level: 1

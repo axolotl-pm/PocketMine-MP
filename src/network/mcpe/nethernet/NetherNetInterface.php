@@ -86,6 +86,8 @@ class NetherNetInterface implements NetworkInterface{
 	private array $sessions = [];
 
 	/**
+	 * @phpstan-param ThreadSafeArray<int, string>|null $reverseProxyNetworks
+	 *
 	 * @throws NetworkInterfaceStartException if the identity key cannot be prepared
 	 */
 	public function __construct(
@@ -94,6 +96,7 @@ class NetherNetInterface implements NetworkInterface{
 		int $port,
 		private string $identityKeyFile,
 		NetherNetIceConfiguration $iceConfig,
+		?ThreadSafeArray $reverseProxyNetworks,
 		private PacketBroadcaster $packetBroadcaster,
 		private EntityEventBroadcaster $entityEventBroadcaster,
 		private TypeConverter $typeConverter
@@ -146,6 +149,7 @@ class NetherNetInterface implements NetworkInterface{
 			$this->networkId,
 			!$this->server->getOnlineMode(),
 			$iceConfig,
+			$reverseProxyNetworks,
 			$sleeperEntry
 		);
 	}

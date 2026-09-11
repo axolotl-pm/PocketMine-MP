@@ -60,6 +60,7 @@ use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\EntityEventBroadcaster;
 use pocketmine\network\mcpe\nethernet\NetherNetIceConfiguration;
 use pocketmine\network\mcpe\nethernet\NetherNetInterface;
+use pocketmine\network\mcpe\nethernet\NetherNetThread;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\PacketBroadcaster;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
@@ -1316,6 +1317,9 @@ class Server{
 				$this->configGroup->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE),
 				$this->configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false)
 			);
+			$reverseProxyNetworks = $this->configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_REVERSE_PROXY_ENABLED, false)
+				? NetherNetThread::parseReverseProxyNetworks($this->configGroup->getProperty(Yml::TRANSPORT_NETHERNET_REVERSE_PROXY_TRUSTED_IPS))
+				: null;
 		}catch(\InvalidArgumentException $e){
 			$this->logger->emergency("Invalid NetherNet settings in pocketmine.yml: " . $e->getMessage()); //TODO: Translations
 			return false;
@@ -1326,7 +1330,7 @@ class Server{
 		}
 
 		try{
-			$this->network->registerInterface(new NetherNetInterface($this, $ip, $port, $keyFile, $iceConfig, $packetBroadcaster, $entityEventBroadcaster, $typeConverter));
+			$this->network->registerInterface(new NetherNetInterface($this, $ip, $port, $keyFile, $iceConfig, $reverseProxyNetworks, $packetBroadcaster, $entityEventBroadcaster, $typeConverter));
 		}catch(NetworkInterfaceStartException $e){
 			$this->logger->emergency($this->language->translate(KnownTranslationFactory::pocketmine_server_networkStartFailed(
 				$ip,

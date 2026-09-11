@@ -40,12 +40,18 @@ use pocketmine\nethernet\NetherNetServer;
 use pocketmine\nethernet\ServerConfiguration;
 use pocketmine\nethernet\signaling\http\HttpSignaling;
 use pocketmine\nethernet\signaling\http\MutableServerStatusProvider;
+use pocketmine\nethernet\signaling\http\ReverseProxy;
 use pocketmine\nethernet\signaling\SignalingException;
 use pocketmine\network\NetworkInterfaceStartException;
 use pocketmine\snooze\SleeperHandlerEntry;
 use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\thread\Thread;
 use pocketmine\thread\ThreadCrashException;
+use pocketmine\utils\Utils;
+use function array_values;
+use function get_debug_type;
+use function is_array;
+use function is_string;
 use function microtime;
 use function ord;
 use function time_sleep_until;
@@ -64,13 +70,9 @@ class NetherNetThread extends Thread{
 	protected int $consumedBytes = 0;
 
 	/**
-	 * @param string   $identityPem    Server identity private key in PEM format.
-	 * @param int|null $lanPort        UDP port for LAN discovery, or null to disable it.
-	 * @param int      $networkId      Unique network ID for LAN discovery.
-	 * @param bool     $allowAnonymous Whether to accept peers that present no identity assertion.
-	 *
 	 * @phpstan-param ThreadSafeArray<int, string> $mainToThread
 	 * @phpstan-param ThreadSafeArray<int, string> $threadToMain
+	 * @phpstan-param ThreadSafeArray<int, string>|null $reverseProxyNetworks
 	 */
 	public function __construct(
 		protected ThreadSafeLogger $logger,
@@ -85,8 +87,43 @@ class NetherNetThread extends Thread{
 		protected int $networkId,
 		protected bool $allowAnonymous,
 		protected NetherNetIceConfiguration $iceConfig,
+		protected ?ThreadSafeArray $reverseProxyNetworks,
 		protected SleeperHandlerEntry $sleeperEntry
 	){}
+
+	/**
+	 * @phpstan-param list<string> $networks
+	 */
+	private static function createReverseProxy(array $networks) : ReverseProxy{
+		return new ReverseProxy(
+			[ReverseProxy::HEADER_FORWARDED_FOR, ReverseProxy::HEADER_REAL_IP, ReverseProxy::HEADER_CF_CONNECTING_IP],
+			$networks
+		);
+	}
+
+	/**
+	 * @phpstan-return ThreadSafeArray<int, string>
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	public static function parseReverseProxyNetworks(mixed $trustedIps) : ThreadSafeArray{
+		if($trustedIps === null){
+			$trustedIps = [];
+		}elseif(!is_array($trustedIps)){
+			throw new \InvalidArgumentException("Trusted IPs must be a list of addresses or CIDR blocks, got " . get_debug_type($trustedIps));
+		}
+
+		$networks = [];
+		foreach(Utils::promoteKeys($trustedIps) as $index => $entry){
+			if(!is_string($entry) || $entry === ""){
+				throw new \InvalidArgumentException("Trusted IPs entry $index must be an address or CIDR block, got " . get_debug_type($entry));
+			}
+			$networks[] = $entry;
+		}
+		self::createReverseProxy($networks);
+
+		return ThreadSafeArray::fromArray($networks);
+	}
 
 	/**
 	 * @throws NetworkInterfaceStartException
@@ -209,7 +246,17 @@ class NetherNetThread extends Thread{
 		$tlsContext = $this->tlsCertFile !== null && $this->tlsKeyFile !== null
 			? ["local_cert" => $this->tlsCertFile, "local_pk" => $this->tlsKeyFile]
 			: null;
-		$server->addSignaling(new HttpSignaling($server->getNegotiator(), $this->ip, $this->port, $tlsContext, $this->logger, statusProvider: $status));
+		$reverseProxy = $this->reverseProxyNetworks !== null ? self::createReverseProxy(array_values((array) $this->reverseProxyNetworks)) : null;
+		$server->addSignaling(new HttpSignaling(
+			$server->getNegotiator(),
+			$this->ip,
+			$this->port,
+			$tlsContext,
+			$this->logger,
+			HttpSignaling::DEFAULT_MAX_CONNECTIONS,
+			$status,
+			$reverseProxy
+		));
 
 		if($lanPort !== null){
 			$server->addSignaling(new LanSignaling(
