@@ -32,39 +32,43 @@ class SmithingTransaction extends InventoryTransaction{
 
 	public function __construct(
 		Player $source,
-		private readonly SmithingRecipe $recipe
+		private readonly SmithingRecipe $recipe,
+		private readonly Item $template,
+		private readonly Item $input,
+		private readonly Item $addition
 	){
 		parent::__construct($source);
 	}
 
 	public function getRecipe() : SmithingRecipe{ return $this->recipe; }
 
+	public function getTemplate() : Item{ return clone $this->template; }
+
+	public function getInput() : Item{ return clone $this->input; }
+
+	public function getAddition() : Item{ return clone $this->addition; }
+
 	/**
-	 * Tries to assign the given items to the recipe's template, input and addition slots, returning the recipe's
-	 * result for that assignment. The items received from the client are unordered, so every permutation is tried.
+	 * @param Item[] $consumedItems
+	 * @phpstan-param list<Item> $consumedItems
 	 *
-	 * @param Item[] $items
-	 * @phpstan-param list<Item> $items
+	 * @throws TransactionValidationException
 	 */
-	private function matchInputs(array $items) : ?Item{
-		foreach($items as $i => $template){
-			foreach($items as $j => $input){
-				if($j === $i){
-					continue;
-				}
-				foreach($items as $k => $addition){
-					if($k === $i || $k === $j){
-						continue;
-					}
-					$result = $this->recipe->getResultFor($template, $input, $addition);
-					if($result !== null){
-						return $result;
-					}
+	private function validateConsumedItems(array $consumedItems) : void{
+		$expectedItems = [$this->template, $this->input, $this->addition];
+		foreach($consumedItems as $consumedItem){
+			if($consumedItem->getCount() !== 1){
+				throw new TransactionValidationException("Expected exactly 1 " . $consumedItem->getName() . " to be consumed, got " . $consumedItem->getCount());
+			}
+			foreach($expectedItems as $key => $expectedItem){
+				if($consumedItem->canStackWith($expectedItem)){
+					unset($expectedItems[$key]);
+					continue 2;
 				}
 			}
-		}
 
-		return null;
+			throw new TransactionValidationException("Item " . $consumedItem->getName() . " is not in the smithing table");
+		}
 	}
 
 	public function validate() : void{
@@ -72,34 +76,27 @@ class SmithingTransaction extends InventoryTransaction{
 			throw new TransactionValidationException("Transaction must have at least one action to be executable");
 		}
 
-		$inputs = [];
-		$outputs = [];
+		$createdItems = [];
+		$consumedItems = [];
 		//matchItems() can't be used here - the result may stack with one of the inputs, e.g. re-applying the trim an
 		//armour piece already has
-		$this->separateCreatedAndConsumedItems($outputs, $inputs);
+		$this->separateCreatedAndConsumedItems($createdItems, $consumedItems);
 
-		if(($inputCount = count($inputs)) !== 3){
-			throw new TransactionValidationException("Expected exactly 3 input items, got $inputCount");
+		if(($consumedCount = count($consumedItems)) !== 3){
+			throw new TransactionValidationException("Expected exactly 3 items to be consumed, got $consumedCount");
 		}
-		if(($outputCount = count($outputs)) !== 1){
-			throw new TransactionValidationException("Expected exactly 1 output item, got $outputCount");
-		}
-		foreach($inputs as $input){
-			if($input->getCount() !== 1){
-				throw new TransactionValidationException("Expected exactly 1 of each input item to be consumed, got " . $input->getCount() . " of " . $input->getName());
-			}
-		}
+		$this->validateConsumedItems($consumedItems);
 
-		$expectedOutput = $this->matchInputs($inputs);
-		if($expectedOutput === null){
-			throw new TransactionValidationException("The given input items don't match the recipe's ingredients");
+		if(($createdCount = count($createdItems)) !== 1){
+			throw new TransactionValidationException("Expected exactly 1 item to be created, got $createdCount");
+		}
+		$createdItem = $createdItems[0];
+		if($createdItem->getCount() !== 1){
+			throw new TransactionValidationException("Expected exactly 1 item to be created, got " . $createdItem->getCount());
 		}
 
-		$output = $outputs[0];
-		if($output->getCount() !== 1){
-			throw new TransactionValidationException("Expected exactly 1 output item, got " . $output->getCount());
-		}
-		if(!$expectedOutput->equalsExact($output)){
+		$expectedResult = $this->recipe->getResultFor($this->template, $this->input, $this->addition);
+		if($expectedResult === null || !$expectedResult->equalsExact($createdItem)){
 			throw new TransactionValidationException("Invalid output item");
 		}
 	}

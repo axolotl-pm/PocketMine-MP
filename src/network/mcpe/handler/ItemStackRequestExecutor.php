@@ -306,16 +306,16 @@ class ItemStackRequestExecutor{
 			throw new ItemStackRequestProcessException("No such smithing recipe index: $recipeIndex");
 		}
 
-		$result = $recipe->getResultFor(
-			$window->getItem(SmithingTableInventory::SLOT_TEMPLATE),
-			$window->getItem(SmithingTableInventory::SLOT_INPUT),
-			$window->getItem(SmithingTableInventory::SLOT_ADDITION)
-		);
+		$template = $window->getItem(SmithingTableInventory::SLOT_TEMPLATE);
+		$input = $window->getItem(SmithingTableInventory::SLOT_INPUT);
+		$addition = $window->getItem(SmithingTableInventory::SLOT_ADDITION);
+
+		$result = $recipe->getResultFor($template, $input, $addition);
 		if($result === null){
 			throw new ItemStackRequestProcessException("Smithing table contents don't match the ingredients of recipe index $recipeIndex");
 		}
 
-		$this->specialTransaction = new SmithingTransaction($this->player, $recipe);
+		$this->specialTransaction = new SmithingTransaction($this->player, $recipe, $template, $input, $addition);
 		$this->setNextCreatedItem($result);
 	}
 
