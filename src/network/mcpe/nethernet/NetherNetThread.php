@@ -78,6 +78,7 @@ class NetherNetThread extends Thread{
 		protected ThreadSafeLogger $logger,
 		protected ThreadSafeArray $mainToThread,
 		protected ThreadSafeArray $threadToMain,
+		protected int $maxMtu,
 		protected string $ip,
 		protected int $port,
 		protected string $identityPem,
@@ -236,7 +237,8 @@ class NetherNetThread extends Thread{
 					iceServers: $iceServers,
 					portRangeBegin: $this->iceConfig->getPortRangeBegin(),
 					portRangeEnd: $this->iceConfig->getPortRangeEnd(),
-					iceUdpMuxEnabled: $this->iceConfig->isUdpMux()
+					iceUdpMuxEnabled: $this->iceConfig->isUdpMux(),
+					mtu: $this->maxMtu
 				),
 				logger: $this->logger
 			),

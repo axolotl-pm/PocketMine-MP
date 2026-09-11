@@ -47,6 +47,7 @@ use pocketmine\thread\ThreadCrashException;
 use pocketmine\timings\Timings;
 use pocketmine\utils\Filesystem;
 use pocketmine\utils\Utils;
+use pocketmine\YmlServerProperties;
 use Symfony\Component\Filesystem\Path;
 use function bin2hex;
 use function chmod;
@@ -140,6 +141,7 @@ class NetherNetInterface implements NetworkInterface{
 			$this->server->getLogger(),
 			$mainToThread,
 			$threadToMain,
+			$this->server->getConfigGroup()->getPropertyInt(YmlServerProperties::NETWORK_MAX_MTU_SIZE, 1492),
 			$ip,
 			$port,
 			$identityPem,

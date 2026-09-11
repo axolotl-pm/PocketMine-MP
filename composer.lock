@@ -196,12 +196,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/NetherNet.git",
-                "reference": "5b666701cdb9b753673b5ab4c3b55abd00f27af2"
+                "reference": "db3aaae63bf52d9b5467ff946bf35a9b4a6728ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/NetherNet/zipball/5b666701cdb9b753673b5ab4c3b55abd00f27af2",
-                "reference": "5b666701cdb9b753673b5ab4c3b55abd00f27af2",
+                "url": "https://api.github.com/repos/axolotl-pm/NetherNet/zipball/db3aaae63bf52d9b5467ff946bf35a9b4a6728ec",
+                "reference": "db3aaae63bf52d9b5467ff946bf35a9b4a6728ec",
                 "shasum": ""
             },
             "require": {
@@ -238,7 +238,7 @@
                 "issues": "https://github.com/axolotl-pm/NetherNet/issues",
                 "source": "https://github.com/axolotl-pm/NetherNet/tree/master"
             },
-            "time": "2026-09-11T12:41:55+00:00"
+            "time": "2026-09-11T17:17:05+00:00"
         },
         {
             "name": "axolotl-pm/xoroshiro128pp",
