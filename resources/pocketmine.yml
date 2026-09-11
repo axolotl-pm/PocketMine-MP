@@ -95,6 +95,36 @@ transport:
     #Changing this file will prompt players to re-verify on their next connection.
     key-file: nethernet.key
 
+    #Whether to enable ICE UDP multiplexing.
+    #Setting this to true will make connections share one UDP socket, so a single forwarded
+    #port handles all of them.
+    #Useful when you have only a few ports available.
+    #The shared socket only gets a fixed port if port-range below names a single port. Without
+    #one, the operating system picks a different port every time the server starts.
+    #NOTE: TURN servers cannot be used with this setting.
+    ice-udp-mux: false
+
+    #UDP port range for connections.
+    #Parsed as [min, max], e.g. [19132, 19140]. Leave empty to use any available port.
+    port-range:
+
+    #ICE servers to enable STUN/TURN relay.
+    #This is an advanced option. Do not modify unless you know what you're doing.
+    #Every server listed here has to be contacted before a join can be answered, so each one
+    #delays every connection, and an unreachable one holds joins up until gathering times out.
+    ice-servers:
+      #You can specify a list of STUN/TURN ICE servers here.
+      #port may be omitted, in which case 3478 is used.
+      #Example:
+      #- type: stun
+      #  host: stun.example.com
+      #  port: 3478
+      #- type: turn
+      #  host: turn.example.com
+      #  port: 3478
+      #  username: <username for the TURN server>
+      #  password: <password for the TURN server>
+
 debug:
   #If > 1, it will show debug messages in the console
   level: 1

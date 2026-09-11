@@ -58,6 +58,7 @@ use pocketmine\network\mcpe\compression\ZlibCompressor;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\EntityEventBroadcaster;
+use pocketmine\network\mcpe\nethernet\NetherNetIceConfiguration;
 use pocketmine\network\mcpe\nethernet\NetherNetInterface;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\PacketBroadcaster;
@@ -1310,7 +1311,22 @@ class Server{
 		$port = $this->getPort();
 		$keyFile = $this->configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_KEY_FILE, "nethernet.key");
 		try{
-			$this->network->registerInterface(new NetherNetInterface($this, $ip, $port, $keyFile, $packetBroadcaster, $entityEventBroadcaster, $typeConverter));
+			$iceConfig = NetherNetIceConfiguration::parse(
+				$this->configGroup->getProperty(Yml::TRANSPORT_NETHERNET_ICE_SERVERS),
+				$this->configGroup->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE),
+				$this->configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false)
+			);
+		}catch(\InvalidArgumentException $e){
+			$this->logger->emergency("Invalid NetherNet settings in pocketmine.yml: " . $e->getMessage()); //TODO: Translations
+			return false;
+		}
+		if($iceConfig->isUdpMux() && $iceConfig->getPortRangeBegin() === null){
+			//without a range the shared socket lands on whatever port the OS hands out, which defeats the point of muxing
+			$this->logger->warning("ICE UDP multiplexing is enabled without a port range, so connections will share a port picked at random on every startup. Set \"" . Yml::TRANSPORT_NETHERNET_PORT_RANGE . "\" to a single port to keep it stable"); //TODO: Translations
+		}
+
+		try{
+			$this->network->registerInterface(new NetherNetInterface($this, $ip, $port, $keyFile, $iceConfig, $packetBroadcaster, $entityEventBroadcaster, $typeConverter));
 		}catch(NetworkInterfaceStartException $e){
 			$this->logger->emergency($this->language->translate(KnownTranslationFactory::pocketmine_server_networkStartFailed(
 				$ip,

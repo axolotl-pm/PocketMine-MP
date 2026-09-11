@@ -93,6 +93,7 @@ class NetherNetInterface implements NetworkInterface{
 		string $ip,
 		int $port,
 		private string $identityKeyFile,
+		NetherNetIceConfiguration $iceConfig,
 		private PacketBroadcaster $packetBroadcaster,
 		private EntityEventBroadcaster $entityEventBroadcaster,
 		private TypeConverter $typeConverter
@@ -144,6 +145,7 @@ class NetherNetInterface implements NetworkInterface{
 			LanSignaling::DEFAULT_PORT, //TODO: should this be configurable?
 			$this->networkId,
 			!$this->server->getOnlineMode(),
+			$iceConfig,
 			$sleeperEntry
 		);
 	}

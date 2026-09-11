@@ -27,12 +27,14 @@ use pmmp\encoding\ByteBufferReader;
 use pmmp\encoding\VarInt;
 use pmmp\thread\Thread as NativeThread;
 use pmmp\thread\ThreadSafeArray;
+use pmmp\webrtc\IceServer;
 use pocketmine\nethernet\discovery\LanSignaling;
 use pocketmine\nethernet\discovery\MutableServerDataProvider;
 use pocketmine\nethernet\discovery\ServerData;
 use pocketmine\nethernet\identity\AssertionIdentityVerifier;
 use pocketmine\nethernet\identity\SelfSignedIdentityProvider;
 use pocketmine\nethernet\identity\ServerIdentity;
+use pocketmine\nethernet\negotiation\ConfiguredPeerConnectionFactory;
 use pocketmine\nethernet\NetherNetException;
 use pocketmine\nethernet\NetherNetServer;
 use pocketmine\nethernet\ServerConfiguration;
@@ -82,6 +84,7 @@ class NetherNetThread extends Thread{
 		protected ?int $lanPort,
 		protected int $networkId,
 		protected bool $allowAnonymous,
+		protected NetherNetIceConfiguration $iceConfig,
 		protected SleeperHandlerEntry $sleeperEntry
 	){}
 
@@ -136,7 +139,7 @@ class NetherNetThread extends Thread{
 				$server = $this->createServer($listener, $advert, $status, null);
 				$server->start();
 			}
-		}catch(NetherNetException $e){
+		}catch(NetherNetException|\InvalidArgumentException $e){
 			$this->synchronized(function() use ($e) : void{
 				$this->startupError = $e->getMessage();
 				$this->ready = true;
@@ -178,12 +181,26 @@ class NetherNetThread extends Thread{
 
 	/**
 	 * @throws NetherNetException
+	 * @throws \InvalidArgumentException
 	 */
 	private function createServer(NetherNetSessionListener $listener, MutableServerDataProvider $advert, MutableServerStatusProvider $status, ?int $lanPort) : NetherNetServer{
+		$iceServers = [];
+		foreach($this->iceConfig->getServers() as $iceServer){
+			$iceServers[] = $iceServer->isTurn()
+				? IceServer::turn($iceServer->getHost(), $iceServer->getPort(), $iceServer->getUsername(), $iceServer->getPassword())
+				: IceServer::stun($iceServer->getHost(), $iceServer->getPort());
+		}
+
 		$server = NetherNetServer::create(
 			new ServerConfiguration(
 				identityProvider: new SelfSignedIdentityProvider(ServerIdentity::fromPrivateKeyPem($this->identityPem)),
 				identityVerifier: new AssertionIdentityVerifier(allowAnonymous: $this->allowAnonymous),
+				peerConnectionFactory: new ConfiguredPeerConnectionFactory(
+					iceServers: $iceServers,
+					portRangeBegin: $this->iceConfig->getPortRangeBegin(),
+					portRangeEnd: $this->iceConfig->getPortRangeEnd(),
+					iceUdpMuxEnabled: $this->iceConfig->isUdpMux()
+				),
 				logger: $this->logger
 			),
 			$listener

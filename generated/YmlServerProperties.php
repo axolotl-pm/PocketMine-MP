@@ -111,6 +111,9 @@ final class YmlServerProperties{
 	public const TRANSPORT = 'transport';
 	public const TRANSPORT_NAME = 'transport.name';
 	public const TRANSPORT_NETHERNET = 'transport.nethernet';
+	public const TRANSPORT_NETHERNET_ICE_SERVERS = 'transport.nethernet.ice-servers';
+	public const TRANSPORT_NETHERNET_ICE_UDP_MUX = 'transport.nethernet.ice-udp-mux';
 	public const TRANSPORT_NETHERNET_KEY_FILE = 'transport.nethernet.key-file';
+	public const TRANSPORT_NETHERNET_PORT_RANGE = 'transport.nethernet.port-range';
 	public const WORLDS = 'worlds';
 }
