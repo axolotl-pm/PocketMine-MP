@@ -113,6 +113,7 @@ namespace pocketmine {
 			"reflection" => "Reflection",
 			"sockets" => "Sockets",
 			"spl" => "SPL",
+			"webrtc" => "axolotl-pm/ext-webrtc",
 			"yaml" => "YAML",
 			"zip" => "Zip",
 			"zlib" => "Zlib"
@@ -159,6 +160,12 @@ namespace pocketmine {
 		if(($encoding_version = phpversion("encoding")) !== false){
 			if(version_compare($encoding_version, "1.0.0") < 0 || version_compare($encoding_version, "2.0.0") >= 0){
 				$messages[] = "pmmp/ext-encoding ^1.0.0 is required, while you have $encoding_version.";
+			}
+		}
+
+		if(($webrtc_version = phpversion("webrtc")) !== false){
+			if(version_compare($webrtc_version, "0.2.0") < 0 || version_compare($webrtc_version, "0.3.0") >= 0){
+				$messages[] = "axolotl-pm/ext-webrtc ^0.2.0 is required, while you have $webrtc_version.";
 			}
 		}
 
