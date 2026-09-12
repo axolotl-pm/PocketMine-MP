@@ -173,7 +173,7 @@ class NetherNetThread extends Thread{
 					throw $e;
 				}
 
-				$this->logger->warning("Unable to start LAN discovery"); //TODO: Translations
+				$this->logger->warning("Unable to start LAN discovery");
 				$server = $this->createServer($listener, $advert, $status, null);
 				$server->start();
 			}

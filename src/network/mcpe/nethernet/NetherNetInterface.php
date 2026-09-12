@@ -131,7 +131,7 @@ class NetherNetInterface implements NetworkInterface{
 
 		[$certificate, $key] = $this->findTlsFiles();
 		if($certificate !== null && $key !== null){
-			$this->server->getLogger()->notice("NetherNet signaling over TLS is enabled. We recommend using a reverse proxy for production use.");
+			$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_tls_enabled()));
 		}
 
 		$identityPem = $this->loadOrCreateIdentityPem();
@@ -200,7 +200,7 @@ class NetherNetInterface implements NetworkInterface{
 		try{
 			Filesystem::safeFilePutContents($path, $pem);
 		}catch(\RuntimeException $e){
-			$this->server->getLogger()->warning("Could not save the NetherNet identity key to $path; players will be prompted again after a restart.");
+			$this->server->getLogger()->warning($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_identityKeySaveFailed($path)));
 		}finally{
 			umask($previousUmask);
 		}
@@ -219,7 +219,7 @@ class NetherNetInterface implements NetworkInterface{
 		$key = Path::join($this->server->getDataPath(), self::TLS_KEY_FILE);
 
 		if(!is_file($certificate) || !is_file($key)){
-			$this->server->getLogger()->notice("NetherNet signaling is being served over plain HTTP. Consider configuring TLS certificate and key files.");
+			$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_tls_disabled()));
 			return [null, null];
 		}
 

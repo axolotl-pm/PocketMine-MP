@@ -1282,7 +1282,7 @@ class Server{
 				)));
 				return false;
 			}
-			$this->getLogger()->warning("RakNet has been deprecated, consider switching over NetherNet"); //TODO: Translations
+			$this->getLogger()->warning($this->language->translate(KnownTranslationFactory::pocketmine_server_raknet_deprecated()));
 		}
 		if($rakLibRegistered){
 			$this->logger->info($this->language->translate(KnownTranslationFactory::pocketmine_server_networkStart($prettyIp, (string) $port)));
@@ -1303,11 +1303,6 @@ class Server{
 		EntityEventBroadcaster $entityEventBroadcaster,
 		TypeConverter $typeConverter
 	) : bool{
-		if(!extension_loaded("webrtc")){
-			$this->logger->emergency("NetherNet transport requires the ext-webrtc extension"); //TODO: Translations
-			return false;
-		}
-
 		$ip = $this->getIp();
 		$port = $this->getPort();
 		$keyFile = $this->configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_KEY_FILE, "nethernet.key");
@@ -1321,12 +1316,12 @@ class Server{
 				? NetherNetThread::parseReverseProxyNetworks($this->configGroup->getProperty(Yml::TRANSPORT_NETHERNET_REVERSE_PROXY_TRUSTED_IPS))
 				: null;
 		}catch(\InvalidArgumentException $e){
-			$this->logger->emergency("Invalid NetherNet settings in pocketmine.yml: " . $e->getMessage()); //TODO: Translations
+			$this->logger->emergency($this->language->translate(KnownTranslationFactory::pocketmine_server_nethernet_invalidSettings($e->getMessage())));
 			return false;
 		}
 		if($iceConfig->isUdpMux() && $iceConfig->getPortRangeBegin() === null){
 			//without a range the shared socket lands on whatever port the OS hands out, which defeats the point of muxing
-			$this->logger->warning("ICE UDP multiplexing is enabled without a port range, so connections will share a port picked at random on every startup. Set \"" . Yml::TRANSPORT_NETHERNET_PORT_RANGE . "\" to a single port to keep it stable"); //TODO: Translations
+			$this->logger->warning($this->language->translate(KnownTranslationFactory::pocketmine_server_nethernet_udpMuxWithoutPortRange(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX)));
 		}
 
 		try{
@@ -1339,7 +1334,7 @@ class Server{
 			)));
 			return false;
 		}
-		$this->logger->info("NetherNet signaling listening on $ip:$port (TCP)"); //TODO: Translations
+		$this->logger->info($this->language->translate(KnownTranslationFactory::pocketmine_server_nethernet_signalingStart($ip, (string) $port, "TCP")));
 
 		return true;
 	}
@@ -1351,10 +1346,10 @@ class Server{
 			$this->configGroup->getPropertyString(Yml::TRANSPORT_NAME, Transport::RAKNET->value)
 		);
 		foreach($unknownTransports as $name){
-			$this->logger->warning("Ignoring unknown transport \"$name\" under \"" . Yml::TRANSPORT_NAME . "\" in pocketmine.yml"); //TODO: Translations
+			$this->logger->warning($this->language->translate(KnownTranslationFactory::pocketmine_server_transport_unknown($name)));
 		}
 		if(count($transports) === 0){
-			$this->logger->emergency("No usable transport is configured; set \"" . Yml::TRANSPORT_NAME . "\" in pocketmine.yml"); //TODO: Translations
+			$this->logger->emergency($this->language->translate(KnownTranslationFactory::pocketmine_server_transport_noneConfigured()));
 			return false;
 		}
 

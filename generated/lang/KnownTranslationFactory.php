@@ -2849,6 +2849,40 @@ final class KnownTranslationFactory{
 		]);
 	}
 
+``	public static function pocketmine_server_nethernet_identityKeySaveFailed(Translatable|string $param0) : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_IDENTITYKEYSAVEFAILED, [
+			0 => $param0,
+		]);
+	}
+
+	public static function pocketmine_server_nethernet_invalidSettings(Translatable|string $param0) : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_INVALIDSETTINGS, [
+			0 => $param0,
+		]);
+	}
+
+	public static function pocketmine_server_nethernet_signalingStart(Translatable|string $param0, Translatable|string $param1, Translatable|string $param2) : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_SIGNALINGSTART, [
+			0 => $param0,
+			1 => $param1,
+			2 => $param2,
+		]);
+	}
+
+	public static function pocketmine_server_nethernet_tls_disabled() : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_TLS_DISABLED, []);
+	}
+
+	public static function pocketmine_server_nethernet_tls_enabled() : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_TLS_ENABLED, []);
+	}
+
+	public static function pocketmine_server_nethernet_udpMuxWithoutPortRange(Translatable|string $param0) : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_UDPMUXWITHOUTPORTRANGE, [
+			0 => $param0,
+		]);
+	}
+
 	public static function pocketmine_server_networkStart(Translatable|string $param0, Translatable|string $param1) : Translatable{
 		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETWORKSTART, [
 			0 => $param0,
@@ -2891,6 +2925,10 @@ final class KnownTranslationFactory{
 		]);
 	}
 
+	public static function pocketmine_server_raknet_deprecated() : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_RAKNET_DEPRECATED, []);
+	}
+
 	public static function pocketmine_server_start(Translatable|string $param0) : Translatable{
 		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_START, [
 			0 => $param0,
@@ -2905,6 +2943,16 @@ final class KnownTranslationFactory{
 
 	public static function pocketmine_server_tickOverload() : Translatable{
 		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_TICKOVERLOAD, []);
+	}
+
+	public static function pocketmine_server_transport_noneConfigured() : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_TRANSPORT_NONECONFIGURED, []);
+	}
+
+	public static function pocketmine_server_transport_unknown(Translatable|string $param0) : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_TRANSPORT_UNKNOWN, [
+			0 => $param0,
+		]);
 	}
 
 	public static function pocketmine_server_url_bugReporting(Translatable|string $bugReportingUrl) : Translatable{
