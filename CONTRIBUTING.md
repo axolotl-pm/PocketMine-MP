@@ -6,7 +6,7 @@ Larger contributions like feature additions should be preceded by a [Change Prop
 
 > [!TIP]
 > Want to contribute (non-English) translations? Visit our
-> [Crowdin Translation Project](https://crowdin.com/project/pocketmine) instead.
+> [Weblate Translation Project](https://translate.axolotl-pm.org) instead.
 >
 > Translations need to go through a different review process, so we can't accept changes to them in PRs.
 

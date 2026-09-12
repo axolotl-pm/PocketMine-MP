@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup PHP
-        uses: pmmp/setup-php-action@3.2.0
+        uses: axolotl-pm/setup-php-action@b8c3f9add4f2ad4a5e2624a1112aba899ee8db0e
         with:
           php-version: ${{ inputs.php }}
           install-path: "./bin"
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup PHP
-        uses: pmmp/setup-php-action@3.2.0
+        uses: axolotl-pm/setup-php-action@b8c3f9add4f2ad4a5e2624a1112aba899ee8db0e
         with:
           php-version: ${{ inputs.php }}
           install-path: "./bin"
@@ -96,7 +96,7 @@ jobs:
           submodules: true
 
       - name: Setup PHP
-        uses: pmmp/setup-php-action@3.2.0
+        uses: axolotl-pm/setup-php-action@b8c3f9add4f2ad4a5e2624a1112aba899ee8db0e
         with:
           php-version: ${{ inputs.php }}
           install-path: "./bin"
@@ -128,7 +128,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup PHP
-        uses: pmmp/setup-php-action@3.2.0
+        uses: axolotl-pm/setup-php-action@b8c3f9add4f2ad4a5e2624a1112aba899ee8db0e
         with:
           php-version: ${{ inputs.php }}
           install-path: "./bin"
