@@ -260,7 +260,9 @@ class CraftingTransaction extends InventoryTransaction{
 			throw new TransactionValidationException("Transaction must have at least one action to be executable");
 		}
 
-		$this->matchItems($this->outputs, $this->inputs);
+		//matchItems() can't be used here - a recipe's result may stack with its own ingredients, e.g. duplicating a
+		//smithing template consumes 1 template and produces 2
+		$this->separateCreatedAndConsumedItems($this->outputs, $this->inputs);
 
 		if($this->recipe === null){
 			$failed = 0;
