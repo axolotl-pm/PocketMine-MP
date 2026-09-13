@@ -48,18 +48,10 @@ final class NetherNetSessionListener implements ServerEventListener{
 	/** @var array<int, Session> */
 	private array $sessions = [];
 
-	/**
-	 * Total bytes queued per session.
-	 *
-	 * @var array<int, int>
-	 */
+	/** @phpstan-var array<int, int> */
 	private array $queuedBytes = [];
 
-	/**
-	 * Pending ACK receipts mapped by session ID and tracking watermark.
-	 *
-	 * @var array<int, list<array{int, int}>>
-	 */
+	/** @phpstan-var array<int, list<array{int, int}>> */
 	private array $pendingReceipts = [];
 
 	private int $consumedBytes = 0;
@@ -88,10 +80,6 @@ final class NetherNetSessionListener implements ServerEventListener{
 			&& $this->out->getTotalBytes() - $this->consumedBytes < self::MAX_BACKLOG_SIZE;
 	}
 
-	/**
-	 * Reports how much of the channel the main thread has consumed, which is the half of the backlog this
-	 * thread cannot measure on its own.
-	 */
 	public function setConsumedBytes(int $bytes) : void{
 		$this->consumedBytes = $bytes;
 	}
@@ -131,9 +119,6 @@ final class NetherNetSessionListener implements ServerEventListener{
 		($this->sessions[$sessionId] ?? null)?->initiateDisconnect($reason);
 	}
 
-	/**
-	 * Checks and dispatches ACK receipts for packets that have cleared the send buffer.
-	 */
 	public function flushReceipts() : void{
 		foreach($this->pendingReceipts as $sessionId => $pending){
 			if(count($pending) === 0){

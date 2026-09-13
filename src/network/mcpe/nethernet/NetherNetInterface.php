@@ -63,7 +63,7 @@ use function umask;
 use function unpack;
 use const PHP_INT_MAX;
 
-class NetherNetInterface implements NetworkInterface{
+final class NetherNetInterface implements NetworkInterface{
 
 	private const TLS_CERT_FILE = "nethernet-cert.pem";
 	private const TLS_KEY_FILE = "nethernet-key.pem";
@@ -107,9 +107,6 @@ class NetherNetInterface implements NetworkInterface{
 			try{
 				$handled = 0;
 				while($this->handleMessage()){
-					/* Reported mid-drain as well as at the end, because clearing a large backlog can take
-					 * long enough that a total left over from before it started reads as a backlog of its
-					 * own and closes the thread's gate while the queue is in fact draining. */
 					if(++$handled % self::CONSUMPTION_REPORT_INTERVAL === 0){
 						$this->thread->setConsumedBytes($this->fromThread->getTotalBytes());
 					}
@@ -163,8 +160,6 @@ class NetherNetInterface implements NetworkInterface{
 	}
 
 	/**
-	 * Loads the NetherNet server identity private key from disk, or generates and saves a new one.
-	 *
 	 * @throws NetworkInterfaceStartException
 	 */
 	private function loadOrCreateIdentityPem() : string{
@@ -210,9 +205,7 @@ class NetherNetInterface implements NetworkInterface{
 	}
 
 	/**
-	 * Locates TLS certificate and key files in the data directory if present.
-	 *
-	 * @return array{?string, ?string}
+	 * @phpstan-return array{?string, ?string}
 	 */
 	private function findTlsFiles() : array{
 		$certificate = Path::join($this->server->getDataPath(), self::TLS_CERT_FILE);

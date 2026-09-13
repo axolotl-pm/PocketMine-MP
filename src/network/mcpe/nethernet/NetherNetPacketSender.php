@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\nethernet;
 
 use pocketmine\network\mcpe\PacketSender;
 
-class NetherNetPacketSender implements PacketSender{
+final class NetherNetPacketSender implements PacketSender{
 	private bool $closed = false;
 
 	public function __construct(

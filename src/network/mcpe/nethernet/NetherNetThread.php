@@ -56,7 +56,7 @@ use function microtime;
 use function ord;
 use function time_sleep_until;
 
-class NetherNetThread extends Thread{
+final class NetherNetThread extends Thread{
 
 	private const TPS = 100;
 	private const TIME_PER_TICK = 1 / self::TPS;
@@ -146,10 +146,6 @@ class NetherNetThread extends Thread{
 		}
 	}
 
-	/**
-	 * Reports how many bytes the main thread has read from the outgoing channel, so that this thread can
-	 * tell how far behind the main thread is and stop reading packets while it catches up.
-	 */
 	public function setConsumedBytes(int $bytes) : void{
 		$this->consumedBytes = $bytes;
 	}
