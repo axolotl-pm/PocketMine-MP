@@ -78,14 +78,14 @@ class TypeConverter{
 
 	private SkinAdapter $skinAdapter;
 
-	public function __construct(){
+	public function __construct(bool $blockNetworkIdsAreHashes = false){
 		//TODO: inject stuff via constructor
 		$this->blockItemIdMap = BlockItemIdMap::getInstance();
 
 		$canonicalBlockStatesRaw = Filesystem::fileGetContents(BedrockDataFiles::CANONICAL_BLOCK_STATES_NBT);
 		$metaMappingRaw = Filesystem::fileGetContents(BedrockDataFiles::BLOCK_STATE_META_MAP_JSON);
 		$this->blockTranslator = new BlockTranslator(
-			BlockStateDictionary::loadFromString($canonicalBlockStatesRaw, $metaMappingRaw),
+			BlockStateDictionary::loadFromString($canonicalBlockStatesRaw, $metaMappingRaw, $blockNetworkIdsAreHashes),
 			GlobalBlockStateHandlers::getSerializer()
 		);
 
