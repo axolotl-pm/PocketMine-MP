@@ -24,17 +24,25 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\cache;
 
 use pocketmine\color\Color;
+use pocketmine\data\bedrock\ArmorTrimMaterialTypeIdMap;
+use pocketmine\data\bedrock\ArmorTrimPatternTypeIdMap;
 use pocketmine\data\bedrock\BedrockDataFiles;
 use pocketmine\data\SavedDataLoadingException;
+use pocketmine\item\ArmorTrimMaterial;
+use pocketmine\item\ArmorTrimPattern;
 use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
 use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\serializer\NetworkNbtSerializer;
+use pocketmine\network\mcpe\protocol\TrimDataPacket;
 use pocketmine\network\mcpe\protocol\types\biome\BiomeDefinitionEntry;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
+use pocketmine\network\mcpe\protocol\types\TrimMaterial;
+use pocketmine\network\mcpe\protocol\types\TrimPattern;
 use pocketmine\utils\Filesystem;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use pocketmine\world\biome\model\BiomeDefinitionEntryData;
+use pocketmine\world\format\io\GlobalItemDataHandlers;
 use function count;
 use function get_debug_type;
 use function is_array;
@@ -99,17 +107,47 @@ class StaticPacketCache{
 		return $entries;
 	}
 
+	private static function makeTrimData() : TrimDataPacket{
+		$itemSerializer = GlobalItemDataHandlers::getSerializer();
+		$patternIdMap = ArmorTrimPatternTypeIdMap::getInstance();
+		$materialIdMap = ArmorTrimMaterialTypeIdMap::getInstance();
+
+		$patterns = [];
+		foreach(ArmorTrimPattern::cases() as $pattern){
+			$patterns[] = new TrimPattern(
+				$itemSerializer->serializeType($pattern->getTemplate())->getName(),
+				$patternIdMap->toId($pattern)
+			);
+		}
+		$materials = [];
+		foreach(ArmorTrimMaterial::cases() as $material){
+			$materials[] = new TrimMaterial(
+				$materialIdMap->toId($material),
+				$material->getColor(),
+				$itemSerializer->serializeType($material->getItem())->getName()
+			);
+		}
+
+		return TrimDataPacket::create($patterns, $materials);
+	}
+
 	private static function make() : self{
 		return new self(
 			BiomeDefinitionListPacket::fromDefinitions(self::loadBiomeDefinitionModel(BedrockDataFiles::BIOME_DEFINITIONS_JSON)),
-			AvailableActorIdentifiersPacket::create(self::loadCompoundFromFile(BedrockDataFiles::ENTITY_IDENTIFIERS_NBT))
+			AvailableActorIdentifiersPacket::create(self::loadCompoundFromFile(BedrockDataFiles::ENTITY_IDENTIFIERS_NBT)),
+			self::makeTrimData()
 		);
 	}
 
 	public function __construct(
 		private BiomeDefinitionListPacket $biomeDefs,
-		private AvailableActorIdentifiersPacket $availableActorIdentifiers
+		private AvailableActorIdentifiersPacket $availableActorIdentifiers,
+		private TrimDataPacket $trimData
 	){}
+
+	public function getTrimData() : TrimDataPacket{
+		return $this->trimData;
+	}
 
 	public function getBiomeDefs() : BiomeDefinitionListPacket{
 		return $this->biomeDefs;
