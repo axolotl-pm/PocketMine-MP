@@ -547,7 +547,8 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("carpet", fn(BID $id) => new Carpet($id, "Carpet", new Info(new BreakInfo(0.1))));
 		self::register("concrete", fn(BID $id) => new Concrete($id, "Concrete", new Info(BreakInfo::pickaxe(1.8, ToolTier::WOOD))));
 		self::register("concrete_powder", fn(BID $id) => new ConcretePowder($id, "Concrete Powder", new Info(BreakInfo::shovel(0.5))));
-		self::register("wool", fn(BID $id) => new Wool($id, "Wool", new Info(new class(0.8, ToolType::SHEARS) extends BreakInfo{
+
+		$woolBreakInfo = new Info(new class(0.8, ToolType::SHEARS) extends BreakInfo{
 			public function getBreakTime(Item $item) : float{
 				$time = parent::getBreakTime($item);
 				if($item->getBlockToolType() === ToolType::SHEARS){
@@ -556,7 +557,10 @@ final class VanillaBlocksInputs extends RegistrySource{
 
 				return $time;
 			}
-		})));
+		});
+		self::register("wool", fn(BID $id) => new Wool($id, "Wool", $woolBreakInfo));
+		self::register("wool_slab", fn(BID $id) => new WoolSlab($id, "Wool Slab", $woolBreakInfo));
+		self::register("wool_stairs", fn(BID $id) => new WoolStair($id, "Wool Stair", $woolBreakInfo));
 
 		self::register("end_stone_brick_wall", fn(BID $id) => new Wall($id, "End Stone Brick Wall", new Info(BreakInfo::pickaxe(3.0, ToolTier::WOOD, 45.0))));
 

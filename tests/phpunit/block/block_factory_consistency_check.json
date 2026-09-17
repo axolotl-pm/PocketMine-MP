@@ -829,7 +829,9 @@
         "WHEAT": 8,
         "WHITE_TULIP": 1,
         "WITHER_ROSE": 1,
-        "WOOL": 16
+        "WOOL": 16,
+        "WOOL_SLAB": 16,
+        "WOOL_STAIRS": 16
     },
     "tiles": {
         "ACACIA_CEILING_CENTER_HANGING_SIGN": "pocketmine\\block\\tile\\HangingSign",

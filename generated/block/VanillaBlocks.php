@@ -868,6 +868,8 @@ final class VanillaBlocks{
 	private static Flower $_mWHITE_TULIP;
 	private static WitherRose $_mWITHER_ROSE;
 	private static Wool $_mWOOL;
+	private static WoolSlab $_mWOOL_SLAB;
+	private static WoolStair $_mWOOL_STAIRS;
 
 	/**
 	 * @var Block[]
@@ -1732,6 +1734,8 @@ final class VanillaBlocks{
 			"white_tulip" => fn(Flower $v) => self::$_mWHITE_TULIP = $v,
 			"wither_rose" => fn(WitherRose $v) => self::$_mWITHER_ROSE = $v,
 			"wool" => fn(Wool $v) => self::$_mWOOL = $v,
+			"wool_slab" => fn(WoolSlab $v) => self::$_mWOOL_SLAB = $v,
+			"wool_stairs" => fn(WoolStair $v) => self::$_mWOOL_STAIRS = $v,
 		];
 	}
 
@@ -5918,5 +5922,15 @@ final class VanillaBlocks{
 	public static function WOOL() : Wool{
 		if(!isset(self::$_mWOOL)){ self::init(); }
 		return clone self::$_mWOOL;
+	}
+
+	public static function WOOL_SLAB() : WoolSlab{
+		if(!isset(self::$_mWOOL_SLAB)){ self::init(); }
+		return clone self::$_mWOOL_SLAB;
+	}
+
+	public static function WOOL_STAIRS() : WoolStair{
+		if(!isset(self::$_mWOOL_STAIRS)){ self::init(); }
+		return clone self::$_mWOOL_STAIRS;
 	}
 }
