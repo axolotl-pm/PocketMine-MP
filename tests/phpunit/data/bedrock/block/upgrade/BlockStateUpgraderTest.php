@@ -33,6 +33,7 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\utils\Filesystem;
 use pocketmine\utils\Utils;
 use Symfony\Component\Filesystem\Path;
+use function array_keys;
 use function array_slice;
 use function basename;
 use function count;
@@ -315,6 +316,33 @@ class BlockStateUpgraderTest extends TestCase{
 		return $state->getName() . "[" . implode(",", $properties) . "]";
 	}
 
+	/**
+	 * @param true[][][] $currentProperties
+	 * @phpstan-param array<string, array<string, array<string, true>>> $currentProperties
+	 */
+	private static function describeMismatch(BlockStateData $upgraded, array $currentProperties) : string{
+		$expected = $currentProperties[$upgraded->getName()] ?? null;
+		if($expected === null){
+			return "block does not exist in the current palette";
+		}
+
+		$problems = [];
+		foreach(Utils::stringifyKeys($upgraded->getStates()) as $property => $value){
+			if(!isset($expected[$property])){
+				$problems[] = "unexpected property " . $property;
+			}elseif(!isset($expected[$property][(string) $value])){
+				$problems[] = "invalid value " . $property . "=" . $value . " (expected " . implode("|", array_keys($expected[$property])) . ")";
+			}
+		}
+		foreach(Utils::stringifyKeys($expected) as $property => $values){
+			if($upgraded->getState($property) === null){
+				$problems[] = "missing property " . $property . " (" . implode("|", array_keys($values)) . ")";
+			}
+		}
+
+		return count($problems) === 0 ? "no current state has this combination of property values" : implode(", ", $problems);
+	}
+
 	public function testEveryArchivedStateUpgradesToACurrentState() : void{
 		$archiveDir = self::paletteArchivePath();
 
@@ -326,8 +354,17 @@ class BlockStateUpgraderTest extends TestCase{
 		self::assertFileExists($targetFile, "palette archive has no palette for the current version ($currentVersion)");
 
 		$current = [];
+		/**
+		 * @var true[][][] $currentProperties
+		 * @phpstan-var array<string, array<string, array<string, true>>> $currentProperties
+		 */
+		$currentProperties = [];
 		foreach(BlockStateDictionary::loadPaletteFromString(Filesystem::fileGetContents($targetFile)) as $state){
 			$current[self::canonical($state)] = true;
+			$currentProperties[$state->getName()] ??= [];
+			foreach(Utils::stringifyKeys($state->getStates()) as $property => $value){
+				$currentProperties[$state->getName()][$property][(string) $value] = true;
+			}
 		}
 
 		$oldStates = [];
@@ -342,9 +379,10 @@ class BlockStateUpgraderTest extends TestCase{
 
 		$failures = [];
 		foreach(Utils::stringifyKeys($oldStates) as $key => $forced){
-			$upgraded = self::canonical($upgrader->upgrade($forced));
-			if(!isset($current[$upgraded])){
-				$failures[] = $key . ' -> ' . $upgraded;
+			$upgraded = $upgrader->upgrade($forced);
+			$upgradedKey = self::canonical($upgraded);
+			if(!isset($current[$upgradedKey])){
+				$failures[] = ($upgradedKey === $key ? $key : $key . ' -> ' . $upgradedKey) . ': ' . self::describeMismatch($upgraded, $currentProperties);
 			}
 		}
 
