@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c954097ca89fb6fe86b538fb0f87694",
+    "content-hash": "d966352f626e9151163d3ed2117dae3a",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -999,6 +999,33 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "axolotl-pm/bedrock-block-palette-archive",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/axolotl-pm/BedrockBlockPaletteArchive.git",
+                "reference": "14175635112b5661ac8e971fc80787c0e1bb1c9b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockPaletteArchive/zipball/14175635112b5661ac8e971fc80787c0e1bb1c9b",
+                "reference": "14175635112b5661ac8e971fc80787c0e1bb1c9b",
+                "shasum": ""
+            },
+            "default-branch": true,
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC0-1.0"
+            ],
+            "description": "Archive of previous Minecraft Bedrock block palettes of interest, useful for world format upgrading",
+            "support": {
+                "issues": "https://github.com/axolotl-pm/BedrockBlockPaletteArchive/issues",
+                "source": "https://github.com/axolotl-pm/BedrockBlockPaletteArchive/tree/master"
+            },
+            "time": "2026-09-18T02:09:02+00:00"
+        },
         {
             "name": "myclabs/deep-copy",
             "version": "1.14.0",
@@ -2814,7 +2841,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "axolotl-pm/bedrock-block-palette-archive": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
