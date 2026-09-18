@@ -39,8 +39,10 @@ use pocketmine\utils\LegacyEnumShimTrait;
  * @method static WoodType OAK()
  * @method static WoodType SPRUCE()
  * @method static WoodType WARPED()
+ * @method static WoodType POPLAR()
  */
-enum WoodType{
+enum WoodType
+{
 	use LegacyEnumShimTrait;
 
 	case OAK;
@@ -55,9 +57,11 @@ enum WoodType{
 	case CHERRY;
 	case PALE_OAK;
 	case BAMBOO;
+	case POPLAR;
 
-	public function getDisplayName() : string{
-		return match($this){
+	public function getDisplayName() : string
+	{
+		return match($this) {
 			self::OAK => "Oak",
 			self::SPRUCE => "Spruce",
 			self::BIRCH => "Birch",
@@ -70,22 +74,26 @@ enum WoodType{
 			self::CHERRY => "Cherry",
 			self::PALE_OAK => "Pale Oak",
 			self::BAMBOO => "Bamboo",
+			self::POPLAR => "Poplar"
 		};
 	}
 
-	public function isFlammable() : bool{
+	public function isFlammable() : bool
+	{
 		return $this !== self::CRIMSON && $this !== self::WARPED;
 	}
 
-	public function getStandardLogSuffix() : ?string{
-		return match($this){
+	public function getStandardLogSuffix() : ?string
+	{
+		return match($this) {
 			self::CRIMSON, self::WARPED => "Stem",
 			self::BAMBOO => "Block",
 			default => null,
 		};
 	}
 
-	public function getAllSidedLogSuffix() : ?string{
+	public function getAllSidedLogSuffix() : ?string
+	{
 		return $this === self::CRIMSON || $this === self::WARPED ? "Hyphae" : null;
 	}
 }

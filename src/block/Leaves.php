@@ -37,42 +37,57 @@ use pocketmine\world\BlockTransaction;
 use pocketmine\world\World;
 use function mt_rand;
 
-class Leaves extends Transparent{
+class Leaves extends Transparent
+{
 	private const MAX_LOG_DISTANCE = 4;
 
 	protected LeavesType $leavesType; //immutable for now
 	protected bool $noDecay = false;
 	protected bool $checkDecay = false;
 
-	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo, LeavesType $leavesType){
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo, LeavesType $leavesType)
+	{
 		parent::__construct($idInfo, $name, $typeInfo);
 		$this->leavesType = $leavesType;
 	}
 
-	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void
+	{
 		$w->bool($this->noDecay);
 		$w->bool($this->checkDecay);
 	}
 
-	public function getLeavesType() : LeavesType{ return $this->leavesType; }
+	public function getLeavesType() : LeavesType
+	{
+		return $this->leavesType;
+	}
 
-	public function isNoDecay() : bool{ return $this->noDecay; }
+	public function isNoDecay() : bool
+	{
+		return $this->noDecay;
+	}
 
 	/** @return $this */
-	public function setNoDecay(bool $noDecay) : self{
+	public function setNoDecay(bool $noDecay) : self
+	{
 		$this->noDecay = $noDecay;
 		return $this;
 	}
 
-	public function isCheckDecay() : bool{ return $this->checkDecay; }
+	public function isCheckDecay() : bool
+	{
+		return $this->checkDecay;
+	}
 
 	/** @return $this */
-	public function setCheckDecay(bool $checkDecay) : self{
+	public function setCheckDecay(bool $checkDecay) : self
+	{
 		$this->checkDecay = $checkDecay;
 		return $this;
 	}
 
-	public function blocksDirectSkyLight() : bool{
+	public function blocksDirectSkyLight() : bool
+	{
 		return true;
 	}
 
@@ -81,21 +96,22 @@ class Leaves extends Transparent{
 	 * @phpstan-param array<int, true> $visited
 	 * @phpstan-param-out array<int, true> $visited
 	 */
-	protected function findLog(Vector3 $pos, array &$visited = [], int $distance = 0) : bool{
+	protected function findLog(Vector3 $pos, array &$visited = [], int $distance = 0) : bool
+	{
 		$index = World::blockHash($pos->x, $pos->y, $pos->z);
-		if(isset($visited[$index])){
+		if (isset($visited[$index])) {
 			return false;
 		}
 		$visited[$index] = true;
 
 		$block = $this->position->getWorld()->getBlock($pos);
-		if($block instanceof Wood){ //type doesn't matter
+		if ($block instanceof Wood) { //type doesn't matter
 			return true;
 		}
 
-		if($block instanceof Leaves && $distance <= self::MAX_LOG_DISTANCE){
-			foreach(Facing::ALL as $side){
-				if($this->findLog($pos->getSide($side), $visited, $distance + 1)){
+		if ($block instanceof Leaves && $distance <= self::MAX_LOG_DISTANCE) {
+			foreach (Facing::ALL as $side) {
+				if ($this->findLog($pos->getSide($side), $visited, $distance + 1)) {
 					return true;
 				}
 			}
@@ -104,50 +120,55 @@ class Leaves extends Transparent{
 		return false;
 	}
 
-	public function onNearbyBlockChange() : void{
-		if(!$this->noDecay && !$this->checkDecay){
+	public function onNearbyBlockChange() : void
+	{
+		if (!$this->noDecay && !$this->checkDecay) {
 			$this->checkDecay = true;
 			$this->position->getWorld()->setBlock($this->position, $this, false);
 		}
 	}
 
-	public function ticksRandomly() : bool{
+	public function ticksRandomly() : bool
+	{
 		return !$this->noDecay && $this->checkDecay;
 	}
 
-	public function onRandomTick() : void{
-		if(!$this->noDecay && $this->checkDecay){
+	public function onRandomTick() : void
+	{
+		if (!$this->noDecay && $this->checkDecay) {
 			$cancelled = false;
-			if(LeavesDecayEvent::hasHandlers()){
+			if (LeavesDecayEvent::hasHandlers()) {
 				$ev = new LeavesDecayEvent($this);
 				$ev->call();
 				$cancelled = $ev->isCancelled();
 			}
 
 			$world = $this->position->getWorld();
-			if($cancelled || $this->findLog($this->position)){
+			if ($cancelled || $this->findLog($this->position)) {
 				$this->checkDecay = false;
 				$world->setBlock($this->position, $this, false);
-			}else{
+			} else {
 				$world->useBreakOn($this->position);
 			}
 		}
 	}
 
-	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool
+	{
 		$this->noDecay = true; //artificial leaves don't decay
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
-	public function getDropsForCompatibleTool(Item $item) : array{
-		if(($item->getBlockToolType() & BlockToolType::SHEARS) !== 0){
+	public function getDropsForCompatibleTool(Item $item) : array
+	{
+		if (($item->getBlockToolType() & BlockToolType::SHEARS) !== 0) {
 			return parent::getDropsForCompatibleTool($item);
 		}
 
 		$drops = [];
-		if(FortuneDropHelper::bonusChanceDivisor($item, 20, 4)){ //Saplings
+		if (FortuneDropHelper::bonusChanceDivisor($item, 20, 4)) { //Saplings
 			// TODO: according to the wiki, the jungle saplings have a different drop rate
-			$sapling = (match($this->leavesType){
+			$sapling = (match($this->leavesType) {
 				LeavesType::ACACIA => VanillaBlocks::ACACIA_SAPLING(),
 				LeavesType::BIRCH => VanillaBlocks::BIRCH_SAPLING(),
 				LeavesType::DARK_OAK => VanillaBlocks::DARK_OAK_SAPLING(),
@@ -159,37 +180,44 @@ class Leaves extends Transparent{
 				LeavesType::FLOWERING_AZALEA => VanillaBlocks::FLOWERING_AZALEA(),
 				LeavesType::CHERRY => null, //TODO: cherry
 				LeavesType::PALE_OAK => null, //TODO: pale oak
+				LeavesType::ORANGE_POPLAR => null, //TODO: poplar sapling
+				LeavesType::RED_POPLAR => null,
+				LeavesType::YELLOW_POPLAR => null
 			})?->asItem();
-			if($sapling !== null){
+			if ($sapling !== null) {
 				$drops[] = $sapling;
 			}
 		}
-		if(
+		if (
 			($this->leavesType === LeavesType::OAK || $this->leavesType === LeavesType::DARK_OAK) &&
 			FortuneDropHelper::bonusChanceDivisor($item, 200, 20)
-		){ //Apples
+		) { //Apples
 			$drops[] = VanillaItems::APPLE();
 		}
-		if(FortuneDropHelper::bonusChanceDivisor($item, 50, 5)){
+		if (FortuneDropHelper::bonusChanceDivisor($item, 50, 5)) {
 			$drops[] = VanillaItems::STICK()->setCount(mt_rand(1, 2));
 		}
 
 		return $drops;
 	}
 
-	public function isAffectedBySilkTouch() : bool{
+	public function isAffectedBySilkTouch() : bool
+	{
 		return true;
 	}
 
-	public function getFlameEncouragement() : int{
+	public function getFlameEncouragement() : int
+	{
 		return 30;
 	}
 
-	public function getFlammability() : int{
+	public function getFlammability() : int
+	{
 		return 60;
 	}
 
-	public function getSupportType(int $facing) : SupportType{
+	public function getSupportType(int $facing) : SupportType
+	{
 		return SupportType::NONE;
 	}
 }
