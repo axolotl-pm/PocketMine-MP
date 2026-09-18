@@ -21,19 +21,20 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\world\sound;
+namespace pocketmine\block\utils;
 
-use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\ClientboundUpdateSoundDataPacket;
-use pocketmine\network\mcpe\protocol\types\sound\SoundDataEvent;
+/**
+ * Implemented by blocks (fences, glass panes, bars, ...) that carry per-horizontal-facing connection state.
+ */
+interface HorizontalConnectable{
 
-class RecordStopSound implements Sound{
-	public function __construct(private int $serverSoundHandleId = 0){
-	}
+	/**
+	 * @param int $facing one of Facing::NORTH/EAST/SOUTH/WEST
+	 */
+	public function isConnectedAt(int $facing) : bool;
 
-	public function encode(Vector3 $pos) : array{
-		return [
-			ClientboundUpdateSoundDataPacket::create($this->serverSoundHandleId, SoundDataEvent::stop(), null, null, null, null, null, null)
-		];
-	}
+	/**
+	 * @param int $facing one of Facing::NORTH/EAST/SOUTH/WEST
+	 */
+	public function setConnectedAt(int $facing, bool $connected) : void;
 }
