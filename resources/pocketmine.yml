@@ -126,6 +126,20 @@ transport:
       #If disabled without an alternative signaling mechanism, clients cannot connect.
       enabled: true
 
+      #TCP port for HTTP signaling. Set to 0 to use server-port from server.properties.
+      #Only modify this when behind a reverse proxy that forwards signaling traffic to a custom port.
+      port: 0
+
+      #TLS encryption for the HTTP signaling endpoint. Plain HTTP requests are redirected to HTTPS.
+      #Leave certificate and key empty to serve plain HTTP only. Paths are relative to the data directory.
+      tls:
+        #Path to PEM certificate or certificate chain file.
+        certificate:
+        #Path to PEM private key file.
+        key:
+        #Optional private key passphrase, or file:<path> to read from a file.
+        passphrase:
+
       #Enable when HTTP signaling is behind a reverse proxy (e.g. nginx, Caddy, Cloudflare).
       #Allows resolving the client's real IP from forwarded headers for features like TURN relays.
       reverse-proxy:

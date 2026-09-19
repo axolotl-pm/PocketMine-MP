@@ -48,6 +48,9 @@ use function is_dir;
 use function is_file;
 use function is_string;
 use function mkdir;
+use function rtrim;
+use function str_starts_with;
+use function strlen;
 use function substr;
 use function umask;
 use function unpack;
@@ -57,8 +60,7 @@ final class NetherNetTransport implements Transport{
 
 	public const NAME = "nethernet";
 
-	private const TLS_CERT_FILE = "nethernet-cert.pem";
-	private const TLS_KEY_FILE = "nethernet-key.pem";
+	private const TLS_PASSPHRASE_FILE_PREFIX = "file:";
 
 	/**
 	 * @var NetherNetSignalingFactory[]
@@ -129,13 +131,19 @@ final class NetherNetTransport implements Transport{
 	 * @throws \InvalidArgumentException
 	 */
 	private function createBuiltinSignaling(ServerConfigGroup $configGroup, int $networkId) : NetherNetBuiltinSignalingFactory{
-		[$certificate, $key] = $this->findTlsFiles();
+		[$certificate, $key, $passphrase] = $this->parseTls($configGroup);
+
+		$httpPort = $configGroup->getPropertyInt(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_PORT, 0);
+		if($httpPort < 0 || $httpPort > 65535){
+			throw new \InvalidArgumentException(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_PORT . " must be between 0 and 65535, got $httpPort");
+		}
 
 		return new NetherNetBuiltinSignalingFactory(
 			httpBindAddress: $this->server->getIp(),
-			httpPort: $this->server->getPort(),
+			httpPort: $httpPort === 0 ? $this->server->getPort() : $httpPort,
 			tlsCertFile: $certificate,
 			tlsKeyFile: $key,
+			tlsPassphrase: $passphrase,
 			reverseProxyNetworks: $configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY_ENABLED, false)
 				? self::parseReverseProxyNetworks($configGroup->getProperty(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY_TRUSTED_IPS))
 				: null,
@@ -169,19 +177,37 @@ final class NetherNetTransport implements Transport{
 	}
 
 	/**
-	 * @phpstan-return array{?string, ?string}
+	 * @phpstan-return array{?string, ?string, ?string}
+	 *
+	 * @throws \InvalidArgumentException
 	 */
-	private function findTlsFiles() : array{
-		$certificate = Path::join($this->server->getDataPath(), self::TLS_CERT_FILE);
-		$key = Path::join($this->server->getDataPath(), self::TLS_KEY_FILE);
-
-		if(!is_file($certificate) || !is_file($key)){
+	private function parseTls(ServerConfigGroup $configGroup) : array{
+		$certificate = $configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_TLS_CERTIFICATE, "");
+		$key = $configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_TLS_KEY, "");
+		if(($certificate === "") !== ($key === "")){
+			throw new \InvalidArgumentException(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_TLS_CERTIFICATE . " and " . Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_TLS_KEY . " must be set together");
+		}
+		if($certificate === ""){
 			$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_tls_disabled()));
-			return [null, null];
+			return [null, null, null];
+		}
+
+		$passphrase = $configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_TLS_PASSPHRASE, "");
+		if(str_starts_with($passphrase, self::TLS_PASSPHRASE_FILE_PREFIX)){
+			$passphraseFile = Path::makeAbsolute(substr($passphrase, strlen(self::TLS_PASSPHRASE_FILE_PREFIX)), $this->server->getDataPath());
+			try{
+				$passphrase = rtrim(Filesystem::fileGetContents($passphraseFile), "\r\n");
+			}catch(\RuntimeException $e){
+				throw new \InvalidArgumentException("Could not read the TLS passphrase file: " . $e->getMessage(), 0, $e);
+			}
 		}
 
 		$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_tls_enabled()));
-		return [$certificate, $key];
+		return [
+			Path::makeAbsolute($certificate, $this->server->getDataPath()),
+			Path::makeAbsolute($key, $this->server->getDataPath()),
+			$passphrase === "" ? null : $passphrase
+		];
 	}
 
 	/**

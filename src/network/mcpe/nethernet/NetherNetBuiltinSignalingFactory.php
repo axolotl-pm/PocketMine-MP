@@ -36,7 +36,6 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 	private ?ThreadSafeArray $reverseProxyNetworks;
 
 	/**
-	 * @param string[]|null $reverseProxyNetworks Trusted reverse proxy IP addresses or CIDR blocks, empty list to trust all peers, or null to ignore proxy headers
 	 * @phpstan-param list<string>|null $reverseProxyNetworks
 	 *
 	 * @throws \InvalidArgumentException if a network cannot be parsed
@@ -46,6 +45,7 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 		private int $httpPort,
 		private ?string $tlsCertFile,
 		private ?string $tlsKeyFile,
+		private ?string $tlsPassphrase,
 		?array $reverseProxyNetworks,
 		private string $lanBindAddress,
 		private int $lanPort,
@@ -70,9 +70,13 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 	}
 
 	public function create(NetherNetSignalingContext $context) : array{
-		$tlsContext = $this->tlsCertFile !== null && $this->tlsKeyFile !== null
-			? ["local_cert" => $this->tlsCertFile, "local_pk" => $this->tlsKeyFile]
-			: null;
+		$tlsContext = null;
+		if($this->tlsCertFile !== null && $this->tlsKeyFile !== null){
+			$tlsContext = ["local_cert" => $this->tlsCertFile, "local_pk" => $this->tlsKeyFile];
+			if($this->tlsPassphrase !== null){
+				$tlsContext["passphrase"] = $this->tlsPassphrase;
+			}
+		}
 
 		return [
 			new HttpSignaling(
@@ -85,7 +89,6 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 				$context->getStatusProvider(),
 				$this->reverseProxyNetworks !== null ? self::createReverseProxy(array_values((array) $this->reverseProxyNetworks)) : null
 			),
-			//the discovery port is fixed by the protocol and may already be in use
 			new NetherNetOptionalSignaling(
 				new LanSignaling(
 					$context->getNegotiator(),
