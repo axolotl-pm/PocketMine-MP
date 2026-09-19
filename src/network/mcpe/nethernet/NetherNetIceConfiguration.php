@@ -48,12 +48,13 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 		array $servers,
 		private bool $udpMux,
 		private ?int $portRangeBegin,
-		private ?int $portRangeEnd
+		private ?int $portRangeEnd,
+		private ?string $bindAddress = null
 	){
 		$this->servers = ThreadSafeArray::fromArray($servers);
 	}
 
-	public static function parse(mixed $iceServers, mixed $portRange, bool $udpMux) : self{
+	public static function parse(mixed $iceServers, mixed $portRange, bool $udpMux, ?string $bindAddress = null) : self{
 		[$portRangeBegin, $portRangeEnd] = self::parsePortRange($portRange);
 
 		if($iceServers === null){
@@ -71,7 +72,7 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 			$servers[] = $server;
 		}
 
-		return new self($servers, $udpMux, $portRangeBegin, $portRangeEnd);
+		return new self($servers, $udpMux, $portRangeBegin, $portRangeEnd, $bindAddress);
 	}
 
 	/**
@@ -167,4 +168,6 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 	public function getPortRangeBegin() : ?int{ return $this->portRangeBegin; }
 
 	public function getPortRangeEnd() : ?int{ return $this->portRangeEnd; }
+
+	public function getBindAddress() : ?string{ return $this->bindAddress; }
 }

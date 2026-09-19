@@ -97,6 +97,11 @@ transport:
     #Changing this file will prompt players to re-verify on their next connection.
     key-file: nethernet.key
 
+    #Operator domain or server name included in identity assertions sent to clients.
+    #Leave empty to use the server MOTD (with formatting codes stripped).
+    #Clients pin the public key rather than this name, so changing it does not require players to re-verify.
+    identity-domain:
+
     #Enables ICE UDP multiplexing so connections share a single UDP socket.
     #Only uses a fixed port if port-range specifies a single port; otherwise, an arbitrary port is assigned.
     #NOTE: Cannot be used with TURN servers.

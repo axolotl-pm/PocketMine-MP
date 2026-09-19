@@ -87,6 +87,7 @@ final class NetherNetInterface implements AdvancedNetworkInterface{
 	public function __construct(
 		private Server $server,
 		string $identityPem,
+		string $identityDomain,
 		private int $networkId,
 		NetherNetIceConfiguration $iceConfig,
 		private ThreadSafeArray $signalingFactories,
@@ -124,6 +125,7 @@ final class NetherNetInterface implements AdvancedNetworkInterface{
 			$threadToMain,
 			$this->server->getConfigGroup()->getPropertyInt(YmlServerProperties::NETWORK_MAX_MTU_SIZE, 1492),
 			$identityPem,
+			$identityDomain,
 			!$this->server->getOnlineMode(),
 			$iceConfig,
 			$signalingFactories,

@@ -87,6 +87,7 @@ final class NetherNetThread extends Thread{
 		protected ThreadSafeArray $threadToMain,
 		protected int $maxMtu,
 		protected string $identityPem,
+		protected string $identityDomain,
 		protected bool $allowAnonymous,
 		protected NetherNetIceConfiguration $iceConfig,
 		ThreadSafeArray $signalingFactories,
@@ -193,10 +194,11 @@ final class NetherNetThread extends Thread{
 
 		$server = NetherNetServer::create(
 			new ServerConfiguration(
-				identityProvider: new SelfSignedIdentityProvider(ServerIdentity::fromPrivateKeyPem($this->identityPem)),
+				identityProvider: new SelfSignedIdentityProvider(ServerIdentity::fromPrivateKeyPem($this->identityPem), $this->identityDomain),
 				identityVerifier: new AssertionIdentityVerifier(allowAnonymous: $this->allowAnonymous),
 				peerConnectionFactory: new ConfiguredPeerConnectionFactory(
 					iceServers: $iceServers,
+					bindAddress: $this->iceConfig->getBindAddress(),
 					portRangeBegin: $this->iceConfig->getPortRangeBegin(),
 					portRangeEnd: $this->iceConfig->getPortRangeEnd(),
 					iceUdpMuxEnabled: $this->iceConfig->isUdpMux(),

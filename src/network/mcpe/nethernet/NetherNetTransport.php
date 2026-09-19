@@ -36,6 +36,7 @@ use pocketmine\network\Transport;
 use pocketmine\Server;
 use pocketmine\ServerConfigGroup;
 use pocketmine\utils\Filesystem;
+use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use pocketmine\YmlServerProperties as Yml;
 use Symfony\Component\Filesystem\Path;
@@ -96,10 +97,12 @@ final class NetherNetTransport implements Transport{
 
 		$signaling = $this->signaling;
 		try{
+			$bindAddress = $this->server->getIp();
 			$iceConfig = NetherNetIceConfiguration::parse(
 				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_ICE_SERVERS),
 				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE),
-				$configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false)
+				$configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false),
+				$bindAddress === "0.0.0.0" ? null : $bindAddress
 			);
 			if($configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_ENABLED, true)){
 				$signaling = [$this->createBuiltinSignaling($configGroup, $networkId), ...$signaling];
@@ -118,6 +121,7 @@ final class NetherNetTransport implements Transport{
 		return [new NetherNetInterface(
 			$this->server,
 			$identityPem,
+			$this->identityDomain($configGroup),
 			$networkId,
 			$iceConfig,
 			ThreadSafeArray::fromArray($signaling),
@@ -125,6 +129,15 @@ final class NetherNetTransport implements Transport{
 			$entityEventBroadcaster,
 			$typeConverter
 		)];
+	}
+
+	private function identityDomain(ServerConfigGroup $configGroup) : string{
+		$domain = $configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_IDENTITY_DOMAIN, "");
+		if($domain === ""){
+			$domain = TextFormat::clean($this->server->getMotd());
+		}
+
+		return $domain !== "" ? $domain : $this->server->getName();
 	}
 
 	/**
