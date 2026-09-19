@@ -28,7 +28,6 @@ use pmmp\encoding\VarInt;
 use pmmp\thread\Thread as NativeThread;
 use pmmp\thread\ThreadSafeArray;
 use pmmp\webrtc\IceServer;
-use pocketmine\nethernet\discovery\LanSignaling;
 use pocketmine\nethernet\discovery\MutableServerDataProvider;
 use pocketmine\nethernet\discovery\ServerData;
 use pocketmine\nethernet\identity\AssertionIdentityVerifier;
@@ -39,20 +38,12 @@ use pocketmine\nethernet\NetherNetException;
 use pocketmine\nethernet\NetherNetServer;
 use pocketmine\nethernet\SctpConfiguration;
 use pocketmine\nethernet\ServerConfiguration;
-use pocketmine\nethernet\signaling\http\HttpSignaling;
 use pocketmine\nethernet\signaling\http\MutableServerStatusProvider;
-use pocketmine\nethernet\signaling\http\ReverseProxy;
-use pocketmine\nethernet\signaling\SignalingException;
 use pocketmine\network\NetworkInterfaceStartException;
 use pocketmine\snooze\SleeperHandlerEntry;
 use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\thread\Thread;
 use pocketmine\thread\ThreadCrashException;
-use pocketmine\utils\Utils;
-use function array_values;
-use function get_debug_type;
-use function is_array;
-use function is_string;
 use function microtime;
 use function ord;
 use function time_sleep_until;
@@ -82,61 +73,26 @@ final class NetherNetThread extends Thread{
 
 	protected int $ticks = 0;
 
+	/** @phpstan-var ThreadSafeArray<int, NetherNetSignalingFactory> */
+	protected ThreadSafeArray $signalingFactories;
+
 	/**
-	 * @phpstan-param ThreadSafeArray<int, string> $mainToThread
-	 * @phpstan-param ThreadSafeArray<int, string> $threadToMain
-	 * @phpstan-param ThreadSafeArray<int, string>|null $reverseProxyNetworks
+	 * @phpstan-param ThreadSafeArray<int, string>                    $mainToThread
+	 * @phpstan-param ThreadSafeArray<int, string>                    $threadToMain
+	 * @phpstan-param ThreadSafeArray<int, NetherNetSignalingFactory> $signalingFactories
 	 */
 	public function __construct(
 		protected ThreadSafeLogger $logger,
 		protected ThreadSafeArray $mainToThread,
 		protected ThreadSafeArray $threadToMain,
 		protected int $maxMtu,
-		protected string $ip,
-		protected int $port,
 		protected string $identityPem,
-		protected ?string $tlsCertFile,
-		protected ?string $tlsKeyFile,
-		protected ?int $lanPort,
-		protected int $networkId,
 		protected bool $allowAnonymous,
 		protected NetherNetIceConfiguration $iceConfig,
-		protected ?ThreadSafeArray $reverseProxyNetworks,
+		ThreadSafeArray $signalingFactories,
 		protected SleeperHandlerEntry $sleeperEntry
-	){}
-
-	/**
-	 * @phpstan-param list<string> $networks
-	 */
-	private static function createReverseProxy(array $networks) : ReverseProxy{
-		return new ReverseProxy(
-			[ReverseProxy::HEADER_FORWARDED_FOR, ReverseProxy::HEADER_REAL_IP, ReverseProxy::HEADER_CF_CONNECTING_IP],
-			$networks
-		);
-	}
-
-	/**
-	 * @phpstan-return ThreadSafeArray<int, string>
-	 *
-	 * @throws \InvalidArgumentException
-	 */
-	public static function parseReverseProxyNetworks(mixed $trustedIps) : ThreadSafeArray{
-		if($trustedIps === null){
-			$trustedIps = [];
-		}elseif(!is_array($trustedIps)){
-			throw new \InvalidArgumentException("Trusted IPs must be a list of addresses or CIDR blocks, got " . get_debug_type($trustedIps));
-		}
-
-		$networks = [];
-		foreach(Utils::promoteKeys($trustedIps) as $index => $entry){
-			if(!is_string($entry) || $entry === ""){
-				throw new \InvalidArgumentException("Trusted IPs entry $index must be an address or CIDR block, got " . get_debug_type($entry));
-			}
-			$networks[] = $entry;
-		}
-		self::createReverseProxy($networks);
-
-		return ThreadSafeArray::fromArray($networks);
+	){
+		$this->signalingFactories = $signalingFactories;
 	}
 
 	/**
@@ -174,18 +130,8 @@ final class NetherNetThread extends Thread{
 		$status = new MutableServerStatusProvider();
 
 		try{
-			try{
-				$server = $this->createServer($listener, $advert, $status, $this->lanPort);
-				$server->start();
-			}catch(SignalingException $e){
-				if($this->lanPort === null){
-					throw $e;
-				}
-
-				$this->logger->warning("Unable to start LAN discovery");
-				$server = $this->createServer($listener, $advert, $status, null);
-				$server->start();
-			}
+			[$server, $ipcSignaling] = $this->createServer($listener, $out, $advert, $status);
+			$server->start();
 		}catch(NetherNetException|\InvalidArgumentException $e){
 			$this->synchronized(function() use ($e) : void{
 				$this->startupError = $e->getMessage();
@@ -207,7 +153,7 @@ final class NetherNetThread extends Thread{
 			$listener->setConsumedBytes($this->consumedBytes);
 			$server->tick();
 
-			$this->handleInbound($in, $server, $listener, $advert, $status);
+			$this->handleInbound($in, $server, $listener, $ipcSignaling, $advert, $status);
 			$listener->flushReceipts();
 			$listener->updateBandwidthStats();
 			if(++$this->ticks % self::TPS === 0){
@@ -217,7 +163,7 @@ final class NetherNetThread extends Thread{
 
 			self::sleepUntilNextTick($start);
 		}
-		$this->handleInbound($in, $server, $listener, $advert, $status);
+		$this->handleInbound($in, $server, $listener, $ipcSignaling, $advert, $status);
 
 		$deadline = microtime(true) + self::SHUTDOWN_DRAIN_TIMEOUT;
 		while($server->getSessionManager()->count() > 0 && microtime(true) < $deadline){
@@ -232,10 +178,12 @@ final class NetherNetThread extends Thread{
 	}
 
 	/**
+	 * @phpstan-return array{NetherNetServer, NetherNetIpcSignaling}
+	 *
 	 * @throws NetherNetException
 	 * @throws \InvalidArgumentException
 	 */
-	private function createServer(NetherNetSessionListener $listener, MutableServerDataProvider $advert, MutableServerStatusProvider $status, ?int $lanPort) : NetherNetServer{
+	private function createServer(NetherNetSessionListener $listener, NetherNetChannel $out, MutableServerDataProvider $advert, MutableServerStatusProvider $status) : array{
 		$iceServers = [];
 		foreach($this->iceConfig->getServers() as $iceServer){
 			$iceServers[] = $iceServer->isTurn()
@@ -263,33 +211,17 @@ final class NetherNetThread extends Thread{
 			$listener
 		);
 
-		$tlsContext = $this->tlsCertFile !== null && $this->tlsKeyFile !== null
-			? ["local_cert" => $this->tlsCertFile, "local_pk" => $this->tlsKeyFile]
-			: null;
-		$reverseProxy = $this->reverseProxyNetworks !== null ? self::createReverseProxy(array_values((array) $this->reverseProxyNetworks)) : null;
-		$server->addSignaling(new HttpSignaling(
-			$server->getNegotiator(),
-			$this->ip,
-			$this->port,
-			$tlsContext,
-			$this->logger,
-			HttpSignaling::DEFAULT_MAX_CONNECTIONS,
-			$status,
-			$reverseProxy
-		));
-
-		if($lanPort !== null){
-			$server->addSignaling(new LanSignaling(
-				$server->getNegotiator(),
-				$advert,
-				$this->networkId,
-				"0.0.0.0",
-				$lanPort,
-				$this->logger
-			));
+		$context = new NetherNetSignalingContext($server->getNegotiator(), $status, $advert, $this->logger);
+		foreach((array) $this->signalingFactories as $factory){
+			foreach($factory->create($context) as $signaling){
+				$server->addSignaling($signaling);
+			}
 		}
 
-		return $server;
+		$ipcSignaling = new NetherNetIpcSignaling($server->getNegotiator(), $out, $this->logger);
+		$server->addSignaling($ipcSignaling);
+
+		return [$server, $ipcSignaling];
 	}
 
 	private static function sleepUntilNextTick(float $start) : void{
@@ -298,7 +230,7 @@ final class NetherNetThread extends Thread{
 		}
 	}
 
-	private function handleInbound(NetherNetChannel $in, NetherNetServer $server, NetherNetSessionListener $listener, MutableServerDataProvider $advert, MutableServerStatusProvider $status) : void{
+	private function handleInbound(NetherNetChannel $in, NetherNetServer $server, NetherNetSessionListener $listener, NetherNetIpcSignaling $ipcSignaling, MutableServerDataProvider $advert, MutableServerStatusProvider $status) : void{
 		while(($message = $in->read()) !== null){
 			$reader = new ByteBufferReader($message);
 			$type = ord($reader->readByteArray(1));
@@ -323,6 +255,24 @@ final class NetherNetThread extends Thread{
 			if($type === NetherNetIpc::M2T_UNBLOCK_ADDRESS){
 				$address = $reader->readByteArray(VarInt::readUnsignedInt($reader));
 				$server->unblockAddress($address);
+				continue;
+			}
+
+			if($type === NetherNetIpc::M2T_OFFER){
+				$requestId = VarInt::readUnsignedInt($reader);
+				$networkId = $reader->readByteArray(VarInt::readUnsignedInt($reader));
+				$clientAddress = $reader->readByteArray(VarInt::readUnsignedInt($reader));
+				$ipcSignaling->acceptOffer(
+					$requestId,
+					$networkId,
+					$reader->readByteArray($reader->getUnreadLength()),
+					$clientAddress === "" ? null : $clientAddress
+				);
+				continue;
+			}
+
+			if($type === NetherNetIpc::M2T_CANCEL_OFFER){
+				$ipcSignaling->cancel(VarInt::readUnsignedInt($reader));
 				continue;
 			}
 

@@ -37,6 +37,8 @@ final class NetherNetIpc{
 	public const T2M_RECEIPT = 3;
 	public const T2M_BANDWIDTH_STATS = 4;
 	public const T2M_PING = 5;
+	public const T2M_OFFER_ANSWER = 6;
+	public const T2M_OFFER_FAILURE = 7;
 
 	//main to thread
 	public const M2T_SEND = 0;
@@ -44,6 +46,8 @@ final class NetherNetIpc{
 	public const M2T_SET_SERVER_DATA = 2;
 	public const M2T_BLOCK_ADDRESS = 3;
 	public const M2T_UNBLOCK_ADDRESS = 4;
+	public const M2T_OFFER = 5;
+	public const M2T_CANCEL_OFFER = 6;
 
 	private function __construct(){
 		//NOOP
@@ -115,6 +119,25 @@ final class NetherNetIpc{
 		return $out->getData();
 	}
 
+	public static function offerAnswer(int $requestId, string $answerSdp) : string{
+		$out = new ByteBufferWriter();
+		$out->writeByteArray(chr(self::T2M_OFFER_ANSWER));
+		VarInt::writeUnsignedInt($out, $requestId);
+		$out->writeByteArray($answerSdp);
+
+		return $out->getData();
+	}
+
+	public static function offerFailure(int $requestId, int $errorCode, string $reason) : string{
+		$out = new ByteBufferWriter();
+		$out->writeByteArray(chr(self::T2M_OFFER_FAILURE));
+		VarInt::writeUnsignedInt($out, $requestId);
+		VarInt::writeUnsignedInt($out, $errorCode);
+		$out->writeByteArray($reason);
+
+		return $out->getData();
+	}
+
 	public static function send(int $sessionId, string $payload, ?int $receiptId) : string{
 		$out = new ByteBufferWriter();
 		$out->writeByteArray(chr(self::M2T_SEND));
@@ -149,6 +172,29 @@ final class NetherNetIpc{
 		$out->writeByteArray(chr(self::M2T_UNBLOCK_ADDRESS));
 		VarInt::writeUnsignedInt($out, strlen($address));
 		$out->writeByteArray($address);
+
+		return $out->getData();
+	}
+
+	public static function offer(int $requestId, string $networkId, ?string $clientAddress, string $offerSdp) : string{
+		$clientAddress ??= "";
+
+		$out = new ByteBufferWriter();
+		$out->writeByteArray(chr(self::M2T_OFFER));
+		VarInt::writeUnsignedInt($out, $requestId);
+		VarInt::writeUnsignedInt($out, strlen($networkId));
+		$out->writeByteArray($networkId);
+		VarInt::writeUnsignedInt($out, strlen($clientAddress));
+		$out->writeByteArray($clientAddress);
+		$out->writeByteArray($offerSdp);
+
+		return $out->getData();
+	}
+
+	public static function cancelOffer(int $requestId) : string{
+		$out = new ByteBufferWriter();
+		$out->writeByteArray(chr(self::M2T_CANCEL_OFFER));
+		VarInt::writeUnsignedInt($out, $requestId);
 
 		return $out->getData();
 	}

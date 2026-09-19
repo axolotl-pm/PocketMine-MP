@@ -23,22 +23,64 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\nethernet;
 
+use pmmp\thread\ThreadSafeArray;
 use pocketmine\lang\KnownTranslationFactory;
+use pocketmine\nethernet\crypto\CryptoException;
+use pocketmine\nethernet\discovery\LanSignaling;
+use pocketmine\nethernet\identity\ServerIdentity;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\EntityEventBroadcaster;
 use pocketmine\network\mcpe\PacketBroadcaster;
 use pocketmine\network\NetworkInterfaceStartException;
 use pocketmine\network\Transport;
 use pocketmine\Server;
+use pocketmine\ServerConfigGroup;
+use pocketmine\utils\Filesystem;
+use pocketmine\utils\Utils;
 use pocketmine\YmlServerProperties as Yml;
+use Symfony\Component\Filesystem\Path;
+use function chmod;
+use function dirname;
+use function get_debug_type;
+use function hash;
+use function is_array;
+use function is_dir;
+use function is_file;
+use function is_string;
+use function mkdir;
+use function substr;
+use function umask;
+use function unpack;
+use const PHP_INT_MAX;
 
 final class NetherNetTransport implements Transport{
 
 	public const NAME = "nethernet";
 
+	private const TLS_CERT_FILE = "nethernet-cert.pem";
+	private const TLS_KEY_FILE = "nethernet-key.pem";
+
+	/**
+	 * @var NetherNetSignalingFactory[]
+	 * @phpstan-var list<NetherNetSignalingFactory>
+	 */
+	private array $signaling = [];
+
+	private bool $started = false;
+
 	public function __construct(
 		private Server $server
 	){}
+
+	/**
+	 * @throws \LogicException if NetherNet has already started
+	 */
+	public function addSignaling(NetherNetSignalingFactory $factory) : void{
+		if($this->started){
+			throw new \LogicException("Signaling must be registered before NetherNet starts");
+		}
+		$this->signaling[] = $factory;
+	}
 
 	public function createInterfaces(
 		PacketBroadcaster $packetBroadcaster,
@@ -47,16 +89,21 @@ final class NetherNetTransport implements Transport{
 	) : array{
 		$configGroup = $this->server->getConfigGroup();
 
-		$keyFile = $configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_KEY_FILE, "nethernet.key");
+		$identityPem = $this->loadOrCreateIdentityPem($configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_KEY_FILE, "nethernet.key"));
+		$networkId = self::networkIdOf($identityPem);
+
+		$signaling = $this->signaling;
 		try{
 			$iceConfig = NetherNetIceConfiguration::parse(
 				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_ICE_SERVERS),
 				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE),
 				$configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false)
 			);
-			$reverseProxyNetworks = $configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_REVERSE_PROXY_ENABLED, false)
-				? NetherNetThread::parseReverseProxyNetworks($configGroup->getProperty(Yml::TRANSPORT_NETHERNET_REVERSE_PROXY_TRUSTED_IPS))
-				: null;
+			if($configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_ENABLED, true)){
+				$signaling = [$this->createBuiltinSignaling($configGroup, $networkId), ...$signaling];
+			}else{
+				$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_builtinSignalingDisabled()));
+			}
 		}catch(\InvalidArgumentException $e){
 			throw new NetworkInterfaceStartException("Invalid NetherNet settings in pocketmine.yml: " . $e->getMessage(), 0, $e);
 		}
@@ -64,6 +111,131 @@ final class NetherNetTransport implements Transport{
 			$this->server->getLogger()->warning($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_udpMuxWithoutPortRange(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX)));
 		}
 
-		return [new NetherNetInterface($this->server, $this->server->getIp(), $this->server->getPort(), $keyFile, $iceConfig, $reverseProxyNetworks, $packetBroadcaster, $entityEventBroadcaster, $typeConverter)];
+		$this->started = true;
+
+		return [new NetherNetInterface(
+			$this->server,
+			$identityPem,
+			$networkId,
+			$iceConfig,
+			ThreadSafeArray::fromArray($signaling),
+			$packetBroadcaster,
+			$entityEventBroadcaster,
+			$typeConverter
+		)];
+	}
+
+	/**
+	 * @throws \InvalidArgumentException
+	 */
+	private function createBuiltinSignaling(ServerConfigGroup $configGroup, int $networkId) : NetherNetBuiltinSignalingFactory{
+		[$certificate, $key] = $this->findTlsFiles();
+
+		return new NetherNetBuiltinSignalingFactory(
+			httpBindAddress: $this->server->getIp(),
+			httpPort: $this->server->getPort(),
+			tlsCertFile: $certificate,
+			tlsKeyFile: $key,
+			reverseProxyNetworks: $configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY_ENABLED, false)
+				? self::parseReverseProxyNetworks($configGroup->getProperty(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY_TRUSTED_IPS))
+				: null,
+			lanBindAddress: "0.0.0.0",
+			lanPort: LanSignaling::DEFAULT_PORT, //TODO: should this be configurable?
+			networkId: $networkId
+		);
+	}
+
+	/**
+	 * @phpstan-return list<string>
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	private static function parseReverseProxyNetworks(mixed $trustedIps) : array{
+		if($trustedIps === null){
+			$trustedIps = [];
+		}elseif(!is_array($trustedIps)){
+			throw new \InvalidArgumentException("Trusted IPs must be a list of addresses or CIDR blocks, got " . get_debug_type($trustedIps));
+		}
+
+		$networks = [];
+		foreach(Utils::promoteKeys($trustedIps) as $index => $entry){
+			if(!is_string($entry) || $entry === ""){
+				throw new \InvalidArgumentException("Trusted IPs entry $index must be an address or CIDR block, got " . get_debug_type($entry));
+			}
+			$networks[] = $entry;
+		}
+
+		return $networks;
+	}
+
+	/**
+	 * @phpstan-return array{?string, ?string}
+	 */
+	private function findTlsFiles() : array{
+		$certificate = Path::join($this->server->getDataPath(), self::TLS_CERT_FILE);
+		$key = Path::join($this->server->getDataPath(), self::TLS_KEY_FILE);
+
+		if(!is_file($certificate) || !is_file($key)){
+			$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_tls_disabled()));
+			return [null, null];
+		}
+
+		$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_tls_enabled()));
+		return [$certificate, $key];
+	}
+
+	/**
+	 * @throws NetworkInterfaceStartException
+	 */
+	private function loadOrCreateIdentityPem(string $identityKeyFile) : string{
+		$path = Path::makeAbsolute($identityKeyFile, $this->server->getDataPath());
+
+		if(is_file($path)){
+			$pem = Filesystem::fileGetContents($path);
+			try{
+				ServerIdentity::fromPrivateKeyPem($pem);
+			}catch(CryptoException $e){
+				throw new NetworkInterfaceStartException(
+					"NetherNet identity key $path is invalid",
+					0,
+					$e
+				);
+			}
+
+			return $pem;
+		}
+
+		try{
+			$pem = ServerIdentity::generate()->exportPrivateKeyPem();
+		}catch(CryptoException $e){
+			throw new NetworkInterfaceStartException("Could not create a NetherNet identity: " . $e->getMessage(), 0, $e);
+		}
+
+		$directory = dirname($path);
+		if(!is_dir($directory)){
+			@mkdir($directory, 0700, true);
+		}
+
+		$previousUmask = umask(0077);
+		try{
+			Filesystem::safeFilePutContents($path, $pem);
+		}catch(\RuntimeException $e){
+			$this->server->getLogger()->warning($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_server_nethernet_identityKeySaveFailed($path)));
+		}finally{
+			umask($previousUmask);
+		}
+		@chmod($path, 0600);
+
+		return $pem;
+	}
+
+	/**
+	 * Derives a deterministic 64-bit positive integer network ID from the identity key.
+	 */
+	private static function networkIdOf(string $identityPem) : int{
+		$digest = hash("sha256", $identityPem, true);
+		$id = unpack("P", substr($digest, 0, 8));
+
+		return $id === false ? 1 : (($id[1] & PHP_INT_MAX) | 1);
 	}
 }

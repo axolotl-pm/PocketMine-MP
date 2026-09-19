@@ -111,12 +111,14 @@ final class YmlServerProperties{
 	public const TRANSPORT = 'transport';
 	public const TRANSPORT_NAME = 'transport.name';
 	public const TRANSPORT_NETHERNET = 'transport.nethernet';
+	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING = 'transport.nethernet.builtin-signaling';
+	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING_ENABLED = 'transport.nethernet.builtin-signaling.enabled';
+	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY = 'transport.nethernet.builtin-signaling.reverse-proxy';
+	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY_ENABLED = 'transport.nethernet.builtin-signaling.reverse-proxy.enabled';
+	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY_TRUSTED_IPS = 'transport.nethernet.builtin-signaling.reverse-proxy.trusted-ips';
 	public const TRANSPORT_NETHERNET_ICE_SERVERS = 'transport.nethernet.ice-servers';
 	public const TRANSPORT_NETHERNET_ICE_UDP_MUX = 'transport.nethernet.ice-udp-mux';
 	public const TRANSPORT_NETHERNET_KEY_FILE = 'transport.nethernet.key-file';
 	public const TRANSPORT_NETHERNET_PORT_RANGE = 'transport.nethernet.port-range';
-	public const TRANSPORT_NETHERNET_REVERSE_PROXY = 'transport.nethernet.reverse-proxy';
-	public const TRANSPORT_NETHERNET_REVERSE_PROXY_ENABLED = 'transport.nethernet.reverse-proxy.enabled';
-	public const TRANSPORT_NETHERNET_REVERSE_PROXY_TRUSTED_IPS = 'transport.nethernet.reverse-proxy.trusted-ips';
 	public const WORLDS = 'worlds';
 }

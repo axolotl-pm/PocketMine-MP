@@ -91,33 +91,25 @@ transport:
   #Built-in options: raknet, nethernet. Plugins may register additional transports.
   name: nethernet
   #Settings for the NetherNet (WebRTC) transport.
-  #Applies only if nethernet is enabled above.
   nethernet:
     #Path to the persistent identity key, relative to the data directory.
     #Clients trust this key upon their first join.
     #Changing this file will prompt players to re-verify on their next connection.
     key-file: nethernet.key
 
-    #Whether to enable ICE UDP multiplexing.
-    #Setting this to true will make connections share one UDP socket, so a single forwarded
-    #port handles all of them.
-    #Useful when you have only a few ports available.
-    #The shared socket only uses a fixed port if port-range specifies a single port. Otherwise,
-    #the operating system assigns an arbitrary port each time the server starts.
-    #NOTE: TURN servers cannot be used with this setting.
+    #Enables ICE UDP multiplexing so connections share a single UDP socket.
+    #Only uses a fixed port if port-range specifies a single port; otherwise, an arbitrary port is assigned.
+    #NOTE: Cannot be used with TURN servers.
     ice-udp-mux: false
 
     #UDP port range for connections.
     #Parsed as [min, max], e.g. [19132, 19140]. Leave empty to use any available port.
     port-range:
 
-    #ICE servers to enable STUN/TURN relay.
-    #This is an advanced option. Do not modify unless you know what you are doing.
-    #Every listed server must be contacted before a connection can be established; unreachable
-    #servers will delay player connections until candidate gathering times out.
+    #STUN/TURN ICE servers for NAT traversal and relay.
+    #Unreachable servers will delay connection establishment until candidate gathering times out.
     ice-servers:
-      #You can specify a list of STUN/TURN ICE servers here.
-      #port may be omitted, in which case 3478 is used.
+      #port defaults to 3478 if omitted.
       #Example:
       #- type: stun
       #  host: stun.example.com
@@ -128,20 +120,23 @@ transport:
       #  username: <username for the TURN server>
       #  password: <password for the TURN server>
 
-    #Enable this when signaling connections arrive through a reverse proxy (nginx, Caddy, Cloudflare).
-    #The server will use the client's actual IP from proxy headers (X-Forwarded-For, X-Real-IP, etc.).
-    #Without this, features requiring the client's real IP (such as TURN relays) will fail.
-    reverse-proxy:
-      enabled: false
-      #IP addresses or CIDR blocks of reverse proxies whose forwarded headers are trusted.
-      #Headers from unlisted addresses are ignored to prevent IP address spoofing.
-      #Leave empty to trust headers from any connecting address. This is only safe if
-      #the signaling port is blocked from direct public access.
-      #CIDR notation is supported.
-      trusted-ips:
-      #Example:
-      #- 127.0.0.1
-      #- 192.168.0.0/16
+    #Built-in signaling channels: HTTP signaling endpoint (GET/POST /v1/join) and LAN broadcast discovery.
+    builtin-signaling:
+      #Disable if signaling is handled externally (e.g. by a custom signaling plugin using NetherNetInterface::acceptOffer()).
+      #If disabled without an alternative signaling mechanism, clients cannot connect.
+      enabled: true
+
+      #Enable when HTTP signaling is behind a reverse proxy (e.g. nginx, Caddy, Cloudflare).
+      #Allows resolving the client's real IP from forwarded headers for features like TURN relays.
+      reverse-proxy:
+        enabled: false
+        #List of trusted reverse proxy IP addresses or CIDR blocks.
+        #Forwarded headers from unlisted addresses are ignored to prevent IP address spoofing.
+        #Leave empty to trust headers from any address (only safe if public access to the signaling port is restricted).
+        trusted-ips:
+        #Example:
+        #- 127.0.0.1
+        #- 192.168.0.0/16
 
 debug:
   #If > 1, it will show debug messages in the console

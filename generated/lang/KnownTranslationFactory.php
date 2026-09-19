@@ -2849,6 +2849,10 @@ final class KnownTranslationFactory{
 		]);
 	}
 
+	public static function pocketmine_server_nethernet_builtinSignalingDisabled() : Translatable{
+		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_BUILTINSIGNALINGDISABLED, []);
+	}
+
 	public static function pocketmine_server_nethernet_identityKeySaveFailed(Translatable|string $param0) : Translatable{
 		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETHERNET_IDENTITYKEYSAVEFAILED, [
 			0 => $param0,
