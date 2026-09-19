@@ -11,6 +11,10 @@ crashdumps/*
 *.txt
 *.phar
 server.properties
+# the private key clients pin this server's NetherNet identity by - never commit it
+nethernet.key
+nethernet-cert.pem
+nethernet-key.pem
 /pocketmine.yml
 /plugin_list.yml
 memory_dumps/*
