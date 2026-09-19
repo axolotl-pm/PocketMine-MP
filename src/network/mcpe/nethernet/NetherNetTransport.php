@@ -102,7 +102,8 @@ final class NetherNetTransport implements Transport{
 				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_ICE_SERVERS),
 				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE),
 				$configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false),
-				$bindAddress === "0.0.0.0" ? null : $bindAddress
+				$bindAddress === "0.0.0.0" ? null : $bindAddress,
+				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_ADVERTISE_ADDRESSES)
 			);
 			if($configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_ENABLED, true)){
 				$signaling = [$this->createBuiltinSignaling($configGroup, $networkId), ...$signaling];

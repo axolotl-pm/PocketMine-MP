@@ -208,7 +208,8 @@ final class NetherNetThread extends Thread{
 				sctp: new SctpConfiguration(
 					heartbeatInterval: self::SCTP_HEARTBEAT_INTERVAL,
 					maxRetransmitAttempts: self::SCTP_MAX_RETRANSMIT_ATTEMPTS
-				)
+				),
+				advertisedAddresses: $this->iceConfig->getAdvertisedAddresses()
 			),
 			$listener
 		);

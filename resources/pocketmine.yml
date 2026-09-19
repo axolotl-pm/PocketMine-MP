@@ -111,6 +111,14 @@ transport:
     #Parsed as [min, max], e.g. [19132, 19140]. Leave empty to use any available port.
     port-range:
 
+    #IP addresses advertised to clients for peer connections instead of locally gathered interface addresses.
+    #Useful when behind a 1:1 NAT (specify the public IP) or when the server has unreachable internal interfaces.
+    #Addresses are announced using the local bound port; 1:1 port forwarding without port translation is required.
+    #Only affects HTTP signaling; LAN discovery always advertises local addresses. Leave empty to advertise all gathered addresses.
+    advertise-addresses:
+    #Example:
+    #- 203.0.113.10
+
     #STUN/TURN ICE servers for NAT traversal and relay.
     #Unreachable servers will delay connection establishment until candidate gathering times out.
     ice-servers:

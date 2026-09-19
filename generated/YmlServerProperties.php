@@ -111,6 +111,7 @@ final class YmlServerProperties{
 	public const TRANSPORT = 'transport';
 	public const TRANSPORT_NAME = 'transport.name';
 	public const TRANSPORT_NETHERNET = 'transport.nethernet';
+	public const TRANSPORT_NETHERNET_ADVERTISE_ADDRESSES = 'transport.nethernet.advertise-addresses';
 	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING = 'transport.nethernet.builtin-signaling';
 	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING_ENABLED = 'transport.nethernet.builtin-signaling.enabled';
 	public const TRANSPORT_NETHERNET_BUILTIN_SIGNALING_PORT = 'transport.nethernet.builtin-signaling.port';

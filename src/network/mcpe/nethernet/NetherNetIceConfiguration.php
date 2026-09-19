@@ -26,11 +26,14 @@ namespace pocketmine\network\mcpe\nethernet;
 use pmmp\thread\ThreadSafe;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\utils\Utils;
+use function array_values;
 use function count;
+use function filter_var;
 use function get_debug_type;
 use function is_array;
 use function is_int;
 use function is_string;
+use const FILTER_VALIDATE_IP;
 
 final class NetherNetIceConfiguration extends ThreadSafe{
 
@@ -39,22 +42,28 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 	/** @phpstan-var ThreadSafeArray<int, NetherNetIceServer> */
 	private ThreadSafeArray $servers;
 
+	/** @phpstan-var ThreadSafeArray<int, string>|null */
+	private ?ThreadSafeArray $advertisedAddresses;
+
 	/**
 	 * Both port range bounds are null when any port may be used.
 	 *
 	 * @param NetherNetIceServer[] $servers
+	 * @phpstan-param list<string>|null $advertisedAddresses
 	 */
 	public function __construct(
 		array $servers,
 		private bool $udpMux,
 		private ?int $portRangeBegin,
 		private ?int $portRangeEnd,
-		private ?string $bindAddress = null
+		private ?string $bindAddress = null,
+		?array $advertisedAddresses = null
 	){
 		$this->servers = ThreadSafeArray::fromArray($servers);
+		$this->advertisedAddresses = $advertisedAddresses === null ? null : ThreadSafeArray::fromArray($advertisedAddresses);
 	}
 
-	public static function parse(mixed $iceServers, mixed $portRange, bool $udpMux, ?string $bindAddress = null) : self{
+	public static function parse(mixed $iceServers, mixed $portRange, bool $udpMux, ?string $bindAddress = null, mixed $advertiseAddresses = null) : self{
 		[$portRangeBegin, $portRangeEnd] = self::parsePortRange($portRange);
 
 		if($iceServers === null){
@@ -72,7 +81,31 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 			$servers[] = $server;
 		}
 
-		return new self($servers, $udpMux, $portRangeBegin, $portRangeEnd, $bindAddress);
+		return new self($servers, $udpMux, $portRangeBegin, $portRangeEnd, $bindAddress, self::parseAdvertiseAddresses($advertiseAddresses));
+	}
+
+	/**
+	 * @throws \InvalidArgumentException
+	 *
+	 * @phpstan-return list<string>|null
+	 */
+	private static function parseAdvertiseAddresses(mixed $advertiseAddresses) : ?array{
+		if($advertiseAddresses === null || $advertiseAddresses === []){
+			return null;
+		}
+		if(!is_array($advertiseAddresses)){
+			throw new \InvalidArgumentException("advertise-addresses must be a list of IP addresses, got " . get_debug_type($advertiseAddresses));
+		}
+
+		$addresses = [];
+		foreach(Utils::promoteKeys($advertiseAddresses) as $index => $entry){
+			if(!is_string($entry) || filter_var($entry, FILTER_VALIDATE_IP) === false){
+				throw new \InvalidArgumentException("advertise-addresses entry $index must be a valid IP address, got " . (is_string($entry) ? "\"$entry\"" : get_debug_type($entry)));
+			}
+			$addresses[] = $entry;
+		}
+
+		return $addresses;
 	}
 
 	/**
@@ -170,4 +203,12 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 	public function getPortRangeEnd() : ?int{ return $this->portRangeEnd; }
 
 	public function getBindAddress() : ?string{ return $this->bindAddress; }
+
+	/**
+	 * @return string[]|null
+	 * @phpstan-return list<string>|null
+	 */
+	public function getAdvertisedAddresses() : ?array{
+		return $this->advertisedAddresses === null ? null : array_values((array) $this->advertisedAddresses);
+	}
 }
