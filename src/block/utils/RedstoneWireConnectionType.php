@@ -21,19 +21,10 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\world\sound;
+namespace pocketmine\block\utils;
 
-use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\ClientboundUpdateSoundDataPacket;
-use pocketmine\network\mcpe\protocol\types\sound\SoundDataEvent;
-
-class RecordStopSound implements Sound{
-	public function __construct(private int $serverSoundHandleId = 0){
-	}
-
-	public function encode(Vector3 $pos) : array{
-		return [
-			ClientboundUpdateSoundDataPacket::create($this->serverSoundHandleId, SoundDataEvent::stop())
-		];
-	}
+enum RedstoneWireConnectionType : int{
+	case NONE = 0;
+	case SIDE = 1;
+	case UP = 2;
 }
