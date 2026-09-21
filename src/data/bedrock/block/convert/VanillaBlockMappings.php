@@ -464,6 +464,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::PINK_TULIP(), Ids::PINK_TULIP);
 		$reg->mapSimple(Blocks::RED_TULIP(), Ids::RED_TULIP);
 		$reg->mapSimple(Blocks::WHITE_TULIP(), Ids::WHITE_TULIP);
+		$reg->mapSimple(Blocks::RED_SHRUB(), Ids::RED_SHRUB);
 
 		$reg->mapSimple(Blocks::CACTUS_FLOWER(), Ids::CACTUS_FLOWER);
 		$reg->mapSimple(Blocks::CRIMSON_FUNGUS(), Ids::CRIMSON_FUNGUS);
