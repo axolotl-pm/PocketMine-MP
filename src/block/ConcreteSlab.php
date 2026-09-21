@@ -26,7 +26,6 @@ namespace pocketmine\block;
 use pocketmine\block\utils\Colored;
 use pocketmine\block\utils\ColoredTrait;
 
-final class ConcreteSlab extends Slab implements Colored
-{
+final class ConcreteSlab extends Slab implements Colored{
 	use ColoredTrait;
 }

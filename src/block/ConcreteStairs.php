@@ -26,7 +26,6 @@ namespace pocketmine\block;
 use pocketmine\block\utils\Colored;
 use pocketmine\block\utils\ColoredTrait;
 
-final class ConcreteStairs extends Stair implements Colored
-{
+final class ConcreteStairs extends Stair implements Colored{
 	use ColoredTrait;
 }
