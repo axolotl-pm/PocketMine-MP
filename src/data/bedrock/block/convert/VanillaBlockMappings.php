@@ -464,6 +464,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::PINK_TULIP(), Ids::PINK_TULIP);
 		$reg->mapSimple(Blocks::RED_TULIP(), Ids::RED_TULIP);
 		$reg->mapSimple(Blocks::WHITE_TULIP(), Ids::WHITE_TULIP);
+		$reg->mapSimple(Blocks::RED_SHRUB(), Ids::RED_SHRUB);
 
 		$reg->mapSimple(Blocks::CACTUS_FLOWER(), Ids::CACTUS_FLOWER);
 		$reg->mapSimple(Blocks::CRIMSON_FUNGUS(), Ids::CRIMSON_FUNGUS);
@@ -494,6 +495,12 @@ final class VanillaBlockMappings{
 		$reg->mapColored(Blocks::STAINED_GLASS(), "minecraft:", "_stained_glass");
 		$reg->mapColoredHorizontalConnections(Blocks::STAINED_GLASS_PANE(), "minecraft:", "_stained_glass_pane");
 		$reg->mapColored(Blocks::WOOL(), "minecraft:", "_wool");
+
+		$reg->mapColoredSlab(Blocks::WOOL_SLAB(), "wool");
+		$reg->mapColoredStairs(Blocks::WOOL_STAIRS(), "wool");
+
+		$reg->mapColoredSlab(Blocks::CONCRETE_SLAB(), "concrete");
+		$reg->mapColoredStairs(Blocks::CONCRETE_STAIRS(), "concrete");
 
 		$reg->mapFlattenedId(FlattenedIdModel::create(Blocks::GLAZED_TERRACOTTA())
 			->idComponents([

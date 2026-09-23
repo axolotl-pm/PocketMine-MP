@@ -212,6 +212,8 @@ final class VanillaBlocks{
 	private static ChemistryTable $_mCOMPOUND_CREATOR;
 	private static Concrete $_mCONCRETE;
 	private static ConcretePowder $_mCONCRETE_POWDER;
+	private static ConcreteSlab $_mCONCRETE_SLAB;
+	private static ConcreteStairs $_mCONCRETE_STAIRS;
 	private static ContinuousPotentSulfur $_mCONTINUOUS_POTENT_SULFUR;
 	private static Copper $_mCOPPER;
 	private static CopperBars $_mCOPPER_BARS;
@@ -723,6 +725,7 @@ final class VanillaBlocks{
 	private static Slab $_mRED_SANDSTONE_SLAB;
 	private static Stair $_mRED_SANDSTONE_STAIRS;
 	private static Wall $_mRED_SANDSTONE_WALL;
+	private static RedShrub $_mRED_SHRUB;
 	private static Torch $_mRED_TORCH;
 	private static Flower $_mRED_TULIP;
 	private static Opaque $_mREINFORCED_DEEPSLATE;
@@ -868,6 +871,8 @@ final class VanillaBlocks{
 	private static Flower $_mWHITE_TULIP;
 	private static WitherRose $_mWITHER_ROSE;
 	private static Wool $_mWOOL;
+	private static WoolSlab $_mWOOL_SLAB;
+	private static WoolStair $_mWOOL_STAIRS;
 
 	/**
 	 * @var Block[]
@@ -1076,6 +1081,8 @@ final class VanillaBlocks{
 			"compound_creator" => fn(ChemistryTable $v) => self::$_mCOMPOUND_CREATOR = $v,
 			"concrete" => fn(Concrete $v) => self::$_mCONCRETE = $v,
 			"concrete_powder" => fn(ConcretePowder $v) => self::$_mCONCRETE_POWDER = $v,
+			"concrete_slab" => fn(ConcreteSlab $v) => self::$_mCONCRETE_SLAB = $v,
+			"concrete_stairs" => fn(ConcreteStairs $v) => self::$_mCONCRETE_STAIRS = $v,
 			"continuous_potent_sulfur" => fn(ContinuousPotentSulfur $v) => self::$_mCONTINUOUS_POTENT_SULFUR = $v,
 			"copper" => fn(Copper $v) => self::$_mCOPPER = $v,
 			"copper_bars" => fn(CopperBars $v) => self::$_mCOPPER_BARS = $v,
@@ -1587,6 +1594,7 @@ final class VanillaBlocks{
 			"red_sandstone_slab" => fn(Slab $v) => self::$_mRED_SANDSTONE_SLAB = $v,
 			"red_sandstone_stairs" => fn(Stair $v) => self::$_mRED_SANDSTONE_STAIRS = $v,
 			"red_sandstone_wall" => fn(Wall $v) => self::$_mRED_SANDSTONE_WALL = $v,
+			"red_shrub" => fn(RedShrub $v) => self::$_mRED_SHRUB = $v,
 			"red_torch" => fn(Torch $v) => self::$_mRED_TORCH = $v,
 			"red_tulip" => fn(Flower $v) => self::$_mRED_TULIP = $v,
 			"reinforced_deepslate" => fn(Opaque $v) => self::$_mREINFORCED_DEEPSLATE = $v,
@@ -1732,6 +1740,8 @@ final class VanillaBlocks{
 			"white_tulip" => fn(Flower $v) => self::$_mWHITE_TULIP = $v,
 			"wither_rose" => fn(WitherRose $v) => self::$_mWITHER_ROSE = $v,
 			"wool" => fn(Wool $v) => self::$_mWOOL = $v,
+			"wool_slab" => fn(WoolSlab $v) => self::$_mWOOL_SLAB = $v,
+			"wool_stairs" => fn(WoolStair $v) => self::$_mWOOL_STAIRS = $v,
 		];
 	}
 
@@ -2638,6 +2648,16 @@ final class VanillaBlocks{
 	public static function CONCRETE_POWDER() : ConcretePowder{
 		if(!isset(self::$_mCONCRETE_POWDER)){ self::init(); }
 		return clone self::$_mCONCRETE_POWDER;
+	}
+
+	public static function CONCRETE_SLAB() : ConcreteSlab{
+		if(!isset(self::$_mCONCRETE_SLAB)){ self::init(); }
+		return clone self::$_mCONCRETE_SLAB;
+	}
+
+	public static function CONCRETE_STAIRS() : ConcreteStairs{
+		if(!isset(self::$_mCONCRETE_STAIRS)){ self::init(); }
+		return clone self::$_mCONCRETE_STAIRS;
 	}
 
 	public static function CONTINUOUS_POTENT_SULFUR() : ContinuousPotentSulfur{
@@ -5195,6 +5215,11 @@ final class VanillaBlocks{
 		return clone self::$_mRED_SANDSTONE_WALL;
 	}
 
+	public static function RED_SHRUB() : RedShrub{
+		if(!isset(self::$_mRED_SHRUB)){ self::init(); }
+		return clone self::$_mRED_SHRUB;
+	}
+
 	public static function RED_TORCH() : Torch{
 		if(!isset(self::$_mRED_TORCH)){ self::init(); }
 		return clone self::$_mRED_TORCH;
@@ -5918,5 +5943,15 @@ final class VanillaBlocks{
 	public static function WOOL() : Wool{
 		if(!isset(self::$_mWOOL)){ self::init(); }
 		return clone self::$_mWOOL;
+	}
+
+	public static function WOOL_SLAB() : WoolSlab{
+		if(!isset(self::$_mWOOL_SLAB)){ self::init(); }
+		return clone self::$_mWOOL_SLAB;
+	}
+
+	public static function WOOL_STAIRS() : WoolStair{
+		if(!isset(self::$_mWOOL_STAIRS)){ self::init(); }
+		return clone self::$_mWOOL_STAIRS;
 	}
 }
