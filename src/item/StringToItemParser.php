@@ -1379,6 +1379,7 @@ final class StringToItemParser extends StringToTParser{
 		$result->register("clown_fish", fn() => Items::CLOWNFISH());
 		$result->register("clownfish", fn() => Items::CLOWNFISH());
 		$result->register("coal", fn() => Items::COAL());
+		$result->register("bolt_armor_trim_smithing_template", fn() => Items::BOLT_ARMOR_TRIM_SMITHING_TEMPLATE());
 		$result->register("coast_armor_trim_smithing_template", fn() => Items::COAST_ARMOR_TRIM_SMITHING_TEMPLATE());
 		$result->register("cocoa_beans", fn() => Items::COCOA_BEANS());
 		$result->register("cod", fn() => Items::RAW_FISH());
@@ -1443,6 +1444,7 @@ final class StringToItemParser extends StringToTParser{
 		$result->register("fish", fn() => Items::RAW_FISH());
 		$result->register("fishing_rod", fn() => Items::FISHING_ROD());
 		$result->register("flint", fn() => Items::FLINT());
+		$result->register("flow_armor_trim_smithing_template", fn() => Items::FLOW_ARMOR_TRIM_SMITHING_TEMPLATE());
 		$result->register("flint_and_steel", fn() => Items::FLINT_AND_STEEL());
 		$result->register("flint_steel", fn() => Items::FLINT_AND_STEEL());
 		$result->register("ghast_tear", fn() => Items::GHAST_TEAR());
