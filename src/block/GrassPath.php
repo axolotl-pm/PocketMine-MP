@@ -34,7 +34,7 @@ class GrassPath extends Transparent{
 		return [AxisAlignedBB::one()->trimmedCopy(Facing::UP, 1 / 16)];
 	}
 
-	public function getSupportType(int $facing) : SupportType{
+	public function getSupportType(Facing $facing) : SupportType{
 		return match($facing){
 			Facing::UP => SupportType::EDGE,
 			Facing::DOWN => SupportType::FULL,

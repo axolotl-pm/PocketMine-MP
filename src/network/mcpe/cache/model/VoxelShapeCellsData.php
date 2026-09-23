@@ -21,19 +21,25 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\world\sound;
+namespace pocketmine\network\mcpe\cache\model;
 
-use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\ClientboundUpdateSoundDataPacket;
-use pocketmine\network\mcpe\protocol\types\sound\SoundDataEvent;
+/**
+ * Model for loading a voxel shape's cell grid from JSON.
+ */
+final class VoxelShapeCellsData{
+	/** @required */
+	public int $xSize;
 
-class RecordStopSound implements Sound{
-	public function __construct(private int $serverSoundHandleId = 0){
-	}
+	/** @required */
+	public int $ySize;
 
-	public function encode(Vector3 $pos) : array{
-		return [
-			ClientboundUpdateSoundDataPacket::create($this->serverSoundHandleId, SoundDataEvent::stop(), null, null, null, null, null, null)
-		];
-	}
+	/** @required */
+	public int $zSize;
+
+	/**
+	 * @required
+	 * @var int[]
+	 * @phpstan-var list<int>
+	 */
+	public array $storage;
 }

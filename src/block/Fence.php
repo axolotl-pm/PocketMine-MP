@@ -23,35 +23,34 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\HorizontalConnectable;
+use pocketmine\block\utils\HorizontalConnectableTrait;
+use pocketmine\block\utils\HorizontalFacingOption;
 use pocketmine\block\utils\SupportType;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use function count;
 
-class Fence extends Transparent{
-	/** @var bool[] facing => dummy */
-	protected array $connections = [];
+class Fence extends Transparent implements HorizontalConnectable{
+	use HorizontalConnectableTrait;
 
 	public function getThickness() : float{
 		return 0.25;
 	}
 
-	public function readStateFromWorld() : Block{
-		parent::readStateFromWorld();
-
-		$this->collisionBoxes = null;
-
+	protected function recalculateConnections() : bool{
+		$changed = false;
 		foreach(Facing::HORIZONTAL as $facing){
+			$horizontalFacing = HorizontalFacingOption::fromFacing($facing);
 			$block = $this->getSide($facing);
-			if($block instanceof static || $block instanceof FenceGate || $block->getSupportType(Facing::opposite($facing)) === SupportType::FULL){
-				$this->connections[$facing->value] = true;
-			}else{
-				unset($this->connections[$facing->value]);
+			$connected = $block instanceof static || $block instanceof FenceGate || $block->getSupportType(Facing::opposite($facing)) === SupportType::FULL;
+			if($connected !== $this->isConnectedAt($horizontalFacing)){
+				$this->setConnectedAt($horizontalFacing, $connected);
+				$changed = true;
 			}
 		}
-
-		return $this;
+		return $changed;
 	}
 
 	protected function recalculateCollisionBoxes() : array{
@@ -59,8 +58,8 @@ class Fence extends Transparent{
 
 		$bbs = [];
 
-		$connectWest = isset($this->connections[Facing::WEST->value]);
-		$connectEast = isset($this->connections[Facing::EAST->value]);
+		$connectWest = $this->isConnectedAt(HorizontalFacingOption::WEST);
+		$connectEast = $this->isConnectedAt(HorizontalFacingOption::EAST);
 
 		if($connectWest || $connectEast){
 			//X axis (west/east)
@@ -71,8 +70,8 @@ class Fence extends Transparent{
 				->trimmedCopy(Facing::EAST, $connectEast ? 0 : $inset);
 		}
 
-		$connectNorth = isset($this->connections[Facing::NORTH->value]);
-		$connectSouth = isset($this->connections[Facing::SOUTH->value]);
+		$connectNorth = $this->isConnectedAt(HorizontalFacingOption::NORTH);
+		$connectSouth = $this->isConnectedAt(HorizontalFacingOption::SOUTH);
 
 		if($connectNorth || $connectSouth){
 			//Z axis (north/south)

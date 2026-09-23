@@ -99,7 +99,7 @@ class Farmland extends Transparent{
 		return [AxisAlignedBB::one()->trimmedCopy(Facing::UP, 1 / 16)];
 	}
 
-	public function getSupportType(int $facing) : SupportType{
+	public function getSupportType(Facing $facing) : SupportType{
 		return match($facing){
 			Facing::DOWN => SupportType::FULL,
 			default => SupportType::NONE,
