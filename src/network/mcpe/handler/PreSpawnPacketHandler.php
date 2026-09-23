@@ -71,6 +71,12 @@ class PreSpawnPacketHandler extends PacketHandler{
 
 			$typeConverter = $this->session->getTypeConverter();
 
+			$this->session->getLogger()->debug("Sending JigsawStructureData");
+			$this->session->sendDataPacket(StaticPacketCache::getInstance()->getJigsawStructureData());
+
+			$this->session->getLogger()->debug("Sending VoxelShapesPacket");
+			$this->session->sendDataPacket(StaticPacketCache::getInstance()->getVoxelShapes());
+
 			$this->session->getLogger()->debug("Preparing StartGamePacket");
 			$levelSettings = new LevelSettings();
 			$levelSettings->seed = -1;
@@ -115,7 +121,7 @@ class PreSpawnPacketHandler extends PacketHandler{
 				new NetworkPermissions(disableClientSounds: true),
 				null,
 				new ServerTelemetryData("", "", "", ""),
-				[],
+				StaticPacketCache::getInstance()->getBlockPaletteEntries(),
 				0,
 			));
 
