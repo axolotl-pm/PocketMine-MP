@@ -363,7 +363,11 @@ final class ItemTypeIds{
 	public const BAMBOO_HANGING_SIGN = 20324;
 	public const BAMBOO_SIGN = 20325;
 
-	public const FIRST_UNUSED_ITEM_ID = 20326;
+	public const POPLAR_SIGN = 20326;
+	public const POPLAR_HANGING_SIGN = 20327;
+	public const POPLAR_BOAT = 20328;
+
+	public const FIRST_UNUSED_ITEM_ID = 20329;
 
 	private static int $nextDynamicId = self::FIRST_UNUSED_ITEM_ID;
 

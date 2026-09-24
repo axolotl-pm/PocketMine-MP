@@ -84,6 +84,7 @@ use pocketmine\block\SmallDripleaf;
 use pocketmine\block\SnowLayer;
 use pocketmine\block\Sponge;
 use pocketmine\block\StraightOnlyRail;
+use pocketmine\block\StrawBed;
 use pocketmine\block\Sugarcane;
 use pocketmine\block\SweetBerryBush;
 use pocketmine\block\TNT;
@@ -547,8 +548,11 @@ final class VanillaBlockMappings{
 			Ids::JUNGLE_LEAVES => Blocks::JUNGLE_LEAVES(),
 			Ids::MANGROVE_LEAVES => Blocks::MANGROVE_LEAVES(),
 			Ids::OAK_LEAVES => Blocks::OAK_LEAVES(),
+			Ids::ORANGE_POPLAR_LEAVES => Blocks::ORANGE_POPLAR_LEAVES(),
 			Ids::PALE_OAK_LEAVES => Blocks::PALE_OAK_LEAVES(),
-			Ids::SPRUCE_LEAVES => Blocks::SPRUCE_LEAVES()
+			Ids::RED_POPLAR_LEAVES => Blocks::RED_POPLAR_LEAVES(),
+			Ids::SPRUCE_LEAVES => Blocks::SPRUCE_LEAVES(),
+			Ids::YELLOW_POPLAR_LEAVES => Blocks::YELLOW_POPLAR_LEAVES()
 		] as $id => $block){
 			$reg->mapModel(Model::create($block, $id)->properties($properties));
 		}
@@ -1034,7 +1038,8 @@ final class VanillaBlockMappings{
 			[Blocks::OAK_BUTTON(), Ids::WOODEN_BUTTON],
 			[Blocks::PALE_OAK_BUTTON(), Ids::PALE_OAK_BUTTON],
 			[Blocks::SPRUCE_BUTTON(), Ids::SPRUCE_BUTTON],
-			[Blocks::WARPED_BUTTON(), Ids::WARPED_BUTTON]
+			[Blocks::WARPED_BUTTON(), Ids::WARPED_BUTTON],
+			[Blocks::POPLAR_BUTTON(), Ids::POPLAR_BUTTON]
 		] as [$block, $id]){
 			$reg->mapModel(Model::create($block, $id)->properties($commonProperties->buttonProperties));
 		}
@@ -1052,7 +1057,8 @@ final class VanillaBlockMappings{
 			[Blocks::OAK_DOOR(), Ids::WOODEN_DOOR],
 			[Blocks::PALE_OAK_DOOR(), Ids::PALE_OAK_DOOR],
 			[Blocks::SPRUCE_DOOR(), Ids::SPRUCE_DOOR],
-			[Blocks::WARPED_DOOR(), Ids::WARPED_DOOR]
+			[Blocks::WARPED_DOOR(), Ids::WARPED_DOOR],
+			[Blocks::POPLAR_DOOR(), Ids::POPLAR_DOOR]
 		] as [$block, $id]){
 			$reg->mapModel(Model::create($block, $id)->properties($commonProperties->doorProperties));
 		}
@@ -1070,7 +1076,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_FENCE(), Ids::PALE_OAK_FENCE],
 			[Blocks::SPRUCE_FENCE(), Ids::SPRUCE_FENCE],
 			[Blocks::CRIMSON_FENCE(), Ids::CRIMSON_FENCE],
-			[Blocks::WARPED_FENCE(), Ids::WARPED_FENCE]
+			[Blocks::WARPED_FENCE(), Ids::WARPED_FENCE],
+			[Blocks::POPLAR_FENCE(), Ids::POPLAR_FENCE]
 		] as [$block, $id]){
 			$reg->mapHorizontalConnections($block, $id);
 		}
@@ -1087,7 +1094,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_FENCE_GATE(), Ids::PALE_OAK_FENCE_GATE],
 			[Blocks::SPRUCE_FENCE_GATE(), Ids::SPRUCE_FENCE_GATE],
 			[Blocks::CRIMSON_FENCE_GATE(), Ids::CRIMSON_FENCE_GATE],
-			[Blocks::WARPED_FENCE_GATE(), Ids::WARPED_FENCE_GATE]
+			[Blocks::WARPED_FENCE_GATE(), Ids::WARPED_FENCE_GATE],
+			[Blocks::POPLAR_FENCE_GATE(), Ids::POPLAR_FENCE_GATE]
 		] as [$block, $id]){
 			$reg->mapModel(Model::create($block, $id)->properties($commonProperties->fenceGateProperties));
 		}
@@ -1104,7 +1112,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_SIGN(), Ids::PALE_OAK_STANDING_SIGN],
 			[Blocks::SPRUCE_SIGN(), Ids::SPRUCE_STANDING_SIGN],
 			[Blocks::CRIMSON_SIGN(), Ids::CRIMSON_STANDING_SIGN],
-			[Blocks::WARPED_SIGN(), Ids::WARPED_STANDING_SIGN]
+			[Blocks::WARPED_SIGN(), Ids::WARPED_STANDING_SIGN],
+			[Blocks::POPLAR_SIGN(), Ids::POPLAR_STANDING_SIGN]
 		] as [$block, $id]){
 			$reg->mapModel(Model::create($block, $id)->properties([$commonProperties->floorSignLikeRotation]));
 		}
@@ -1122,6 +1131,7 @@ final class VanillaBlockMappings{
 			[Blocks::SPRUCE_LOG(), "spruce_log"],
 			[Blocks::CRIMSON_STEM(), "crimson_stem"],
 			[Blocks::WARPED_STEM(), "warped_stem"],
+			[Blocks::POPLAR_LOG(), "poplar_log"],
 
 			//all-sided logs
 			[Blocks::ACACIA_WOOD(), "acacia_wood"],
@@ -1135,6 +1145,7 @@ final class VanillaBlockMappings{
 			[Blocks::SPRUCE_WOOD(), "spruce_wood"],
 			[Blocks::CRIMSON_HYPHAE(), "crimson_hyphae"],
 			[Blocks::WARPED_HYPHAE(), "warped_hyphae"],
+			[Blocks::POPLAR_WOOD(), "poplar_wood"],
 
 			//bamboo is a special cookie - its name differs and there's no all-sided variant
 			[Blocks::BAMBOO_BLOCK(), "bamboo_block"],
@@ -1159,7 +1170,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_PLANKS(), Ids::PALE_OAK_PLANKS],
 			[Blocks::SPRUCE_PLANKS(), Ids::SPRUCE_PLANKS],
 			[Blocks::CRIMSON_PLANKS(), Ids::CRIMSON_PLANKS],
-			[Blocks::WARPED_PLANKS(), Ids::WARPED_PLANKS]
+			[Blocks::WARPED_PLANKS(), Ids::WARPED_PLANKS],
+			[Blocks::POPLAR_PLANKS(), Ids::POPLAR_PLANKS]
 		] as [$block, $id]){
 			$reg->mapSimple($block, $id);
 		}
@@ -1177,7 +1189,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_PRESSURE_PLATE(), Ids::PALE_OAK_PRESSURE_PLATE],
 			[Blocks::SPRUCE_PRESSURE_PLATE(), Ids::SPRUCE_PRESSURE_PLATE],
 			[Blocks::CRIMSON_PRESSURE_PLATE(), Ids::CRIMSON_PRESSURE_PLATE],
-			[Blocks::WARPED_PRESSURE_PLATE(), Ids::WARPED_PRESSURE_PLATE]
+			[Blocks::WARPED_PRESSURE_PLATE(), Ids::WARPED_PRESSURE_PLATE],
+			[Blocks::POPLAR_PRESSURE_PLATE(), Ids::POPLAR_PRESSURE_PLATE]
 		] as [$block, $id]){
 			$reg->mapModel(Model::create($block, $id)->properties($commonProperties->simplePressurePlateProperties));
 		}
@@ -1196,7 +1209,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_SLAB(), "pale_oak"],
 			[Blocks::SPRUCE_SLAB(), "spruce"],
 			[Blocks::CRIMSON_SLAB(), "crimson"],
-			[Blocks::WARPED_SLAB(), "warped"]
+			[Blocks::WARPED_SLAB(), "warped"],
+			[Blocks::POPLAR_SLAB(), "poplar"]
 		] as [$block, $type]){
 			$reg->mapSlab($block, $type);
 		}
@@ -1215,7 +1229,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_STAIRS(), Ids::PALE_OAK_STAIRS],
 			[Blocks::SPRUCE_STAIRS(), Ids::SPRUCE_STAIRS],
 			[Blocks::CRIMSON_STAIRS(), Ids::CRIMSON_STAIRS],
-			[Blocks::WARPED_STAIRS(), Ids::WARPED_STAIRS]
+			[Blocks::WARPED_STAIRS(), Ids::WARPED_STAIRS],
+			[Blocks::POPLAR_STAIRS(), Ids::POPLAR_STAIRS]
 		] as [$block, $id]){
 			$reg->mapStairs($block, $id);
 		}
@@ -1233,7 +1248,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_TRAPDOOR(), Ids::PALE_OAK_TRAPDOOR],
 			[Blocks::SPRUCE_TRAPDOOR(), Ids::SPRUCE_TRAPDOOR],
 			[Blocks::CRIMSON_TRAPDOOR(), Ids::CRIMSON_TRAPDOOR],
-			[Blocks::WARPED_TRAPDOOR(), Ids::WARPED_TRAPDOOR]
+			[Blocks::WARPED_TRAPDOOR(), Ids::WARPED_TRAPDOOR],
+			[Blocks::POPLAR_TRAPDOOR(), Ids::POPLAR_TRAPDOOR]
 		] as [$block, $id]){
 			$reg->mapModel(Model::create($block, $id)->properties($commonProperties->trapdoorProperties));
 		}
@@ -1251,7 +1267,8 @@ final class VanillaBlockMappings{
 			[Blocks::PALE_OAK_WALL_SIGN(), Ids::PALE_OAK_WALL_SIGN],
 			[Blocks::SPRUCE_WALL_SIGN(), Ids::SPRUCE_WALL_SIGN],
 			[Blocks::CRIMSON_WALL_SIGN(), Ids::CRIMSON_WALL_SIGN],
-			[Blocks::WARPED_WALL_SIGN(), Ids::WARPED_WALL_SIGN]
+			[Blocks::WARPED_WALL_SIGN(), Ids::WARPED_WALL_SIGN],
+			[Blocks::POPLAR_WALL_SIGN(), Ids::POPLAR_WALL_SIGN]
 		] as [$block, $id]){
 			$reg->mapModel(Model::create($block, $id)->properties([$commonProperties->horizontalFacingClassic]));
 		}
@@ -1310,6 +1327,11 @@ final class VanillaBlockMappings{
 			new BoolProperty(StateNames::HEAD_PIECE_BIT, fn(Bed $b) => $b->isHeadPart(), fn(Bed $b, bool $v) => $b->setHead($v)),
 			new BoolProperty(StateNames::OCCUPIED_BIT, fn(Bed $b) => $b->isOccupied(), fn(Bed $b, bool $v) => $b->setOccupied($v)),
 			$commonProperties->horizontalFacingSWNE
+		]));
+		$reg->mapModel(Model::create(Blocks::STRAW_BED(), Ids::STRAW_BED)->properties([
+			new BoolProperty(StateNames::HEAD_PIECE_BIT, fn(StrawBed $b) => $b->isHeadPart(), fn(StrawBed $b, bool $v) => $b->setHead($v)),
+			new BoolProperty(StateNames::OCCUPIED_BIT, fn(StrawBed $b) => $b->isOccupied(), fn(StrawBed $b, bool $v) => $b->setOccupied($v)),
+			$commonProperties->horizontalFacingCardinal
 		]));
 		$reg->mapModel(Model::create(Blocks::BEDROCK(), Ids::BEDROCK)->properties([
 			new BoolProperty(StateNames::INFINIBURN_BIT, fn(Bedrock $b) => $b->burnsForever(), fn(Bedrock $b, bool $v) => $b->setBurnsForever($v))
@@ -1688,6 +1710,7 @@ final class VanillaBlockMappings{
 			Ids::PALE_OAK_HANGING_SIGN => [Blocks::PALE_OAK_CEILING_CENTER_HANGING_SIGN(), Blocks::PALE_OAK_CEILING_EDGES_HANGING_SIGN(), Blocks::PALE_OAK_WALL_HANGING_SIGN()],
 			Ids::SPRUCE_HANGING_SIGN => [Blocks::SPRUCE_CEILING_CENTER_HANGING_SIGN(), Blocks::SPRUCE_CEILING_EDGES_HANGING_SIGN(), Blocks::SPRUCE_WALL_HANGING_SIGN()],
 			Ids::WARPED_HANGING_SIGN => [Blocks::WARPED_CEILING_CENTER_HANGING_SIGN(), Blocks::WARPED_CEILING_EDGES_HANGING_SIGN(), Blocks::WARPED_WALL_HANGING_SIGN()],
+			Ids::POPLAR_HANGING_SIGN => [Blocks::POPLAR_CEILING_CENTER_HANGING_SIGN(), Blocks::POPLAR_CEILING_EDGES_HANGING_SIGN(), Blocks::POPLAR_WALL_HANGING_SIGN()]
 		] as $id => [$center, $edges, $wall]){
 			//attached_bit          - true for ceiling center signs, false for ceiling edges signs and wall signs
 			//hanging               - true for all ceiling signs, false for wall signs
