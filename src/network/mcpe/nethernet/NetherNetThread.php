@@ -128,7 +128,7 @@ final class NetherNetThread extends Thread{
 		$out = new NetherNetChannel($this->threadToMain, $this->sleeperEntry->createNotifier());
 
 		$listener = new NetherNetSessionListener($out);
-		$advert = new MutableServerDataProvider(new ServerData(serverName: "", protocol: ProtocolInfo::CURRENT_PROTOCOL, version: ProtocolInfo::MINECRAFT_VERSION, levelName: ""));
+		$advert = new MutableServerDataProvider(new ServerData(serverName: "", protocol: ProtocolInfo::CURRENT_PROTOCOL, version: ProtocolInfo::MINECRAFT_VERSION_NETWORK, levelName: ""));
 		$status = new MutableServerStatusProvider();
 
 		try{
