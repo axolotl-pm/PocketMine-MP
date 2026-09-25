@@ -39,6 +39,7 @@ use pocketmine\nethernet\NetherNetServer;
 use pocketmine\nethernet\SctpConfiguration;
 use pocketmine\nethernet\ServerConfiguration;
 use pocketmine\nethernet\signaling\http\MutableServerStatusProvider;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\NetworkInterfaceStartException;
 use pocketmine\snooze\SleeperHandlerEntry;
 use pocketmine\thread\log\ThreadSafeLogger;
@@ -127,7 +128,7 @@ final class NetherNetThread extends Thread{
 		$out = new NetherNetChannel($this->threadToMain, $this->sleeperEntry->createNotifier());
 
 		$listener = new NetherNetSessionListener($out);
-		$advert = new MutableServerDataProvider(new ServerData(serverName: "", levelName: ""));
+		$advert = new MutableServerDataProvider(new ServerData(serverName: "", protocol: ProtocolInfo::CURRENT_PROTOCOL, version: ProtocolInfo::MINECRAFT_VERSION, levelName: ""));
 		$status = new MutableServerStatusProvider();
 
 		try{
