@@ -28,6 +28,7 @@ use pmmp\encoding\ByteBufferWriter;
 use pmmp\encoding\DataDecodeException;
 use pocketmine\entity\effect\EffectInstance;
 use pocketmine\event\player\PlayerDuplicateLoginEvent;
+use pocketmine\event\player\PlayerIdentityVerifyEvent;
 use pocketmine\event\player\PlayerResourcePackOfferEvent;
 use pocketmine\event\server\DataPacketDecodeEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -103,6 +104,8 @@ use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\network\NetworkSessionManager;
 use pocketmine\network\PacketHandlingException;
+use pocketmine\network\TransportIdentityException;
+use pocketmine\network\TransportIdentityKey;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\permission\DefaultPermissions;
 use pocketmine\player\GameMode;
@@ -220,7 +223,8 @@ class NetworkSession{
 		private Compressor $compressor,
 		private TypeConverter $typeConverter,
 		private string $ip,
-		private int $port
+		private int $port,
+		private ?TransportIdentityKey $transportIdentityKey = null
 	){
 		$this->logger = new \PrefixedLogger($this->server->getLogger(), $this->getLogPrefix());
 
@@ -908,6 +912,12 @@ class NetworkSession{
 				$error = "Expected XUID but none found";
 			}elseif($clientPubKey === null){
 				$error = "Missing client public key"; //failsafe
+			}elseif($authRequired && $this->transportIdentityKey !== null){
+				try{
+					$this->transportIdentityKey->verify($clientPubKey);
+				}catch(TransportIdentityException $e){
+					$error = $e->getMessage();
+				}
 			}
 		}
 
@@ -918,6 +928,9 @@ class NetworkSession{
 			);
 
 			return;
+		}
+		if($clientPubKey === null){
+			throw new AssumptionFailedError("Client public key should have been checked above");
 		}
 
 		$this->authenticated = $authenticated;
@@ -933,6 +946,22 @@ class NetworkSession{
 			}
 		}
 		$this->logger->debug("Xbox Live authenticated: " . ($this->authenticated ? "YES" : "NO"));
+
+		$ev = new PlayerIdentityVerifyEvent(
+			$this,
+			$this->info ?? throw new AssumptionFailedError("Player info is set before login verification starts"),
+			$this->authenticated,
+			$authRequired,
+			$clientPubKey,
+			$this->transportIdentityKey,
+			"Plugin reason",
+			KnownTranslationFactory::pocketmine_disconnect_error_authentication()
+		);
+		$ev->call();
+		if($ev->isCancelled()){
+			$this->disconnect($ev->getDisconnectReason(), $ev->getDisconnectScreenMessage());
+			return;
+		}
 
 		$checkXUID = $this->server->getConfigGroup()->getPropertyBool(YmlServerProperties::PLAYER_VERIFY_XUID, true);
 		$myXUID = $this->info instanceof XboxLivePlayerInfo ? $this->info->getXuid() : "";
@@ -981,7 +1010,7 @@ class NetworkSession{
 			}
 		}
 
-		if(EncryptionContext::$ENABLED){
+		if(EncryptionContext::$ENABLED && $this->transportIdentityKey === null){
 			$this->server->getAsyncPool()->submitTask(new PrepareEncryptionTask($clientPubKey, function(string $encryptionKey, string $handshakeJwt) : void{
 				if(!$this->connected){
 					return;
