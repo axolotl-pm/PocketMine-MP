@@ -83,7 +83,7 @@ enum ArmorTrimMaterial{
 	/**
 	 * Returns the text format code used by the client to color the trim description in the item tooltip.
 	 */
-	public function getColorFormat() : string{
+	public function getTextColor() : string{
 		return match($this){
 			self::AMETHYST => TextFormat::MATERIAL_AMETHYST,
 			self::COPPER => TextFormat::MATERIAL_COPPER,
