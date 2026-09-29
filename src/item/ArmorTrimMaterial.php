@@ -26,7 +26,7 @@ namespace pocketmine\item;
 use pocketmine\utils\TextFormat;
 
 /**
- * Materials which can be used to apply a trim to a piece of armour using a smithing table.
+ * Materials which can be used to apply a trim to a piece of armor using a smithing table.
  */
 enum ArmorTrimMaterial{
 
@@ -43,15 +43,22 @@ enum ArmorTrimMaterial{
 	case RESIN;
 
 	/**
-	 * Returns the material matching the given item, or null if the item cannot be used as an armour trim material.
+	 * Returns the material matching the given item, or null if the item cannot be used as an armor trim material.
 	 */
 	public static function fromItem(Item $item) : ?self{
-		foreach(self::cases() as $case){
-			if($case->getItem()->getTypeId() === $item->getTypeId()){
-				return $case;
+		/**
+		 * @var self[]|null $typeIdMap
+		 * @phpstan-var array<int, self>|null $typeIdMap
+		 */
+		static $typeIdMap = null;
+
+		if($typeIdMap === null){
+			$typeIdMap = [];
+			foreach(self::cases() as $case){
+				$typeIdMap[$case->getItem()->getTypeId()] = $case;
 			}
 		}
-		return null;
+		return $typeIdMap[$item->getTypeId()] ?? null;
 	}
 
 	/**
@@ -74,9 +81,9 @@ enum ArmorTrimMaterial{
 	}
 
 	/**
-	 * Returns the text format code used by the client to colour the trim description in the item tooltip.
+	 * Returns the text format code used by the client to color the trim description in the item tooltip.
 	 */
-	public function getColor() : string{
+	public function getColorFormat() : string{
 		return match($this){
 			self::AMETHYST => TextFormat::MATERIAL_AMETHYST,
 			self::COPPER => TextFormat::MATERIAL_COPPER,

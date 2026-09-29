@@ -57,8 +57,8 @@ class SmithingTransaction extends InventoryTransaction{
 	private function validateConsumedItems(array $consumedItems) : void{
 		$expectedItems = [$this->template, $this->input, $this->addition];
 		foreach($consumedItems as $consumedItem){
-			if($consumedItem->getCount() !== 1){
-				throw new TransactionValidationException("Expected exactly 1 " . $consumedItem->getName() . " to be consumed, got " . $consumedItem->getCount());
+			if(($consumedItemCount = $consumedItem->getCount()) !== 1){
+				throw new TransactionValidationException("Expected exactly 1 " . $consumedItem->getName() . " to be consumed, got $consumedItemCount");
 			}
 			foreach($expectedItems as $key => $expectedItem){
 				if($consumedItem->canStackWith($expectedItem)){
@@ -79,20 +79,20 @@ class SmithingTransaction extends InventoryTransaction{
 		$createdItems = [];
 		$consumedItems = [];
 		//matchItems() can't be used here - the result may stack with one of the inputs, e.g. re-applying the trim an
-		//armour piece already has
+		//armor piece already has
 		$this->separateCreatedAndConsumedItems($createdItems, $consumedItems);
 
 		if(($consumedCount = count($consumedItems)) !== 3){
-			throw new TransactionValidationException("Expected exactly 3 items to be consumed, got $consumedCount");
+			throw new TransactionValidationException("Expected exactly 3 item stacks to be consumed, got $consumedCount");
 		}
 		$this->validateConsumedItems($consumedItems);
 
 		if(($createdCount = count($createdItems)) !== 1){
-			throw new TransactionValidationException("Expected exactly 1 item to be created, got $createdCount");
+			throw new TransactionValidationException("Expected exactly 1 item stack to be created, got $createdCount");
 		}
 		$createdItem = $createdItems[0];
-		if($createdItem->getCount() !== 1){
-			throw new TransactionValidationException("Expected exactly 1 item to be created, got " . $createdItem->getCount());
+		if(($createdItemCount = $createdItem->getCount()) !== 1){
+			throw new TransactionValidationException("Expected exactly 1 item to be created, got $createdItemCount");
 		}
 
 		$expectedResult = $this->recipe->getResultFor($this->template, $this->input, $this->addition);

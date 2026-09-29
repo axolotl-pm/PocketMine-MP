@@ -114,7 +114,7 @@ class StaticPacketCache{
 		return $entries;
 	}
 
-	private static function makeTrimData() : TrimDataPacket{
+	private static function buildTrimDataPacket() : TrimDataPacket{
 		$itemSerializer = GlobalItemDataHandlers::getSerializer();
 		$patternIdMap = ArmorTrimPatternTypeIdMap::getInstance();
 		$materialIdMap = ArmorTrimMaterialTypeIdMap::getInstance();
@@ -122,7 +122,7 @@ class StaticPacketCache{
 		$patterns = [];
 		foreach(ArmorTrimPattern::cases() as $pattern){
 			$patterns[] = new TrimPattern(
-				$itemSerializer->serializeType($pattern->getTemplate())->getName(),
+				$itemSerializer->serializeType($pattern->getItem())->getName(),
 				$patternIdMap->toId($pattern)
 			);
 		}
@@ -130,7 +130,7 @@ class StaticPacketCache{
 		foreach(ArmorTrimMaterial::cases() as $material){
 			$materials[] = new TrimMaterial(
 				$materialIdMap->toId($material),
-				$material->getColor(),
+				$material->getColorFormat(),
 				$itemSerializer->serializeType($material->getItem())->getName()
 			);
 		}
@@ -200,7 +200,7 @@ class StaticPacketCache{
 		return new self(
 			BiomeDefinitionListPacket::fromDefinitions(self::loadBiomeDefinitionModel(BedrockDataFiles::BIOME_DEFINITIONS_JSON)),
 			AvailableActorIdentifiersPacket::create(self::loadCompoundFromFile(BedrockDataFiles::ENTITY_IDENTIFIERS_NBT)),
-			self::makeTrimData(),
+			self::buildTrimDataPacket(),
 			JigsawStructureDataPacket::create(self::loadCompoundFromFile(BedrockDataFiles::JIGSAW_STRUCTURES_DATA_NBT)),
 			self::buildVoxelShapesPacket(self::loadVoxelShapesModel(BedrockDataFiles::VOXEL_SHAPES_JSON)),
 			self::loadDataDrivenBlockPalette(BedrockDataFiles::DATA_DRIVEN_BLOCKS_NBT)

@@ -113,14 +113,14 @@ class Armor extends Durable{
 	}
 
 	/**
-	 * Returns the decorative trim applied to this armour piece, if any.
+	 * Returns the decorative trim applied to this armor piece, if any.
 	 */
 	public function getTrim() : ?ArmorTrim{
 		return $this->trim;
 	}
 
 	/**
-	 * Applies a decorative trim to this armour piece, or removes it if null is given.
+	 * Applies a decorative trim to this armor piece, or removes it if null is given.
 	 * Trims are purely cosmetic and have no effect on gameplay.
 	 *
 	 * @return $this

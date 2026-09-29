@@ -30,8 +30,8 @@ use pocketmine\item\ArmorTrimPattern;
 use pocketmine\item\Item;
 
 /**
- * Smithing recipe which applies a decorative trim to a piece of armour. The pattern is determined by the template
- * item and the material by the addition item. Any trim already present on the armour is replaced.
+ * Smithing recipe which applies a decorative trim to a piece of armor. The pattern is determined by the template
+ * item and the material by the addition item. Any trim already present on the armor is replaced.
  */
 class SmithingTrimRecipe implements SmithingRecipe{
 

@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\item;
 
 /**
- * Patterns which can be applied to a piece of armour using a smithing table and the matching smithing template.
+ * Patterns which can be applied to a piece of armor using a smithing table and the matching smithing template.
  */
 enum ArmorTrimPattern{
 
@@ -48,23 +48,30 @@ enum ArmorTrimPattern{
 	case WILD;
 
 	/**
-	 * Returns the pattern matching the given smithing template item, or null if the item is not an armour trim
+	 * Returns the pattern matching the given smithing template item, or null if the item is not an armor trim
 	 * smithing template.
 	 */
 	public static function fromItem(Item $item) : ?self{
-		foreach(self::cases() as $case){
-			if($case->getTemplate()->getTypeId() === $item->getTypeId()){
-				return $case;
+		/**
+		 * @var self[]|null $typeIdMap
+		 * @phpstan-var array<int, self>|null $typeIdMap
+		 */
+		static $typeIdMap = null;
+
+		if($typeIdMap === null){
+			$typeIdMap = [];
+			foreach(self::cases() as $case){
+				$typeIdMap[$case->getItem()->getTypeId()] = $case;
 			}
 		}
-		return null;
+		return $typeIdMap[$item->getTypeId()] ?? null;
 	}
 
 	/**
 	 * Returns the smithing template item which must be placed in the smithing table's template slot to apply this
 	 * pattern.
 	 */
-	public function getTemplate() : Item{
+	public function getItem() : Item{
 		return match($this){
 			self::BOLT => VanillaItems::BOLT_ARMOR_TRIM_SMITHING_TEMPLATE(),
 			self::COAST => VanillaItems::COAST_ARMOR_TRIM_SMITHING_TEMPLATE(),

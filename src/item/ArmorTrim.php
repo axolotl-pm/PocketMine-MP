@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\item;
 
 /**
- * Describes a decorative trim applied to a piece of armour.
+ * Describes a decorative trim applied to a piece of armor.
  */
 final class ArmorTrim{
 
