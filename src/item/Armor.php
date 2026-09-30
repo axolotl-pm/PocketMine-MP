@@ -31,6 +31,7 @@ use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\player\Player;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Utils;
@@ -39,10 +40,14 @@ use function mt_rand;
 class Armor extends Durable{
 
 	public const TAG_CUSTOM_COLOR = "customColor"; //TAG_Int
+	public const TAG_TRIM = "Trim"; //TAG_Compound
+	public const TAG_TRIM_MATERIAL = "Material"; //TAG_String
+	public const TAG_TRIM_PATTERN = "Pattern"; //TAG_String
 
 	private ArmorTypeInfo $armorInfo;
 
 	protected ?Color $customColor = null;
+	protected ?Trim $trim = null;
 
 	/**
 	 * @param string[] $enchantmentTags
@@ -107,6 +112,31 @@ class Armor extends Durable{
 	}
 
 	/**
+	 * @return Trim|null
+	 */
+	public function getTrim() : ?Trim{
+		return $this->trim;
+	}
+
+	/**
+	 * @param Trim|null $trim
+	 *
+	 * @return Armor
+	 */
+	public function setTrim(?Trim $trim) : Armor{
+		$this->trim = $trim;
+		return $this;
+	}
+
+	/**
+	 * @return Armor
+	 */
+	public function clearTrim() : Armor{
+		$this->trim = null;
+		return $this;
+	}
+
+	/**
 	 * Returns the total enchantment protection factor this armour piece offers from all applicable protection
 	 * enchantments on the item.
 	 */
@@ -164,6 +194,17 @@ class Armor extends Durable{
 		}else{
 			$this->customColor = null;
 		}
+
+		$this->trim = null;
+
+		$trimTag = $tag->getTag(self::TAG_TRIM);
+		if($trimTag instanceof CompoundTag){
+			$materialTag = $trimTag->getTag(self::TAG_TRIM_MATERIAL);
+			$patternTag = $trimTag->getTag(self::TAG_TRIM_PATTERN);
+			if ($materialTag instanceof StringTag && $patternTag instanceof StringTag){
+				$this->trim = new Trim($materialTag->getValue(), $patternTag->getValue());
+			}
+		}
 	}
 
 	protected function serializeCompoundTag(CompoundTag $tag) : void{
@@ -171,5 +212,16 @@ class Armor extends Durable{
 		$this->customColor !== null ?
 			$tag->setInt(self::TAG_CUSTOM_COLOR, Binary::signInt($this->customColor->toARGB())) :
 			$tag->removeTag(self::TAG_CUSTOM_COLOR);
+
+		if($this->trim !== null){
+			$tag->setTag(
+				self::TAG_TRIM,
+				CompoundTag::create()
+					->setString(self::TAG_TRIM_MATERIAL, $this->trim->getMaterial())
+					->setString(self::TAG_TRIM_PATTERN, $this->trim->getPattern())
+			);
+		}else{
+			$tag->removeTag(self::TAG_TRIM);
+		}
 	}
 }
