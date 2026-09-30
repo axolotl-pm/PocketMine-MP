@@ -130,7 +130,7 @@ class StaticPacketCache{
 		foreach(ArmorTrimMaterial::cases() as $material){
 			$materials[] = new TrimMaterial(
 				$materialIdMap->toId($material),
-				$material->getTextColor(),
+				$material->getTextFormatColor(),
 				$itemSerializer->serializeType($material->getItem())->getName()
 			);
 		}
