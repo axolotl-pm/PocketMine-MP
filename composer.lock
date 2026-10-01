@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema.git",
-                "reference": "bce0144ee78aecafd53dd7da89ddfcd4af7af277"
+                "reference": "6252ad27609185f7be7a594e2b6a863f1743d90e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/bce0144ee78aecafd53dd7da89ddfcd4af7af277",
-                "reference": "bce0144ee78aecafd53dd7da89ddfcd4af7af277",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/6252ad27609185f7be7a594e2b6a863f1743d90e",
+                "reference": "6252ad27609185f7be7a594e2b6a863f1743d90e",
                 "shasum": ""
             },
             "type": "library",
@@ -89,7 +89,7 @@
                 "issues": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/issues",
                 "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/bedrock-1.26.60"
             },
-            "time": "2026-09-23T04:12:50+00:00"
+            "time": "2026-10-01T02:08:45+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-data",
@@ -97,12 +97,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockData.git",
-                "reference": "7ab1d2b4c3fe150d581fb8c7b924f0ed5d84c096"
+                "reference": "221e2c201703516217de8db2826bdc3968f20f67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockData/zipball/7ab1d2b4c3fe150d581fb8c7b924f0ed5d84c096",
-                "reference": "7ab1d2b4c3fe150d581fb8c7b924f0ed5d84c096",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockData/zipball/221e2c201703516217de8db2826bdc3968f20f67",
+                "reference": "221e2c201703516217de8db2826bdc3968f20f67",
                 "shasum": ""
             },
             "type": "library",
@@ -115,7 +115,7 @@
                 "issues": "https://github.com/axolotl-pm/BedrockData/issues",
                 "source": "https://github.com/axolotl-pm/BedrockData/tree/bedrock-1.26.60"
             },
-            "time": "2026-09-23T04:12:31+00:00"
+            "time": "2026-10-01T02:03:50+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-item-upgrade-schema",
@@ -149,12 +149,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "ba85209bf8208de1118017b44426fc67b414ba91"
+                "reference": "7c981c1a9a08eab05c437258bae7d5ac7025a7c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/ba85209bf8208de1118017b44426fc67b414ba91",
-                "reference": "ba85209bf8208de1118017b44426fc67b414ba91",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/7c981c1a9a08eab05c437258bae7d5ac7025a7c1",
+                "reference": "7c981c1a9a08eab05c437258bae7d5ac7025a7c1",
                 "shasum": ""
             },
             "require": {
@@ -188,7 +188,7 @@
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
                 "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/bedrock-1.26.60"
             },
-            "time": "2026-09-23T04:03:34+00:00"
+            "time": "2026-10-01T02:13:34+00:00"
         },
         {
             "name": "axolotl-pm/xoroshiro128pp",
@@ -1717,16 +1717,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.64",
+            "version": "10.5.65",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "0e8c1d19cea35ad97d4887f363d07c78e30fbf06"
+                "reference": "b4f678d4ebb686d6d3bd6a7c193e8a067d1a7f01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/0e8c1d19cea35ad97d4887f363d07c78e30fbf06",
-                "reference": "0e8c1d19cea35ad97d4887f363d07c78e30fbf06",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/b4f678d4ebb686d6d3bd6a7c193e8a067d1a7f01",
+                "reference": "b4f678d4ebb686d6d3bd6a7c193e8a067d1a7f01",
                 "shasum": ""
             },
             "require": {
@@ -1736,7 +1736,7 @@
                 "ext-libxml": "*",
                 "ext-mbstring": "*",
                 "ext-xmlwriter": "*",
-                "myclabs/deep-copy": "^1.13.4",
+                "myclabs/deep-copy": "^1.14.0",
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.1",
@@ -1753,7 +1753,7 @@
                 "sebastian/exporter": "^5.1.4",
                 "sebastian/global-state": "^6.0.2",
                 "sebastian/object-enumerator": "^5.0.0",
-                "sebastian/recursion-context": "^5.0.1",
+                "sebastian/recursion-context": "^5.0.2",
                 "sebastian/type": "^4.0.0",
                 "sebastian/version": "^4.0.1"
             },
@@ -1798,7 +1798,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.64"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.65"
             },
             "funding": [
                 {
@@ -1806,7 +1806,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-07-06T14:50:35+00:00"
+            "time": "2026-09-23T10:01:12+00:00"
         },
         {
             "name": "sebastian/cli-parser",
