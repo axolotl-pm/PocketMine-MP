@@ -224,7 +224,8 @@ class NetworkSession{
 		private TypeConverter $typeConverter,
 		private string $ip,
 		private int $port,
-		private ?TransportIdentityKey $transportIdentityKey = null
+		private ?TransportIdentityKey $transportIdentityKey = null,
+		private bool $transportEncrypted = false
 	){
 		$this->logger = new \PrefixedLogger($this->server->getLogger(), $this->getLogPrefix());
 
@@ -1010,7 +1011,7 @@ class NetworkSession{
 			}
 		}
 
-		if(EncryptionContext::$ENABLED && $this->transportIdentityKey === null){
+		if(EncryptionContext::$ENABLED && !($this->transportEncrypted && $this->transportIdentityKey !== null)){
 			$this->server->getAsyncPool()->submitTask(new PrepareEncryptionTask($clientPubKey, function(string $encryptionKey, string $handshakeJwt) : void{
 				if(!$this->connected){
 					return;
