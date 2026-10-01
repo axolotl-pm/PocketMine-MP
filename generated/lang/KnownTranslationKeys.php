@@ -619,6 +619,7 @@ final class KnownTranslationKeys{
 	public const POCKETMINE_SERVER_NETHERNET_TLS_ENABLED = "pocketmine.server.nethernet.tls.enabled";
 	public const POCKETMINE_SERVER_NETHERNET_UDPMUXWITHOUTPORTRANGE = "pocketmine.server.nethernet.udpMuxWithoutPortRange";
 	public const POCKETMINE_SERVER_NETWORKSTART = "pocketmine.server.networkStart";
+	public const POCKETMINE_SERVER_NETWORKSTARTFAILED = "pocketmine.server.networkStartFailed";
 	public const POCKETMINE_SERVER_OBSOLETE_WARNING1 = "pocketmine.server.obsolete.warning1";
 	public const POCKETMINE_SERVER_OBSOLETE_WARNING2 = "pocketmine.server.obsolete.warning2";
 	public const POCKETMINE_SERVER_OBSOLETE_WARNING3 = "pocketmine.server.obsolete.warning3";
