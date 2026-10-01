@@ -27,6 +27,7 @@ use pmmp\thread\ThreadSafeArray;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\nethernet\crypto\CryptoException;
 use pocketmine\nethernet\discovery\LanSignaling;
+use pocketmine\nethernet\identity\PublicKey;
 use pocketmine\nethernet\identity\ServerIdentity;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\EntityEventBroadcaster;
@@ -42,19 +43,21 @@ use pocketmine\YmlServerProperties as Yml;
 use Symfony\Component\Filesystem\Path;
 use function chmod;
 use function dirname;
+use function extension_loaded;
 use function get_debug_type;
-use function hash;
 use function is_array;
 use function is_dir;
 use function is_file;
 use function is_string;
 use function mkdir;
+use function phpversion;
 use function rtrim;
 use function str_starts_with;
 use function strlen;
 use function substr;
 use function umask;
 use function unpack;
+use function version_compare;
 use const PHP_INT_MAX;
 
 final class NetherNetTransport implements Transport{
@@ -90,10 +93,19 @@ final class NetherNetTransport implements Transport{
 		EntityEventBroadcaster $entityEventBroadcaster,
 		TypeConverter $typeConverter
 	) : array{
+		if(!extension_loaded("webrtc")){
+			throw new NetworkInterfaceStartException("NetherNet transport requires axolotl-pm/ext-webrtc extension, but your binary is missing it");
+		}
+		$webrtcVersion = phpversion("webrtc");
+		if($webrtcVersion !== false){
+			if(version_compare($webrtcVersion = phpversion("webrtc"), "0.3.0") < 0 || version_compare($webrtcVersion, "0.4.0") >= 0){
+				throw new NetworkInterfaceStartException("NetherNet transport requires axolotl-pm/ext-webrtc extension 0.3.x, but your binary is missing or has an incompatible version.");
+			}
+		}
 		$configGroup = $this->server->getConfigGroup();
 
 		$identityPem = $this->loadOrCreateIdentityPem($configGroup->getPropertyString(Yml::TRANSPORT_NETHERNET_KEY_FILE, "nethernet.key"));
-		$networkId = self::networkIdOf($identityPem);
+		$networkId = self::networkIdOf(ServerIdentity::fromPrivateKeyPem($identityPem)->getPublicKey());
 
 		$signaling = $this->signaling;
 		try{
@@ -270,10 +282,10 @@ final class NetherNetTransport implements Transport{
 	}
 
 	/**
-	 * Derives a deterministic 64-bit positive integer network ID from the identity key.
+	 * Derives a deterministic 64-bit positive integer network ID from the identity public key.
 	 */
-	private static function networkIdOf(string $identityPem) : int{
-		$digest = hash("sha256", $identityPem, true);
+	private static function networkIdOf(PublicKey $publicKey) : int{
+		$digest = $publicKey->getDigest();
 		$id = unpack("P", substr($digest, 0, 8));
 
 		return $id === false ? 1 : (($id[1] & PHP_INT_MAX) | 1);

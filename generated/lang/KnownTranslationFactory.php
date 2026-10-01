@@ -2888,14 +2888,6 @@ final class KnownTranslationFactory{
 		]);
 	}
 
-	public static function pocketmine_server_networkStartFailed(Translatable|string $ipAddress, Translatable|string $port, Translatable|string $errorMessage) : Translatable{
-		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_NETWORKSTARTFAILED, [
-			"ipAddress" => $ipAddress,
-			"port" => $port,
-			"errorMessage" => $errorMessage,
-		]);
-	}
-
 	public static function pocketmine_server_obsolete_warning1(Translatable|string $param0, Translatable|string $param1) : Translatable{
 		return new Translatable(KnownTranslationKeys::POCKETMINE_SERVER_OBSOLETE_WARNING1, [
 			0 => $param0,
