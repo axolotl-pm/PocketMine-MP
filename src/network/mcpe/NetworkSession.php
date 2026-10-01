@@ -912,7 +912,7 @@ class NetworkSession{
 				$error = "Expected XUID but none found";
 			}elseif($clientPubKey === null){
 				$error = "Missing client public key"; //failsafe
-			}elseif($authRequired && $this->transportIdentityKey !== null){
+			}elseif($authenticated && $this->transportIdentityKey !== null){
 				try{
 					$this->transportIdentityKey->verify($clientPubKey);
 				}catch(TransportIdentityException $e){
