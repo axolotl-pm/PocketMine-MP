@@ -1272,7 +1272,7 @@ class Server{
 	}
 
 	private function startupPrepareNetworkInterfaces() : bool{
-		foreach(explode(",", $this->configGroup->getPropertyString(Yml::TRANSPORT_NAME, RakLibTransport::NAME), limit: self::MAX_ACTIVE_TRANSPORTS) as $name){
+		foreach(explode(",", $this->configGroup->getPropertyString(Yml::TRANSPORT_NAME, "raknet,nethernet"), limit: self::MAX_ACTIVE_TRANSPORTS) as $name){ //TODO: remove hardcoded string once we remove raknet
 			$name = strtolower(trim($name));
 			if($name === ""){
 				continue;

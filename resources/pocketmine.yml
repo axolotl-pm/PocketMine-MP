@@ -89,7 +89,7 @@ network:
 transport:
   #Network transport(s) used for player connections. Accepts a comma-separated list (e.g. raknet,nethernet).
   #Built-in options: raknet, nethernet. Plugins may register additional transports.
-  name: nethernet
+  name: nethernet,raknet
   #Settings for the NetherNet (WebRTC) transport.
   nethernet:
     #Path to the persistent identity key, relative to the data directory.
