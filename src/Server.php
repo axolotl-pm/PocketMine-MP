@@ -1100,7 +1100,7 @@ class Server{
 			$splash = "\n\n";
 			foreach([
 				KnownTranslationFactory::pocketmine_server_url_discord("{$highlight}https://discord.axolotl-pm.org{$reset}"),
-				KnownTranslationFactory::pocketmine_server_url_docs("{$highlight}https://doc.pmmp.io{$reset}"),
+				KnownTranslationFactory::pocketmine_server_url_docs("{$highlight}https://axolotl-pm.org/docs{$reset}"),
 				KnownTranslationFactory::pocketmine_server_url_sourceCode("{$highlight}{$github}{$reset}"),
 				KnownTranslationFactory::pocketmine_server_url_freePlugins("{$highlight}https://poggit.pmmp.io/plugins{$reset}"),
 				KnownTranslationFactory::pocketmine_server_url_donations("{$highlight}https://patreon.com/pocketminemp{$reset}"),
