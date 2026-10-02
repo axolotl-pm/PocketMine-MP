@@ -151,7 +151,7 @@ parameters:
 			path: ../../../src/block/DragonEgg.php
 
 		-
-			message: '#^Parameter \#2 \$y of method pocketmine\\world\\World\:\:getBlockAt\(\) expects int, float\|int\<\-64, 319\> given\.$#'
+			message: '#^Parameter \#2 \$y of method pocketmine\\world\\World\:\:getBlockAt\(\) expects int, float\|int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: ../../../src/block/DragonEgg.php
