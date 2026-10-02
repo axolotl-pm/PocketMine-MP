@@ -262,6 +262,8 @@ final class VanillaItemsInputs extends RegistrySource{
 		self::register("phantom_membrane", fn(IID $id) => new Item($id, "Phantom Membrane"));
 		self::register("pitcher_pod", fn(IID $id) => new PitcherPod($id, "Pitcher Pod"));
 		self::register("poisonous_potato", fn(IID $id) => new PoisonousPotato($id, "Poisonous Potato"));
+		self::registerDelayed("poplar_sign", fn(string $name) : ItemBlockWallOrFloor => new ItemBlockWallOrFloor(self::makeIID($name), Blocks::POPLAR_SIGN(), Blocks::POPLAR_WALL_SIGN()));
+		self::registerDelayed("poplar_hanging_sign", fn(string $name) : HangingSign => new HangingSign(self::makeIID($name), "Poplar Hanging Sign", Blocks::POPLAR_CEILING_CENTER_HANGING_SIGN(), Blocks::POPLAR_CEILING_EDGES_HANGING_SIGN(), Blocks::POPLAR_WALL_HANGING_SIGN()));
 		self::register("popped_chorus_fruit", fn(IID $id) => new Item($id, "Popped Chorus Fruit"));
 		self::register("potato", fn(IID $id) => new Potato($id, "Potato"));
 		self::register("potion", fn(IID $id) => new Potion($id, "Potion"));
