@@ -28,11 +28,17 @@ use pocketmine\block\RuntimeBlockStateRegistry;
 
 class BlockTranslatorTest extends TestCase{
 
-	/**
-	 * @doesNotPerformAssertions
-	 */
-	public function testAllBlockStatesSerialize() : void{
-		$blockTranslator = TypeConverter::getInstance()->getBlockTranslator();
+	public function testAllBlockStatesSerializeWithSequentialIds() : void{
+		$blockTranslator = (new TypeConverter(false))->getBlockTranslator();
+		self::assertFalse($blockTranslator->useBlockNetworkIdsHashes());
+		foreach(RuntimeBlockStateRegistry::getInstance()->getAllKnownStates() as $state){
+			$blockTranslator->internalIdToNetworkId($state->getStateId());
+		}
+	}
+
+	public function testAllBlockStatesSerializeWithHashedIds() : void{
+		$blockTranslator = (new TypeConverter(true))->getBlockTranslator();
+		self::assertTrue($blockTranslator->useBlockNetworkIdsHashes());
 		foreach(RuntimeBlockStateRegistry::getInstance()->getAllKnownStates() as $state){
 			$blockTranslator->internalIdToNetworkId($state->getStateId());
 		}
