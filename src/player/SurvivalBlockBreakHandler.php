@@ -27,6 +27,7 @@ use pocketmine\block\Block;
 use pocketmine\entity\animation\ArmSwingAnimation;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\item\enchantment\VanillaEnchantments;
+use pocketmine\item\VanillaItems;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
@@ -67,31 +68,49 @@ final class SurvivalBlockBreakHandler{
 		if(!$this->block->getBreakInfo()->isBreakable()){
 			return 0.0;
 		}
-		$breakTimePerTick = $this->block->getBreakInfo()->getBreakTime($this->player->getInventory()->getItemInHand()) * 20;
-		if(!$this->player->isOnGround() && !$this->player->isFlying()){
-			$breakTimePerTick *= 5;
-		}
-		if($this->player->isUnderwater() && !$this->player->getArmorInventory()->getHelmet()->hasEnchantment(VanillaEnchantments::AQUA_AFFINITY())){
-			$breakTimePerTick *= 5;
-		}
-		if($breakTimePerTick > 0){
-			$progressPerTick = 1 / $breakTimePerTick;
 
-			$haste = $this->player->getEffects()->get(VanillaEffects::HASTE());
-			if($haste !== null){
-				$hasteLevel = $haste->getEffectLevel();
-				$progressPerTick *= (1 + 0.2 * $hasteLevel) * (1.2 ** $hasteLevel);
+		$hardness = $this->block->getBreakInfo()->getHardness();
+		if($hardness <= 0.0){
+			return 1.0;
+		}
+
+		$item = $this->player->getInventory()->getItemInHand();
+
+		$speed = $item->getMiningEfficiency(($this->block->getBreakInfo()->getToolType() & $item->getBlockToolType()) !== 0);
+
+		$effectManager = $this->player->getEffects();
+		$hasteLevel = 0;
+
+		if(($haste = $effectManager->get(VanillaEffects::HASTE())) !== null){
+			$hasteLevel = $haste->getEffectLevel();
+		}
+		if(($conduit = $effectManager->get(VanillaEffects::CONDUIT_POWER())) !== null){
+			$hasteLevel = max($hasteLevel, $conduit->getEffectLevel());
+		}
+
+		if($hasteLevel > 0){
+			$speed *= 1.0 + (0.2 * $hasteLevel);
+		}
+
+		if(($fatigue = $effectManager->get(VanillaEffects::MINING_FATIGUE())) !== null){
+			$speed *= pow(0.300000011920929, $fatigue->getEffectLevel());
+		}
+
+		if(!$this->player->isOnGround() && !$this->player->getAllowFlight()){
+			$speed *= 0.2;
+		}
+
+		if($this->player->isUnderwater()){
+			$helmet = $this->player->getArmorInventory()->getHelmet();
+			if(!$helmet->hasEnchantment(VanillaEnchantments::AQUA_AFFINITY())){
+				$speed *= 0.2;
 			}
-
-			$miningFatigue = $this->player->getEffects()->get(VanillaEffects::MINING_FATIGUE());
-			if($miningFatigue !== null){
-				$miningFatigueLevel = $miningFatigue->getEffectLevel();
-				$progressPerTick *= 0.21 ** $miningFatigueLevel;
-			}
-
-			return $progressPerTick;
 		}
-		return 1;
+
+		$damage = $speed / $hardness;
+		$isCompatible = $this->block->getBreakInfo()->isToolCompatible(VanillaItems::AIR()) || $this->block->getBreakInfo()->isToolCompatible($item);
+
+		return $damage * ($isCompatible ? 0.033333335 : 0.0099999998);
 	}
 
 	public function update() : bool{
