@@ -25,15 +25,14 @@ namespace pocketmine\network\mcpe\nethernet;
 
 use pmmp\thread\ThreadSafe;
 use pmmp\thread\ThreadSafeArray;
+use pocketmine\nethernet\InternetAddress;
 use pocketmine\utils\Utils;
 use function array_values;
 use function count;
-use function filter_var;
 use function get_debug_type;
 use function is_array;
 use function is_int;
 use function is_string;
-use const FILTER_VALIDATE_IP;
 
 final class NetherNetIceConfiguration extends ThreadSafe{
 
@@ -99,10 +98,11 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 
 		$addresses = [];
 		foreach(Utils::promoteKeys($advertiseAddresses) as $index => $entry){
-			if(!is_string($entry) || filter_var($entry, FILTER_VALIDATE_IP) === false){
+			$address = is_string($entry) ? InternetAddress::normalizeIp($entry) : null;
+			if($address === null){
 				throw new \InvalidArgumentException("advertise-addresses entry $index must be a valid IP address, got " . (is_string($entry) ? "\"$entry\"" : get_debug_type($entry)));
 			}
-			$addresses[] = $entry;
+			$addresses[] = $address;
 		}
 
 		return $addresses;
