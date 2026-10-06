@@ -28,6 +28,7 @@ use pocketmine\nethernet\session\DisconnectReason;
 use pocketmine\nethernet\session\Reliability;
 use pocketmine\nethernet\session\Session;
 use pocketmine\nethernet\session\SessionException;
+use pocketmine\utils\AssumptionFailedError;
 use function count;
 use function strlen;
 use function strrpos;
@@ -80,8 +81,12 @@ final class NetherNetSessionListener implements ServerEventListener{
 		$this->pendingReceipts[$id] = [];
 		$this->lastBytesSent[$id] = 0;
 		$this->lastBytesReceived[$id] = 0;
-
-		[$address, $port] = self::splitAddress($session->getRemoteAddress());
+		$remoteAddress = $session->getRemoteAddress();
+		if($remoteAddress === null){
+			throw new AssumptionFailedError("Session has no remote address");
+		}
+		$address = $remoteAddress->ip;
+		$port = $remoteAddress->port;
 		$this->out->write(NetherNetIpc::sessionOpen(
 			$id,
 			$address,
@@ -200,21 +205,5 @@ final class NetherNetSessionListener implements ServerEventListener{
 			$this->lastPing[$sessionId] = $ping;
 			$this->out->write(NetherNetIpc::ping($sessionId, $ping));
 		}
-	}
-
-	/**
-	 * @return array{string, int}
-	 */
-	private static function splitAddress(?string $address) : array{
-		if($address === null){
-			return ["0.0.0.0", 0];
-		}
-
-		$separator = strrpos($address, ":");
-		if($separator === false){
-			return [$address, 0];
-		}
-
-		return [substr($address, 0, $separator), (int) substr($address, $separator + 1)];
 	}
 }

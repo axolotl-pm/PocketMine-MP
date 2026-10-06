@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\nethernet;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\nethernet\discovery\LanSignaling;
+use pocketmine\nethernet\InternetAddress;
 use pocketmine\nethernet\signaling\http\HttpSignaling;
 use pocketmine\nethernet\signaling\http\ReverseProxy;
 use function array_values;
@@ -81,8 +82,7 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 		return [
 			new HttpSignaling(
 				$context->getNegotiator(),
-				$this->httpBindAddress,
-				$this->httpPort,
+				new InternetAddress($this->httpBindAddress, $this->httpPort, 4),
 				$tlsContext,
 				$context->getLogger(),
 				HttpSignaling::DEFAULT_MAX_CONNECTIONS,
@@ -94,8 +94,7 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 					$context->getNegotiator(),
 					$context->getServerDataProvider(),
 					$this->networkId,
-					$this->lanBindAddress,
-					$this->lanPort,
+					new InternetAddress($this->lanBindAddress, $this->lanPort, 4),
 					$context->getLogger()
 				),
 				"Unable to start LAN discovery",
