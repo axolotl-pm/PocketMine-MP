@@ -170,6 +170,52 @@ class InventoryTransaction{
 	}
 
 	/**
+	 * Separates the items created by this transaction from the items it consumed.
+	 *
+	 * Unlike matchItems(), created items are not cancelled out against consumed items of the same type. This matters
+	 * for recipes which produce the same item they consume - duplicating a smithing template consumes 1 template and
+	 * produces 2 - where cancelling them out would hide the ingredient and understate the result.
+	 *
+	 * @param Item[] $createdItems  items which did not exist before the transaction
+	 * @param Item[] $consumedItems items which will no longer exist after the transaction
+	 * @phpstan-param-out list<Item> $createdItems
+	 * @phpstan-param-out list<Item> $consumedItems
+	 *
+	 * @throws TransactionValidationException
+	 */
+	protected function separateCreatedAndConsumedItems(array &$createdItems, array &$consumedItems) : void{
+		$createdItems = [];
+		$consumedItems = [];
+		foreach($this->actions as $action){
+			try{
+				$action->validate($this->source);
+			}catch(TransactionValidationException $e){
+				throw new TransactionValidationException(get_class($action) . "#" . spl_object_id($action) . ": " . $e->getMessage(), 0, $e);
+			}
+
+			$sourceItem = $action->getSourceItem();
+			$targetItem = $action->getTargetItem();
+
+			if(!$sourceItem->isNull() && !$targetItem->isNull() && $sourceItem->canStackWith($targetItem)){
+				//the slot kept the same item, so only the change in stack size took part in the transaction
+				$difference = $targetItem->getCount() - $sourceItem->getCount();
+				if($difference > 0){
+					$createdItems[] = $targetItem->setCount($difference);
+				}elseif($difference < 0){
+					$consumedItems[] = $sourceItem->setCount(-$difference);
+				}
+			}else{
+				if(!$targetItem->isNull()){
+					$createdItems[] = $targetItem;
+				}
+				if(!$sourceItem->isNull()){
+					$consumedItems[] = $sourceItem;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Iterates over SlotChangeActions in this transaction and compacts any which refer to the same slot in the same
 	 * inventory so they can be correctly handled.
 	 *
