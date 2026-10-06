@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use function count;
+
 /**
  * Patterns which can be applied to a piece of armor using a smithing table and the matching smithing template.
  */
@@ -53,12 +55,12 @@ enum ArmorTrimPattern{
 	 */
 	public static function fromItem(Item $item) : ?self{
 		/**
-		 * @var self[]|null $typeIdMap
-		 * @phpstan-var array<int, self>|null $typeIdMap
+		 * @var self[] $typeIdMap
+		 * @phpstan-var array<int, self> $typeIdMap
 		 */
-		static $typeIdMap = null;
+		static $typeIdMap = [];
 
-		if($typeIdMap === null){
+		if(count($typeIdMap) === 0){
 			$typeIdMap = [];
 			foreach(self::cases() as $case){
 				$typeIdMap[$case->getItem()->getTypeId()] = $case;

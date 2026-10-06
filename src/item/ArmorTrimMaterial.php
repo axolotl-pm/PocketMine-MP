@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\item;
 
 use pocketmine\utils\TextFormat;
+use function count;
 
 /**
  * Materials which can be used to apply a trim to a piece of armor using a smithing table.
@@ -47,12 +48,12 @@ enum ArmorTrimMaterial{
 	 */
 	public static function fromItem(Item $item) : ?self{
 		/**
-		 * @var self[]|null $typeIdMap
-		 * @phpstan-var array<int, self>|null $typeIdMap
+		 * @var self[] $typeIdMap
+		 * @phpstan-var array<int, self> $typeIdMap
 		 */
-		static $typeIdMap = null;
+		static $typeIdMap = [];
 
-		if($typeIdMap === null){
+		if(count($typeIdMap) === 0){
 			$typeIdMap = [];
 			foreach(self::cases() as $case){
 				$typeIdMap[$case->getItem()->getTypeId()] = $case;
