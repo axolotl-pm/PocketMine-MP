@@ -26,6 +26,7 @@ namespace pocketmine\item;
 use pocketmine\color\Color;
 use pocketmine\data\bedrock\ArmorTrimMaterialTypeIdMap;
 use pocketmine\data\bedrock\ArmorTrimPatternTypeIdMap;
+use pocketmine\data\SavedDataLoadingException;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\item\enchantment\ProtectionEnchantment;
@@ -189,14 +190,16 @@ class Armor extends Durable{
 			$this->customColor = null;
 		}
 
-		$this->trim = null;
 		$trimTag = $tag->getCompoundTag(self::TAG_TRIM);
 		if($trimTag !== null){
-			$material = ArmorTrimMaterialTypeIdMap::getInstance()->fromId($trimTag->getString(self::TAG_TRIM_MATERIAL, ""));
-			$pattern = ArmorTrimPatternTypeIdMap::getInstance()->fromId($trimTag->getString(self::TAG_TRIM_PATTERN, ""));
-			if($material !== null && $pattern !== null){
-				$this->trim = new ArmorTrim($material, $pattern);
-			}
+			$materialId = $trimTag->getString(self::TAG_TRIM_MATERIAL);
+			$patternId = $trimTag->getString(self::TAG_TRIM_PATTERN);
+			$this->trim = new ArmorTrim(
+				ArmorTrimMaterialTypeIdMap::getInstance()->fromId($materialId) ?? throw new SavedDataLoadingException("Unknown armor trim material \"$materialId\""),
+				ArmorTrimPatternTypeIdMap::getInstance()->fromId($patternId) ?? throw new SavedDataLoadingException("Unknown armor trim pattern \"$patternId\"")
+			);
+		}else{
+			$this->trim = null;
 		}
 	}
 

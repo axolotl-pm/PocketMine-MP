@@ -24,11 +24,15 @@ declare(strict_types=1);
 namespace pocketmine\inventory\transaction;
 
 use pocketmine\crafting\SmithingRecipe;
+use pocketmine\event\player\PlayerItemSmithEvent;
 use pocketmine\item\Item;
 use pocketmine\player\Player;
+use pocketmine\utils\AssumptionFailedError;
 use function count;
 
 class SmithingTransaction extends InventoryTransaction{
+
+	private ?Item $outputItem = null;
 
 	public function __construct(
 		Player $source,
@@ -99,5 +103,16 @@ class SmithingTransaction extends InventoryTransaction{
 		if($expectedResult === null || !$expectedResult->equalsExact($createdItem)){
 			throw new TransactionValidationException("Invalid output item");
 		}
+		$this->outputItem = $expectedResult;
+	}
+
+	protected function callExecuteEvent() : bool{
+		if($this->outputItem === null){
+			throw new AssumptionFailedError("Expected that outputItem is not null before executing the event");
+		}
+
+		$event = new PlayerItemSmithEvent($this->source, $this, $this->recipe, $this->outputItem);
+		$event->call();
+		return !$event->isCancelled();
 	}
 }
