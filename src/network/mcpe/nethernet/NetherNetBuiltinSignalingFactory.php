@@ -44,6 +44,7 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 	public function __construct(
 		private string $httpBindAddress,
 		private int $httpPort,
+		private ?string $httpBindAddressV6,
 		private ?string $tlsCertFile,
 		private ?string $tlsKeyFile,
 		private ?string $tlsPassphrase,
@@ -79,31 +80,49 @@ final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 			}
 		}
 
-		return [
-			new HttpSignaling(
+		$signaling = [$this->createHttpSignaling($context, new InternetAddress($this->httpBindAddress, $this->httpPort, 4), $tlsContext)];
+		if($this->httpBindAddressV6 !== null){
+			$signaling[] = new NetherNetOptionalSignaling(
+				$this->createHttpSignaling($context, new InternetAddress($this->httpBindAddressV6, $this->httpPort, 6), $tlsContext),
+				"Unable to start IPv6 signaling",
+				$context->getLogger()
+			);
+		}
+		$signaling[] = new NetherNetOptionalSignaling(
+			new LanSignaling(
 				$context->getNegotiator(),
-				new InternetAddress($this->httpBindAddress, $this->httpPort, 4),
-				$tlsContext,
-				$context->getLogger(),
-				HttpSignaling::DEFAULT_MAX_CONNECTIONS,
-				$context->getStatusProvider(),
-				$this->reverseProxyNetworks !== null ? self::createReverseProxy(array_values((array) $this->reverseProxyNetworks)) : null
-			),
-			new NetherNetOptionalSignaling(
-				new LanSignaling(
-					$context->getNegotiator(),
-					$context->getServerDataProvider(),
-					$this->networkId,
-					new InternetAddress($this->lanBindAddress, $this->lanPort, 4),
-					$context->getLogger()
-				),
-				"Unable to start LAN discovery",
+				$context->getServerDataProvider(),
+				$this->networkId,
+				new InternetAddress($this->lanBindAddress, $this->lanPort, 4),
 				$context->getLogger()
 			),
-		];
+			"Unable to start LAN discovery",
+			$context->getLogger()
+		);
+
+		return $signaling;
+	}
+
+	/**
+	 * @phpstan-param array<string, string>|null $tlsContext
+	 */
+	private function createHttpSignaling(NetherNetSignalingContext $context, InternetAddress $bindAddress, ?array $tlsContext) : HttpSignaling{
+		return new HttpSignaling(
+			$context->getNegotiator(),
+			$bindAddress,
+			$tlsContext,
+			$context->getLogger(),
+			HttpSignaling::DEFAULT_MAX_CONNECTIONS,
+			$context->getStatusProvider(),
+			$this->reverseProxyNetworks !== null ? self::createReverseProxy(array_values((array) $this->reverseProxyNetworks)) : null
+		);
 	}
 
 	public function getStartupMessages() : array{
-		return [KnownTranslationFactory::pocketmine_server_nethernet_signalingStart($this->httpBindAddress, (string) $this->httpPort, "TCP")];
+		$messages = [KnownTranslationFactory::pocketmine_server_nethernet_signalingStart($this->httpBindAddress, (string) $this->httpPort, "TCP")];
+		if($this->httpBindAddressV6 !== null){
+			$messages[] = KnownTranslationFactory::pocketmine_server_nethernet_signalingStart("[$this->httpBindAddressV6]", (string) $this->httpPort, "TCP");
+		}
+		return $messages;
 	}
 }

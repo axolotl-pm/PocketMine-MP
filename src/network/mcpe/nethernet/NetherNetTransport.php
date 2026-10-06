@@ -36,6 +36,7 @@ use pocketmine\network\NetworkInterfaceStartException;
 use pocketmine\network\Transport;
 use pocketmine\Server;
 use pocketmine\ServerConfigGroup;
+use pocketmine\ServerProperties;
 use pocketmine\utils\Filesystem;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
@@ -167,7 +168,7 @@ final class NetherNetTransport implements Transport{
 		return new NetherNetBuiltinSignalingFactory(
 			httpBindAddress: $this->server->getIp(),
 			httpPort: $httpPort === 0 ? $this->server->getPort() : $httpPort,
-			tlsCertFile: $certificate,
+			httpBindAddressV6: $configGroup->getConfigBool(ServerProperties::ENABLE_IPV6, true) ? $this->server->getIpV6() : null,			tlsCertFile: $certificate,
 			tlsKeyFile: $key,
 			tlsPassphrase: $passphrase,
 			reverseProxyNetworks: $configGroup->getPropertyBool(Yml::TRANSPORT_NETHERNET_BUILTIN_SIGNALING_REVERSE_PROXY_ENABLED, false)
