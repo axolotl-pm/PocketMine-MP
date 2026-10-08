@@ -33,6 +33,7 @@ use pocketmine\utils\Utils;
 use function array_fill_keys;
 use function array_keys;
 use function array_pop;
+use function array_values;
 use function count;
 use function intdiv;
 use function min;
@@ -242,16 +243,68 @@ class CraftingTransaction extends InventoryTransaction{
 		return $iterations;
 	}
 
-	private function validateRecipe(CraftingRecipe $recipe, ?int $expectedRepetitions) : int{
+	/**
+	 * Cancels out results which are also ingredients of the same recipe, leaving the net change it makes to the
+	 * items involved.
+	 *
+	 * @param Item[]             $results
+	 * @param RecipeIngredient[] $ingredients
+	 * @return Item[][]|RecipeIngredient[][]
+	 *
+	 * @phpstan-param list<Item> $results
+	 * @phpstan-param list<RecipeIngredient> $ingredients
+	 * @phpstan-return array{list<Item>, list<RecipeIngredient>}
+	 */
+	private static function cancelSelfProducedItems(array $results, array $ingredients) : array{
+		$results = Utils::cloneObjectArray($results);
+		foreach($results as $resultIndex => $result){
+			foreach($ingredients as $ingredientIndex => $ingredient){
+				if(!$result->isNull() && $ingredient->accepts($result)){
+					$result->pop();
+					unset($ingredients[$ingredientIndex]);
+				}
+			}
+			if($result->isNull()){
+				unset($results[$resultIndex]);
+			}
+		}
+
+		return [array_values($results), array_values($ingredients)];
+	}
+
+	/**
+	 * @param Item[]             $results
+	 * @param RecipeIngredient[] $ingredients
+	 *
+	 * @phpstan-param list<Item> $results
+	 * @phpstan-param list<RecipeIngredient> $ingredients
+	 */
+	private function validateRecipeItems(array $results, array $ingredients, ?int $expectedRepetitions) : int{
 		//compute number of times recipe was crafted
-		$repetitions = $this->matchOutputs($this->outputs, $recipe->getResultsFor($this->source->getCraftingGrid()));
+		$repetitions = $this->matchOutputs($this->outputs, $results);
 		if($expectedRepetitions !== null && $repetitions !== $expectedRepetitions){
 			throw new TransactionValidationException("Expected $expectedRepetitions repetitions, got $repetitions");
 		}
 		//assert that $repetitions x recipe ingredients should be consumed
-		self::matchIngredients($this->inputs, $recipe->getIngredientList(), $repetitions);
+		self::matchIngredients($this->inputs, $ingredients, $repetitions);
 
 		return $repetitions;
+	}
+
+	private function validateRecipe(CraftingRecipe $recipe, ?int $expectedRepetitions) : int{
+		$results = $recipe->getResultsFor($this->source->getCraftingGrid());
+		$ingredients = $recipe->getIngredientList();
+		try{
+			return $this->validateRecipeItems($results, $ingredients, $expectedRepetitions);
+		}catch(TransactionValidationException $e){
+			//recipes which produce one of their own ingredients (e.g. smithing template duplication) only show up
+			//as their net change, since matchItems() cancels out created and consumed items of the same type
+			[$netResults, $netIngredients] = self::cancelSelfProducedItems($results, $ingredients);
+			if(count($netIngredients) === count($ingredients)){
+				throw $e;
+			}
+			return $this->validateRecipeItems($netResults, $netIngredients, $expectedRepetitions);
+		}
 	}
 
 	public function validate() : void{
@@ -266,10 +319,9 @@ class CraftingTransaction extends InventoryTransaction{
 			$failed = 0;
 			foreach($this->craftingManager->matchRecipeByOutputs($this->outputs) as $recipe){
 				try{
-					//compute number of times recipe was crafted
-					$this->repetitions = $this->matchOutputs($this->outputs, $recipe->getResultsFor($this->source->getCraftingGrid()));
-					//assert that $repetitions x recipe ingredients should be consumed
-					self::matchIngredients($this->inputs, $recipe->getIngredientList(), $this->repetitions);
+					//compute number of times recipe was crafted, and assert that its ingredients were
+					//consumed that many times
+					$this->repetitions = $this->validateRecipe($recipe, null);
 
 					//Success!
 					$this->recipe = $recipe;
