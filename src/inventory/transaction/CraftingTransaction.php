@@ -246,6 +246,8 @@ class CraftingTransaction extends InventoryTransaction{
 		$results = $recipe->getResultsFor($this->source->getCraftingGrid());
 		$outputs = $this->outputs;
 		$inputs = $this->inputs;
+		//TODO: cancelled results can only be restored when the number of repetitions is known
+		//this should be reworked so that recipes which produce one of their own ingredients are always supported
 		if($expectedRepetitions !== null){
 			//results which were cancelled out against consumed items of the same type are restored to both sides
 			foreach(self::packItems(Utils::cloneObjectArray($results)) as $result){
