@@ -243,13 +243,35 @@ class CraftingTransaction extends InventoryTransaction{
 	}
 
 	private function validateRecipe(CraftingRecipe $recipe, ?int $expectedRepetitions) : int{
+		$results = $recipe->getResultsFor($this->source->getCraftingGrid());
+		$outputs = $this->outputs;
+		$inputs = $this->inputs;
+		//TODO: cancelled results can only be restored when the number of repetitions is known
+		//this should be reworked so that recipes which produce one of their own ingredients are always supported
+		if($expectedRepetitions !== null){
+			//results which were cancelled out against consumed items of the same type are restored to both sides
+			foreach(self::packItems(Utils::cloneObjectArray($results)) as $result){
+				$have = 0;
+				foreach($this->outputs as $output){
+					if($output->canStackWith($result)){
+						$have += $output->getCount();
+					}
+				}
+				$cancelled = $result->getCount() * $expectedRepetitions - $have;
+				if($cancelled > 0){
+					$outputs[] = (clone $result)->setCount($cancelled);
+					$inputs[] = (clone $result)->setCount($cancelled);
+				}
+			}
+		}
+
 		//compute number of times recipe was crafted
-		$repetitions = $this->matchOutputs($this->outputs, $recipe->getResultsFor($this->source->getCraftingGrid()));
+		$repetitions = $this->matchOutputs($outputs, $results);
 		if($expectedRepetitions !== null && $repetitions !== $expectedRepetitions){
 			throw new TransactionValidationException("Expected $expectedRepetitions repetitions, got $repetitions");
 		}
 		//assert that $repetitions x recipe ingredients should be consumed
-		self::matchIngredients($this->inputs, $recipe->getIngredientList(), $repetitions);
+		self::matchIngredients($inputs, $recipe->getIngredientList(), $repetitions);
 
 		return $repetitions;
 	}
