@@ -1,4 +1,4 @@
-Code contributions must be submitted using [GitHub Pull Requests](https://github.com/pmmp/PocketMine-MP/pulls), where they will be reviewed by maintainers.
+Code contributions must be submitted using [GitHub Pull Requests](https://github.com/axolotl-pm/PocketMine-MP/pulls), where they will be reviewed by maintainers.
 
 Small contributions (e.g. minor bug fixes) can be submitted as pull requests directly.
 
@@ -24,21 +24,21 @@ Some of these add extra classes to packages which already exist in PocketMine-MP
 
 Take a look at the table below if you can't find the class or function you're looking for.
 
-| Source URL                                                      | Namespace, class or function                                                                                                             |
-|:----------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|
-| [pmmp/BedrockProtocol](https://github.com/pmmp/BedrockProtocol) | `pocketmine\network\mcpe\protocol`                                                                                                       |
-| [pmmp/BinaryUtils](https://github.com/pmmp/BinaryUtils)         | `pocketmine\utils\BinaryDataException`</br>`pocketmine\utils\BinaryStream`</br>`pocketmine\utils\Binary`                                 |
-| [pmmp/Color](https://github.com/pmmp/Color)                     | `pocketmine\color`                                                                                                                       |
-| [pmmp/ErrorHandler](https://github.com/pmmp/ErrorHandler)       | `pocketmine\errorhandler`                                                                                                                |
-| [pmmp/Log](https://github.com/pmmp/Log)                         | `AttachableLogger`</br>`BufferedLogger`</br>`GlobalLogger`</br>`LogLevel`</br>`Logger`</br>`PrefixedLogger`</br>`SimpleLogger`           |
-| [pmmp/Math](https://github.com/pmmp/Math)                       | `pocketmine\math`                                                                                                                        |
-| [pmmp/NBT](https://github.com/pmmp/NBT)                         | `pocketmine\nbt`                                                                                                                         |
-| [pmmp/RakLibIpc](https://github.com/pmmp/RakLibIpc)             | `raklib\server\ipc`                                                                                                                      |
-| [pmmp/RakLib](https://github.com/pmmp/RakLib)                   | `raklib`                                                                                                                                 |
-| [pmmp/Snooze](https://github.com/pmmp/Snooze)                   | `pocketmine\snooze`                                                                                                                      |
-| [pmmp/ext-chunkutils2](https://github.com/pmmp/ext-chunkutils2) | `pocketmine\world\format\LightArray`</br>`pocketmine\world\format\PalettedBlockArray`</br>`pocketmine\world\format\io\SubChunkConverter` |
-| [pmmp/ext-morton](https://github.com/pmmp/ext-morton)           | `morton2d_decode`</br>`morton2d_encode`</br>`morton3d_decode`</br>`morton3d_encode`                                                      |
-| [pmmp/ext-libdeflate](https://github.com/pmmp/ext-libdeflate)   | `libdeflate_deflate_compress`</br>`libdeflate_gzip_compress`</br>`libdeflate_zlib_compress`                                              |
+| Source URL                                                                  | Namespace, class or function                                                                                                             |
+|:----------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|
+| [axolotl-pm/BedrockProtocol](https://github.com/axolotl-pm/BedrockProtocol) | `pocketmine\network\mcpe\protocol`                                                                                                       |
+| [pmmp/BinaryUtils](https://github.com/pmmp/BinaryUtils)                     | `pocketmine\utils\BinaryDataException`</br>`pocketmine\utils\BinaryStream`</br>`pocketmine\utils\Binary`                                 |
+| [pmmp/Color](https://github.com/pmmp/Color)                                 | `pocketmine\color`                                                                                                                       |
+| [pmmp/ErrorHandler](https://github.com/pmmp/ErrorHandler)                   | `pocketmine\errorhandler`                                                                                                                |
+| [pmmp/Log](https://github.com/pmmp/Log)                                     | `AttachableLogger`</br>`BufferedLogger`</br>`GlobalLogger`</br>`LogLevel`</br>`Logger`</br>`PrefixedLogger`</br>`SimpleLogger`           |
+| [pmmp/Math](https://github.com/pmmp/Math)                                   | `pocketmine\math`                                                                                                                        |
+| [pmmp/NBT](https://github.com/pmmp/NBT)                                     | `pocketmine\nbt`                                                                                                                         |
+| [pmmp/RakLibIpc](https://github.com/pmmp/RakLibIpc)                         | `raklib\server\ipc`                                                                                                                      |
+| [pmmp/RakLib](https://github.com/pmmp/RakLib)                               | `raklib`                                                                                                                                 |
+| [pmmp/Snooze](https://github.com/pmmp/Snooze)                               | `pocketmine\snooze`                                                                                                                      |
+| [axolotl-pm/ext-chunkutils2](https://github.com/axolotl-pm/ext-chunkutils2) | `pocketmine\world\format\LightArray`</br>`pocketmine\world\format\PalettedBlockArray`</br>`pocketmine\world\format\io\SubChunkConverter` |
+| [axolotl-pm/ext-morton](https://github.com/axolotl-pm/ext-morton)           | `morton2d_decode`</br>`morton2d_encode`</br>`morton3d_decode`</br>`morton3d_encode`                                                      |
+| [axolotl-pm/ext-libdeflate](https://github.com/axolotl-pm/ext-libdeflate)   | `libdeflate_deflate_compress`</br>`libdeflate_gzip_compress`</br>`libdeflate_zlib_compress`                                              |
 
 ## Choosing a target branch
 PocketMine-MP has three primary branches of development.
@@ -75,10 +75,10 @@ PocketMine-MP has three primary branches of development.
 
 ## Making a pull request
 The basic procedure to create a pull request is:
-1. [Fork the repository on GitHub](https://github.com/pmmp/PocketMine-MP/fork). This gives you your own copy of the repository to make changes to.
+1. [Fork the repository on GitHub](https://github.com/axolotl-pm/PocketMine-MP/fork). This gives you your own copy of the repository to make changes to.
 2. Create a branch on your fork for your changes.
 3. Make the changes you want to make on this branch.
-4. You can then make a [pull request](https://github.com/pmmp/PocketMine-MP/pull/new) to the project.
+4. You can then make a [pull request](https://github.com/axolotl-pm/PocketMine-MP/pull/new) to the project.
 
 ## Tests and quality checks
 
@@ -132,7 +132,7 @@ The following are required as a minimum for pull requests. PRs that don't meet t
 - **Be patient.** Maintainers are often unavailable or busy. Your PR might not receive attention for a while.
 - **Start small.**
   - This helps you get familiar with the codebase, the contribution process, and the expectations of maintainers.
-  - Check out ["Easy task" issues](https://github.com/pmmp/PocketMine-MP/issues?q=is%3Aissue+is%3Aopen+label%3A%22Easy+task%22) on the issues page for something that you could tackle without too much effort.
+  - Check out ["Easy task" issues](https://github.com/axolotl-pm/PocketMine-MP/issues?q=is%3Aissue+is%3Aopen+label%3A%22Easy+task%22) on the issues page for something that you could tackle without too much effort.
 - **Try to keep your PR diff small.** Small PRs can be reviewed and merged much more quickly than bigger ones.
 - **Do not copy-paste other people's code (or code written by AIs like ChatGPT)**. You'll likely be asked to make changes by reviewers. If you don't understand the code you're submitting, your PR is likely to fail.
 - **Do not edit code directly on github.com.** We recommend learning how to use [`git`](https://git-scm.com).
