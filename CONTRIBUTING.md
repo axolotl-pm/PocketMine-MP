@@ -36,9 +36,9 @@ Take a look at the table below if you can't find the class or function you're lo
 | [pmmp/RakLibIpc](https://github.com/pmmp/RakLibIpc)                         | `raklib\server\ipc`                                                                                                                      |
 | [pmmp/RakLib](https://github.com/pmmp/RakLib)                               | `raklib`                                                                                                                                 |
 | [pmmp/Snooze](https://github.com/pmmp/Snooze)                               | `pocketmine\snooze`                                                                                                                      |
-| [pmmp/ext-chunkutils2](https://github.com/pmmp/ext-chunkutils2)             | `pocketmine\world\format\LightArray`</br>`pocketmine\world\format\PalettedBlockArray`</br>`pocketmine\world\format\io\SubChunkConverter` |
-| [pmmp/ext-morton](https://github.com/pmmp/ext-morton)                       | `morton2d_decode`</br>`morton2d_encode`</br>`morton3d_decode`</br>`morton3d_encode`                                                      |
-| [pmmp/ext-libdeflate](https://github.com/pmmp/ext-libdeflate)               | `libdeflate_deflate_compress`</br>`libdeflate_gzip_compress`</br>`libdeflate_zlib_compress`                                              |
+| [axolotl-pm/ext-chunkutils2](https://github.com/axolotl-pm/ext-chunkutils2) | `pocketmine\world\format\LightArray`</br>`pocketmine\world\format\PalettedBlockArray`</br>`pocketmine\world\format\io\SubChunkConverter` |
+| [axolotl-pm/ext-morton](https://github.com/axolotl-pm/ext-morton)           | `morton2d_decode`</br>`morton2d_encode`</br>`morton3d_decode`</br>`morton3d_encode`                                                      |
+| [axolotl-pm/ext-libdeflate](https://github.com/axolotl-pm/ext-libdeflate)   | `libdeflate_deflate_compress`</br>`libdeflate_gzip_compress`</br>`libdeflate_zlib_compress`                                              |
 
 ## Choosing a target branch
 PocketMine-MP has three primary branches of development.
