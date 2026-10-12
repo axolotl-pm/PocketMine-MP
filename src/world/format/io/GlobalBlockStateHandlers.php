@@ -45,15 +45,17 @@ use const pocketmine\BEDROCK_BLOCK_UPGRADE_SCHEMA_PATH;
  * also because we can't break BC of WorldProvider before PM5. While this is a sucky hack, it provides meaningful
  * benefits for now.
  */
-final class GlobalBlockStateHandlers{
+final class GlobalBlockStateHandlers
+{
 	private static ?BlockDataUpgrader $blockDataUpgrader = null;
 
 	private static ?BlockStateData $unknownBlockStateData = null;
 
 	private static ?BlockSerializerDeserializerRegistrar $registrar = null;
 
-	public static function getRegistrar() : BlockSerializerDeserializerRegistrar{
-		if(self::$registrar === null){
+	public static function getRegistrar() : BlockSerializerDeserializerRegistrar
+	{
+		if (self::$registrar === null) {
 			$deserializer = new BlockStateToObjectDeserializer();
 			$serializer = new BlockObjectToStateSerializer();
 			self::$registrar = new BlockSerializerDeserializerRegistrar($deserializer, $serializer);
@@ -62,16 +64,19 @@ final class GlobalBlockStateHandlers{
 		return self::$registrar;
 	}
 
-	public static function getDeserializer() : BlockStateToObjectDeserializer{
+	public static function getDeserializer() : BlockStateToObjectDeserializer
+	{
 		return self::getRegistrar()->deserializer;
 	}
 
-	public static function getSerializer() : BlockObjectToStateSerializer{
+	public static function getSerializer() : BlockObjectToStateSerializer
+	{
 		return self::getRegistrar()->serializer;
 	}
 
-	public static function getUpgrader() : BlockDataUpgrader{
-		if(self::$blockDataUpgrader === null){
+	public static function getUpgrader() : BlockDataUpgrader
+	{
+		if (self::$blockDataUpgrader === null) {
 			$blockStateUpgrader = new BlockStateUpgrader(BlockStateUpgradeSchemaUtils::loadSchemas(
 				Path::join(BEDROCK_BLOCK_UPGRADE_SCHEMA_PATH, 'nbt_upgrade_schema'),
 				PHP_INT_MAX
@@ -92,7 +97,8 @@ final class GlobalBlockStateHandlers{
 		return self::$blockDataUpgrader;
 	}
 
-	public static function getUnknownBlockStateData() : BlockStateData{
+	public static function getUnknownBlockStateData() : BlockStateData
+	{
 		return self::$unknownBlockStateData ??= BlockStateData::current(BlockTypeNames::INFO_UPDATE, []);
 	}
 }
