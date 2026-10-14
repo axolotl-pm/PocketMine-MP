@@ -1464,11 +1464,11 @@ class Server{
 					return $promise;
 				}
 
-				$compressionType = $compressor->getNetworkId();
+				$compressionType = $compressor->getNetworkType();
 				$compressed = $compressor->compress($buffer);
 			}
 
-			return chr($compressionType) . $compressed;
+			return chr($compressionType->value) . $compressed;
 		}finally{
 			$timings->stopTiming();
 		}

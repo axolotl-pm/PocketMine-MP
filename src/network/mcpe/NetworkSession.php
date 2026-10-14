@@ -412,11 +412,12 @@ class NetworkSession{
 			}
 
 			if($this->enableCompression){
-				$compressionType = ord($payload[0]);
+				$compressionTypeId = ord($payload[0]);
+				$compressionType = CompressionAlgorithm::tryFrom($compressionTypeId);
 				$compressed = substr($payload, 1);
 				if($compressionType === CompressionAlgorithm::NONE){
 					$decompressed = $compressed;
-				}elseif($compressionType === $this->compressor->getNetworkId()){
+				}elseif($compressionType === $this->compressor->getNetworkType()){
 					Timings::$playerNetworkReceiveDecompress->startTiming();
 					try{
 						$decompressed = $this->compressor->decompress($compressed);
@@ -427,7 +428,7 @@ class NetworkSession{
 						Timings::$playerNetworkReceiveDecompress->stopTiming();
 					}
 				}else{
-					throw new PacketHandlingException("Packet compressed with unexpected compression type $compressionType");
+					throw new PacketHandlingException("Packet compressed with unexpected compression type $compressionTypeId");
 				}
 			}else{
 				$decompressed = $payload;
