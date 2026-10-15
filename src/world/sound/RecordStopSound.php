@@ -33,7 +33,7 @@ class RecordStopSound implements Sound{
 
 	public function encode(Vector3 $pos) : array{
 		return [
-			ClientboundUpdateSoundDataPacket::create($this->serverSoundHandleId, SoundDataEvent::stop(), null, null, null, null, null, null)
+			ClientboundUpdateSoundDataPacket::create($this->serverSoundHandleId, SoundDataEvent::stop())
 		];
 	}
 }
