@@ -76,6 +76,12 @@ class CraftingManager{
 	protected array $potionContainerChangeRecipes = [];
 
 	/**
+	 * @var SmithingRecipe[]
+	 * @phpstan-var list<SmithingRecipe>
+	 */
+	protected array $smithingRecipes = [];
+
+	/**
 	 * @var BrewingRecipe[][]
 	 * @phpstan-var array<int, array<int, BrewingRecipe>>
 	 */
@@ -190,6 +196,18 @@ class CraftingManager{
 		return $this->potionContainerChangeRecipes;
 	}
 
+	/**
+	 * @return SmithingRecipe[]
+	 * @phpstan-return list<SmithingRecipe>
+	 */
+	public function getSmithingRecipes() : array{
+		return $this->smithingRecipes;
+	}
+
+	public function getSmithingRecipeFromIndex(int $index) : ?SmithingRecipe{
+		return $this->smithingRecipes[$index] ?? null;
+	}
+
 	public function registerShapedRecipe(ShapedRecipe $recipe) : void{
 		$this->shapedRecipes[self::hashOutputs($recipe->getResults())][] = $recipe;
 		$this->craftingRecipeIndex[] = $recipe;
@@ -218,6 +236,14 @@ class CraftingManager{
 
 	public function registerPotionContainerChangeRecipe(PotionContainerChangeRecipe $recipe) : void{
 		$this->potionContainerChangeRecipes[] = $recipe;
+
+		foreach($this->recipeRegisteredCallbacks as $callback){
+			$callback();
+		}
+	}
+
+	public function registerSmithingRecipe(SmithingRecipe $recipe) : void{
+		$this->smithingRecipes[] = $recipe;
 
 		foreach($this->recipeRegisteredCallbacks as $callback){
 			$callback();
@@ -292,6 +318,20 @@ class CraftingManager{
 		foreach($this->potionTypeRecipes as $recipe){
 			if($recipe->getIngredient()->accepts($ingredient) && $recipe->getResultFor($input) !== null){
 				return $this->brewingRecipeCache[$inputHash][$ingredientHash] = $recipe;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the first smithing recipe which produces a result from the given template, input and addition items,
+	 * or null if no such recipe exists.
+	 */
+	public function matchSmithingRecipe(Item $template, Item $input, Item $addition) : ?SmithingRecipe{
+		foreach($this->smithingRecipes as $recipe){
+			if($recipe->getResultFor($template, $input, $addition) !== null){
+				return $recipe;
 			}
 		}
 

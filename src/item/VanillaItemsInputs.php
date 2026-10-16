@@ -413,9 +413,11 @@ final class VanillaItemsInputs extends RegistrySource{
 
 	private function registerSmithingTemplates() : void{
 		self::register("netherite_upgrade_smithing_template", fn(IID $id) => new Item($id, "Netherite Upgrade Smithing Template"));
+		self::register("bolt_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Bolt Armor Trim Smithing Template"));
 		self::register("coast_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Coast Armor Trim Smithing Template"));
 		self::register("dune_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Dune Armor Trim Smithing Template"));
 		self::register("eye_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Eye Armor Trim Smithing Template"));
+		self::register("flow_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Flow Armor Trim Smithing Template"));
 		self::register("host_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Host Armor Trim Smithing Template"));
 		self::register("raiser_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Raiser Armor Trim Smithing Template"));
 		self::register("rib_armor_trim_smithing_template", fn(IID $id) => new Item($id, "Rib Armor Trim Smithing Template"));
