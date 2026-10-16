@@ -29,6 +29,9 @@ use pocketmine\nethernet\protocol\Reliability;
 use function chr;
 use function strlen;
 
+/**
+ * @internal
+ */
 final class NetherNetIpc{
 
 	//thread to main

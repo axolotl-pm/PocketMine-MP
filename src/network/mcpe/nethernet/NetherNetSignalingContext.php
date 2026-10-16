@@ -30,6 +30,9 @@ use pocketmine\nethernet\info\ServerInfoProvider;
  */
 final class NetherNetSignalingContext{
 
+	/**
+	 * @internal
+	 */
 	public function __construct(
 		private ServerInfoProvider $serverInfoProvider,
 		private \Logger $logger

@@ -27,6 +27,9 @@ use pmmp\thread\ThreadSafeArray;
 use pocketmine\snooze\SleeperNotifier;
 use function strlen;
 
+/**
+ * @internal
+ */
 final class NetherNetChannel{
 
 	private int $totalBytes = 0;

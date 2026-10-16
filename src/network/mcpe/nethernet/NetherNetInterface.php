@@ -150,6 +150,9 @@ final class NetherNetInterface implements AdvancedNetworkInterface{
 		);
 	}
 
+	/**
+	 * @internal
+	 */
 	public function start() : void{
 		$this->server->getLogger()->debug("Waiting for NetherNet to start...");
 		$this->thread->startAndWait();
@@ -355,6 +358,9 @@ final class NetherNetInterface implements AdvancedNetworkInterface{
 		}
 	}
 
+	/**
+	 * @internal
+	 */
 	public function putPacket(int $sessionId, string $payload, ?int $receiptId = null) : void{
 		if(isset($this->sessions[$sessionId])){
 			$this->toThread->write(NetherNetIpc::send($sessionId, $payload, $receiptId, Reliability::RELIABLE));
@@ -383,6 +389,9 @@ final class NetherNetInterface implements AdvancedNetworkInterface{
 		$this->unreliablePacketHandler = $handler;
 	}
 
+	/**
+	 * @internal
+	 */
 	public function close(int $sessionId) : void{
 		if(isset($this->sessions[$sessionId])){
 			unset($this->sessionIds[spl_object_id($this->sessions[$sessionId])], $this->sessions[$sessionId]);

@@ -30,6 +30,9 @@ use function addcslashes;
 use function implode;
 use function rtrim;
 
+/**
+ * @internal
+ */
 final class ServerPongData{
 
 	private const SERVER_NAME_FLAG_TRUE = "1";

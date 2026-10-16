@@ -33,6 +33,9 @@ use pocketmine\nethernet\utils\InternetAddress;
 use function array_values;
 use function count;
 
+/**
+ * @internal
+ */
 final class NetherNetBuiltinSignalingFactory extends NetherNetSignalingFactory{
 
 	/** @phpstan-var ThreadSafeArray<int, string>|null */

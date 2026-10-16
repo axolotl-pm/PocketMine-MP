@@ -46,6 +46,8 @@ final class RakLibTransport implements Transport{
 
 	/**
 	 * Returns whether a RakLib interface bound to the given address is registered on the network.
+	 *
+	 * @internal
 	 */
 	public static function isListeningOn(Network $network, string $ip, int $port, bool $ipV6) : bool{
 		$address = new InternetAddress($ip, $port, $ipV6 ? 6 : 4);

@@ -25,6 +25,9 @@ namespace pocketmine\network\mcpe\nethernet;
 
 use pmmp\thread\ThreadSafe;
 
+/**
+ * @internal
+ */
 final class NetherNetIceServer extends ThreadSafe{
 
 	/**

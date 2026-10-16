@@ -34,6 +34,9 @@ use function is_array;
 use function is_int;
 use function is_string;
 
+/**
+ * @internal
+ */
 final class NetherNetIceConfiguration extends ThreadSafe{
 
 	private const DEFAULT_ICE_SERVER_PORT = 3478;

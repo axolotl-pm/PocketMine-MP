@@ -50,6 +50,9 @@ use function microtime;
 use function ord;
 use function time_sleep_until;
 
+/**
+ * @internal
+ */
 final class NetherNetThread extends Thread{
 
 	private const TPS = 100;

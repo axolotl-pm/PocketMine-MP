@@ -154,6 +154,9 @@ class RakLibInterface implements ServerEventListener, AdvancedNetworkInterface{
 		$this->network = $network;
 	}
 
+	/**
+	 * @internal
+	 */
 	public function getBindAddress() : InternetAddress{
 		return $this->bindAddress;
 	}

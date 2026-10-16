@@ -31,6 +31,8 @@ use pocketmine\nethernet\utils\InternetAddress;
 
 /**
  * Forwards everything the NetherNet server reports to the main thread.
+ *
+ * @internal
  */
 final class NetherNetSessionListener implements ServerEventListener{
 

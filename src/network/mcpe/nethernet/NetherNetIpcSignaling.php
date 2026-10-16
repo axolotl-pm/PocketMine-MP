@@ -33,6 +33,8 @@ use function microtime;
 
 /**
  * Signaling transport that processes offers forwarded from the main thread via IPC ({@link NetherNetInterface::acceptOffer()}).
+ *
+ * @internal
  */
 final class NetherNetIpcSignaling implements Signaling{
 
