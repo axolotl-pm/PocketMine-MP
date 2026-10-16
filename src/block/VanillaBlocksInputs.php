@@ -692,6 +692,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 			WoodType::CHERRY => VanillaItems::CHERRY_SIGN(...),
 			WoodType::PALE_OAK => VanillaItems::PALE_OAK_SIGN(...),
 			WoodType::BAMBOO => VanillaItems::BAMBOO_SIGN(...),
+			WoodType::POPLAR => VanillaItems::POPLAR_SIGN(...),
 		};
 	}
 
@@ -712,6 +713,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 			WoodType::CHERRY => VanillaItems::CHERRY_HANGING_SIGN(...),
 			WoodType::PALE_OAK => VanillaItems::PALE_OAK_HANGING_SIGN(...),
 			WoodType::BAMBOO => VanillaItems::BAMBOO_HANGING_SIGN(...),
+			WoodType::POPLAR => VanillaItems::POPLAR_HANGING_SIGN(...),
 		};
 	}
 

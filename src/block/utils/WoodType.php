@@ -30,6 +30,7 @@ use pocketmine\utils\LegacyEnumShimTrait;
  *  These are retained for backwards compatibility only.
  *
  * @method static WoodType ACACIA()
+ * @method static WoodType BAMBOO()
  * @method static WoodType BIRCH()
  * @method static WoodType CHERRY()
  * @method static WoodType CRIMSON()
@@ -37,6 +38,8 @@ use pocketmine\utils\LegacyEnumShimTrait;
  * @method static WoodType JUNGLE()
  * @method static WoodType MANGROVE()
  * @method static WoodType OAK()
+ * @method static WoodType PALE_OAK()
+ * @method static WoodType POPLAR()
  * @method static WoodType SPRUCE()
  * @method static WoodType WARPED()
  */
@@ -55,6 +58,7 @@ enum WoodType{
 	case CHERRY;
 	case PALE_OAK;
 	case BAMBOO;
+	case POPLAR;
 
 	public function getDisplayName() : string{
 		return match($this){
@@ -70,6 +74,7 @@ enum WoodType{
 			self::CHERRY => "Cherry",
 			self::PALE_OAK => "Pale Oak",
 			self::BAMBOO => "Bamboo",
+			self::POPLAR => "Poplar",
 		};
 	}
 
