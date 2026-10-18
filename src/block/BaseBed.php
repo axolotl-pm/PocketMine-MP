@@ -69,7 +69,6 @@ abstract class BaseBed extends Transparent implements HorizontalFacing{
 			$playerPos = $player->getPosition();
 			if($other === null){
 				$player->sendMessage(KnownTranslationFactory::pocketmine_block_bed_incomplete()->prefix(TextFormat::GRAY));
-
 				return true;
 			}elseif($playerPos->distanceSquared($this->position) > 4 && $playerPos->distanceSquared($other->position) > 4){
 				$player->sendMessage(KnownTranslationFactory::tile_bed_tooFar()->prefix(TextFormat::GRAY));
@@ -77,20 +76,15 @@ abstract class BaseBed extends Transparent implements HorizontalFacing{
 			}
 
 			$time = $this->position->getWorld()->getTimeOfDay();
-
 			$isNight = ($time >= World::TIME_NIGHT && $time < World::TIME_SUNRISE);
-
 			if(!$isNight){
 				$player->sendMessage(KnownTranslationFactory::tile_bed_noSleep()->prefix(TextFormat::GRAY));
-
 				return true;
 			}
 
 			$b = ($this->isHeadPart() ? $this : $other);
-
 			if($b->occupied){
 				$player->sendMessage(KnownTranslationFactory::tile_bed_occupied()->prefix(TextFormat::GRAY));
-
 				return true;
 			}
 
@@ -98,7 +92,6 @@ abstract class BaseBed extends Transparent implements HorizontalFacing{
 		}
 
 		return true;
-
 	}
 
 	public function getOtherHalf() : ?BaseBed{
