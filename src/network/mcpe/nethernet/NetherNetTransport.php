@@ -118,13 +118,13 @@ final class NetherNetTransport implements Transport{
 			$useQuery = $this->server->getConfigGroup()->getConfigBool(ServerProperties::ENABLE_QUERY, true);
 			$iceUdpMuxEnabled = $this->server->getConfigGroup()->getConfigBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false);
 			$portRange = NetherNetIceConfiguration::parsePortRange($this->server->getConfigGroup()->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE));
+			$serverPort = $this->server->getPort();
 			if(
 				$useQuery &&
 				$iceUdpMuxEnabled &&
-				($portRange[0] === $portRange[1]) &&
-				$portRange[0] === $this->server->getPort()
+				($portRange[1] !== null && $portRange[1] <= $serverPort)
 			){
-				return "GS4 Query is enabled, but ICE UDP multiplexing is enabled with a single port that is the same as the server port. This will cause a port conflict, change port range or disable GS4 query or ICE UDP multiplexing.";
+				return "GS4 Query is enabled, but ICE UDP multiplexing is enabled with a port range that includes the server port. This will cause a port conflict, change port range or disable GS4 query or ICE UDP multiplexing.";
 			}
 		}catch(\InvalidArgumentException $e){
 			return $e->getMessage();
