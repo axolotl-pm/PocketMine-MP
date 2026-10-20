@@ -114,6 +114,21 @@ final class NetherNetTransport implements Transport{
 		if($version !== false && (version_compare($version, self::MIN_WEBRTC_VERSION, "<") || version_compare($version, self::MAX_WEBRTC_VERSION, ">="))){
 			return "ext-webrtc ^" . self::MIN_WEBRTC_VERSION . " is required (found $version)";
 		}
+		try{
+			$useQuery = $this->server->getConfigGroup()->getConfigBool(ServerProperties::ENABLE_QUERY, true);
+			$iceUdpMuxEnabled = $this->server->getConfigGroup()->getConfigBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false);
+			$portRange = NetherNetIceConfiguration::parsePortRange($this->server->getConfigGroup()->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE));
+			if(
+				$useQuery &&
+				$iceUdpMuxEnabled &&
+				($portRange[0] === $portRange[1]) &&
+				$portRange[0] === $this->server->getPort()
+			){
+				return "GS4 Query is enabled, but ICE UDP multiplexing is enabled with a single port that is the same as the server port. This will cause a port conflict, change port range or disable GS4 query or ICE UDP multiplexing.";
+			}
+		}catch(\InvalidArgumentException $e){
+			return $e->getMessage();
+		}
 		return null;
 	}
 
