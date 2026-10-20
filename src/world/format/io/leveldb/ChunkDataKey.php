@@ -53,5 +53,6 @@ final class ChunkDataKey{
 	public const OLD_VERSION = "\x76";
 
 	public const PM_DATA_VERSION = VersionInfo::TAG_WORLD_DATA_VERSION;
+	public const PM_CHUNK_FIXER_FLAG = "PMMPChunkFixerFlag";
 
 }

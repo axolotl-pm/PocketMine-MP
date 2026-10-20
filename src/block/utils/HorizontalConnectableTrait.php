@@ -48,11 +48,19 @@ trait HorizontalConnectableTrait{
 		}
 	}
 
+	public function resolvesBeforeNeighbours() : bool{
+		return false;
+	}
+
+	public function recalculateNeighbourState() : bool{
+		return $this->recalculateConnections();
+	}
+
 	/**
 	 * @see Block::onNearbyBlockChange()
 	 */
 	public function onNearbyBlockChange() : void{
-		if($this->recalculateConnections()){
+		if($this->recalculateNeighbourState()){
 			$this->position->getWorld()->setBlock($this->position, $this);
 		}
 	}

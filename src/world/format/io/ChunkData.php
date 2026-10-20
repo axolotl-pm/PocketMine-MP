@@ -41,7 +41,8 @@ final class ChunkData{
 		private array $subChunks,
 		private bool $populated,
 		private array $entityNBT,
-		private array $tileNBT
+		private array $tileNBT,
+		private int $fixerFlags = LoadedChunkData::FIXER_FLAG_NONE
 	){}
 
 	/**
@@ -63,4 +64,6 @@ final class ChunkData{
 	 * @phpstan-return list<CompoundTag>
 	 */
 	public function getTileNBT() : array{ return $this->tileNBT; }
+
+	public function getFixerFlags() : int{ return $this->fixerFlags; }
 }

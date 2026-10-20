@@ -25,6 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\block\utils\HorizontalConnectable;
 use pocketmine\block\utils\HorizontalConnectableTrait;
+use pocketmine\block\utils\NeighbourDerivedState;
 use pocketmine\block\utils\SupportType;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
@@ -34,7 +35,7 @@ use function count;
 /**
  * Thin blocks behave like glass panes. They connect to full-cube blocks horizontally adjacent to them if possible.
  */
-class Thin extends Transparent implements HorizontalConnectable{
+class Thin extends Transparent implements HorizontalConnectable, NeighbourDerivedState{
 	use HorizontalConnectableTrait;
 
 	protected function recalculateConnections() : bool{

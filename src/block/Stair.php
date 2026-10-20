@@ -25,6 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
+use pocketmine\block\utils\NeighbourDerivedState;
 use pocketmine\block\utils\StairShape;
 use pocketmine\block\utils\SupportType;
 use pocketmine\data\runtime\RuntimeDataDescriber;
@@ -36,7 +37,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class Stair extends Transparent implements HorizontalFacing{
+class Stair extends Transparent implements HorizontalFacing, NeighbourDerivedState{
 	use HorizontalFacingTrait;
 
 	protected bool $upsideDown = false;
@@ -60,10 +61,22 @@ class Stair extends Transparent implements HorizontalFacing{
 		return StairShape::STRAIGHT;
 	}
 
-	public function onNearbyBlockChange() : void{
+	public function resolvesBeforeNeighbours() : bool{
+		//getSupportType() depends on the shape, and walls, fences and panes read it to decide their connections
+		return true;
+	}
+
+	public function recalculateNeighbourState() : bool{
 		$shape = $this->recalculateShape();
-		if($shape !== $this->shape){
-			$this->shape = $shape;
+		if($shape === $this->shape){
+			return false;
+		}
+		$this->shape = $shape;
+		return true;
+	}
+
+	public function onNearbyBlockChange() : void{
+		if($this->recalculateNeighbourState()){
 			$this->position->getWorld()->setBlock($this->position, $this);
 		}
 	}

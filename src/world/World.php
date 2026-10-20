@@ -34,6 +34,7 @@ use pocketmine\block\tile\Spawnable;
 use pocketmine\block\tile\Tile;
 use pocketmine\block\tile\TileFactory;
 use pocketmine\block\UnknownBlock;
+use pocketmine\block\utils\NeighbourDerivedState;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\data\bedrock\BiomeIds;
 use pocketmine\data\bedrock\block\BlockStateData;
@@ -91,6 +92,7 @@ use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\ChunkData;
 use pocketmine\world\format\io\exception\CorruptedChunkException;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
+use pocketmine\world\format\io\LoadedChunkData;
 use pocketmine\world\format\io\WritableWorldProvider;
 use pocketmine\world\format\LightArray;
 use pocketmine\world\format\SubChunk;
@@ -289,6 +291,12 @@ class World implements ChunkManager{
 	 * @phpstan-var array<ChunkPosHash, Chunk>
 	 */
 	private array $chunks = [];
+
+	/**
+	 * @var int[] chunkHash => fixer flags
+	 * @phpstan-var array<ChunkPosHash, int>
+	 */
+	private array $pendingFixerFlags = [];
 
 	/**
 	 * @var true[]
@@ -1487,6 +1495,7 @@ class World implements ChunkManager{
 					$chunk->isPopulated(),
 					array_map(fn(Entity $e) => $e->saveNBT(), array_values(array_filter($this->getChunkEntities($chunkX, $chunkZ), fn(Entity $e) => $e->canSaveWithChunk()))),
 					array_map(fn(Tile $t) => $t->saveNBT(), array_values($chunk->getTiles())),
+					$this->pendingFixerFlags[$chunkHash] ?? LoadedChunkData::FIXER_FLAG_NONE,
 				), $chunk->getTerrainDirtyFlags());
 				$chunk->clearTerrainDirtyFlags();
 			}
@@ -2997,6 +3006,9 @@ class World implements ChunkManager{
 
 		$chunkData = $loadedChunkData->getData();
 		$chunk = new Chunk($chunkData->getSubChunks(), $chunkData->isPopulated());
+		if($loadedChunkData->getFixerFlags() !== LoadedChunkData::FIXER_FLAG_NONE){
+			$this->pendingFixerFlags[$chunkHash] = $loadedChunkData->getFixerFlags();
+		}
 		if(!$loadedChunkData->isUpgraded()){
 			$chunk->clearTerrainDirtyFlags();
 		}else{
@@ -3007,6 +3019,8 @@ class World implements ChunkManager{
 		$this->blockCacheSize -= count($this->blockCache[$chunkHash] ?? []);
 		unset($this->blockCache[$chunkHash]);
 		unset($this->blockCollisionBoxCache[$chunkHash]);
+
+		$this->fixNeighbourDerivedStates($x, $z, $chunk);
 
 		$this->initChunk($x, $z, $chunkData, $chunk);
 
@@ -3026,6 +3040,268 @@ class World implements ChunkManager{
 		$this->timings->syncChunkLoad->stopTiming();
 
 		return $this->chunks[$chunkHash];
+	}
+
+	/**
+	 * Recalculates persisted states that are derived from neighbouring blocks, for chunks saved before those states
+	 * were resolved. The pass covers the whole loaded neighbourhood, since a position can only be resolved when every
+	 * neighbour it reads is known, and positions in the neighbourhood can depend on each other.
+	 */
+	private function fixNeighbourDerivedStates(int $chunkX, int $chunkZ, Chunk $chunk) : void{
+		/** @phpstan-var list<array{int, int, Chunk}> $chunks */
+		$chunks = [[$chunkX, $chunkZ, $chunk]];
+		foreach(Facing::HORIZONTAL as $facing){
+			$neighbourX = $chunkX + Facing::OFFSET[$facing][0];
+			$neighbourZ = $chunkZ + Facing::OFFSET[$facing][2];
+			$neighbour = $this->getChunk($neighbourX, $neighbourZ);
+			if($neighbour === null){
+				continue;
+			}
+			$chunks[] = [$neighbourX, $neighbourZ, $neighbour];
+		}
+
+		$first = [];
+		$second = [];
+		$pending = [];
+		foreach($chunks as [$pendingChunkX, $pendingChunkZ, $pendingChunk]){
+			$chunkHash = World::chunkHash($pendingChunkX, $pendingChunkZ);
+			if(!isset($this->pendingFixerFlags[$chunkHash])){
+				continue;
+			}
+			if(!$this->chunkHasNeighbourDerivedStates($pendingChunk)){
+				unset($this->pendingFixerFlags[$chunkHash]);
+				continue;
+			}
+			if(!$this->horizontalNeighboursLoaded($pendingChunkX, $pendingChunkZ)){
+				continue;
+			}
+			[$pendingFirst, $pendingSecond] = $this->collectNeighbourDerivedPositions($pendingChunkX, $pendingChunkZ, $pendingChunk);
+			$pending[$chunkHash] = true;
+			$first = array_merge($first, $pendingFirst);
+			$second = array_merge($second, $pendingSecond);
+		}
+		if(count($first) === 0 && count($second) === 0){
+			return;
+		}
+		//blocks whose derived state the others read have to be resolved first, so that every block is resolved exactly
+		//once against final neighbour state
+		$positions = array_merge($first, $second);
+
+		$deferred = [];
+		$resolvedSides = [];
+		foreach($positions as [$x, $y, $z]){
+			$block = $this->getBlockAt($x, $y, $z, false, false);
+			if(!$block instanceof NeighbourDerivedState){
+				continue;
+			}
+			if(!$this->resolveNeighbourChunkSides($x, $y, $z, $pending, $resolvedSides)){
+				$deferred[World::chunkHash($x >> Chunk::COORD_BIT_SIZE, $z >> Chunk::COORD_BIT_SIZE)] = true;
+				continue;
+			}
+			if($block->recalculateNeighbourState()){
+				$this->writeNeighbourDerivedState($x, $y, $z, $block);
+			}
+		}
+
+		foreach($pending as $chunkHash => $_){
+			if(!isset($deferred[$chunkHash])){
+				unset($this->pendingFixerFlags[$chunkHash]);
+			}
+		}
+	}
+
+	/**
+	 * Recalculates blocks in neighbouring chunks which this position reads, but which are themselves still waiting to
+	 * be recalculated, so that this position isn't resolved against state that is about to change and never revisited.
+	 *
+	 * Returns false if one of them can't be recalculated yet, in which case this position has to be left alone.
+	 *
+	 * @param true[] $pending       chunk hashes being recalculated in this pass
+	 * @param bool[] $resolvedSides position hash => whether that block has already been dealt with
+	 *
+	 * @phpstan-param array<int, true> $pending
+	 * @phpstan-param array<int, bool> $resolvedSides
+	 * @phpstan-param-out array<int, bool> $resolvedSides
+	 */
+	private function resolveNeighbourChunkSides(int $x, int $y, int $z, array $pending, array &$resolvedSides) : bool{
+		if(
+			($x & Chunk::COORD_MASK) !== 0 && ($x & Chunk::COORD_MASK) !== Chunk::COORD_MASK &&
+			($z & Chunk::COORD_MASK) !== 0 && ($z & Chunk::COORD_MASK) !== Chunk::COORD_MASK
+		){
+			return true;
+		}
+
+		foreach(Facing::HORIZONTAL as $facing){
+			[$offsetX, , $offsetZ] = Facing::OFFSET[$facing];
+			$sideX = $x + $offsetX;
+			$sideZ = $z + $offsetZ;
+			if(($sideX >> Chunk::COORD_BIT_SIZE) === ($x >> Chunk::COORD_BIT_SIZE) && ($sideZ >> Chunk::COORD_BIT_SIZE) === ($z >> Chunk::COORD_BIT_SIZE)){
+				continue;
+			}
+			$sideChunkHash = World::chunkHash($sideX >> Chunk::COORD_BIT_SIZE, $sideZ >> Chunk::COORD_BIT_SIZE);
+			if(!isset($this->pendingFixerFlags[$sideChunkHash]) || isset($pending[$sideChunkHash])){
+				continue;
+			}
+			$positionHash = World::blockHash($sideX, $y, $sideZ);
+			if(isset($resolvedSides[$positionHash])){
+				if(!$resolvedSides[$positionHash]){
+					return false;
+				}
+				continue;
+			}
+
+			$side = $this->getBlockAt($sideX, $y, $sideZ, false, false);
+			if(!$side instanceof NeighbourDerivedState || !$side->resolvesBeforeNeighbours()){
+				$resolvedSides[$positionHash] = true;
+				continue;
+			}
+			if(!$this->neighbourStateReadable($sideX, $y, $sideZ)){
+				$resolvedSides[$positionHash] = false;
+				return false;
+			}
+			if($side->recalculateNeighbourState()){
+				$this->writeNeighbourDerivedState($sideX, $y, $sideZ, $side);
+			}
+			$resolvedSides[$positionHash] = true;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether every block the given position reads is in a loaded chunk. Blocks outside the world height are readable,
+	 * since they are air no matter what is loaded.
+	 */
+	private function neighbourStateReadable(int $x, int $y, int $z) : bool{
+		foreach(Facing::OFFSET as [$offsetX, $offsetY, $offsetZ]){
+			$sideY = $y + $offsetY;
+			if($sideY < $this->minY || $sideY >= $this->maxY){
+				continue;
+			}
+			if(!isset($this->chunks[World::chunkHash(($x + $offsetX) >> Chunk::COORD_BIT_SIZE, ($z + $offsetZ) >> Chunk::COORD_BIT_SIZE)])){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function writeNeighbourDerivedState(int $x, int $y, int $z, Block $block) : void{
+		$chunkX = $x >> Chunk::COORD_BIT_SIZE;
+		$chunkZ = $z >> Chunk::COORD_BIT_SIZE;
+
+		//a population task holding a lock on this chunk must discard its result, since it was snapshotted before this
+		$this->unlockChunk($chunkX, $chunkZ, null);
+
+		$block->writeStateToWorld();
+
+		$chunkHash = World::chunkHash($chunkX, $chunkZ);
+		$relativeBlockHash = World::chunkBlockHash($x, $y, $z);
+
+		if(isset($this->blockCache[$chunkHash][$relativeBlockHash])){
+			unset($this->blockCache[$chunkHash][$relativeBlockHash]);
+			$this->blockCacheSize--;
+		}
+		$this->invalidateCollisionBoxCache($chunkHash, $relativeBlockHash);
+		foreach(Facing::OFFSET as [$offsetX, $offsetY, $offsetZ]){
+			$this->invalidateCollisionBoxCache(
+				World::chunkHash(($x + $offsetX) >> Chunk::COORD_BIT_SIZE, ($z + $offsetZ) >> Chunk::COORD_BIT_SIZE),
+				World::chunkBlockHash($x + $offsetX, $y + $offsetY, $z + $offsetZ)
+			);
+		}
+
+		$pos = new Vector3($x, $y, $z);
+		$this->changedBlocks[$chunkHash][$relativeBlockHash] = $pos;
+		foreach($this->getChunkListeners($chunkX, $chunkZ) as $listener){
+			$listener->onBlockChanged($pos);
+		}
+	}
+
+	private function invalidateCollisionBoxCache(int $chunkHash, int $blockHash) : void{
+		unset($this->blockCollisionBoxCache[$chunkHash][$blockHash]);
+	}
+
+	private function horizontalNeighboursLoaded(int $chunkX, int $chunkZ) : bool{
+		foreach(Facing::HORIZONTAL as $facing){
+			if($this->getChunk($chunkX + Facing::OFFSET[$facing][0], $chunkZ + Facing::OFFSET[$facing][2]) === null){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Whether the chunk contains any block which derives state from its neighbours. This only looks at the palettes,
+	 * so a chunk which has nothing to resolve doesn't have to wait for its neighbours to be loaded.
+	 */
+	private function chunkHasNeighbourDerivedStates(Chunk $chunk) : bool{
+		$knownStates = $this->blockStateRegistry->getAllKnownStates();
+		foreach($chunk->getSubChunks() as $subChunk){
+			$layers = $subChunk->getBlockLayers();
+			if(count($layers) === 0){
+				continue;
+			}
+			foreach($layers[0]->getPalette() as $stateId){
+				if(($knownStates[$stateId] ?? $this->blockStateRegistry->fromStateId($stateId)) instanceof NeighbourDerivedState){
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns the positions of the blocks which derive state from their neighbours, split into the ones which have to
+	 * be resolved first and the rest.
+	 *
+	 * @see NeighbourDerivedState::resolvesBeforeNeighbours()
+	 *
+	 * @phpstan-return array{list<array{int, int, int}>, list<array{int, int, int}>}
+	 */
+	private function collectNeighbourDerivedPositions(int $chunkX, int $chunkZ, Chunk $chunk) : array{
+		$knownStates = $this->blockStateRegistry->getAllKnownStates();
+		$first = [];
+		$second = [];
+		foreach($chunk->getSubChunks() as $subChunkY => $subChunk){
+			$layers = $subChunk->getBlockLayers();
+			if(count($layers) === 0){
+				continue;
+			}
+			$layer = $layers[0];
+			$targets = [];
+			foreach($layer->getPalette() as $stateId){
+				$block = $knownStates[$stateId] ?? $this->blockStateRegistry->fromStateId($stateId);
+				if($block instanceof NeighbourDerivedState){
+					$targets[$stateId] = $block->resolvesBeforeNeighbours();
+				}
+			}
+			if(count($targets) === 0){
+				continue;
+			}
+			for($x = 0; $x < SubChunk::EDGE_LENGTH; ++$x){
+				for($z = 0; $z < SubChunk::EDGE_LENGTH; ++$z){
+					for($y = 0; $y < SubChunk::EDGE_LENGTH; ++$y){
+						$stateId = $layer->get($x, $y, $z);
+						if(!isset($targets[$stateId])){
+							continue;
+						}
+						$position = [
+							($chunkX << Chunk::COORD_BIT_SIZE) + $x,
+							($subChunkY << SubChunk::COORD_BIT_SIZE) + $y,
+							($chunkZ << Chunk::COORD_BIT_SIZE) + $z
+						];
+						if($targets[$stateId]){
+							$first[] = $position;
+						}else{
+							$second[] = $position;
+						}
+					}
+				}
+			}
+		}
+
+		return [$first, $second];
 	}
 
 	private function initChunk(int $chunkX, int $chunkZ, ChunkData $chunkData, Chunk $chunk) : void{
@@ -3165,6 +3441,7 @@ class World implements ChunkManager{
 						$chunk->isPopulated(),
 						array_map(fn(Entity $e) => $e->saveNBT(), array_values(array_filter($this->getChunkEntities($x, $z), fn(Entity $e) => $e->canSaveWithChunk()))),
 						array_map(fn(Tile $t) => $t->saveNBT(), array_values($chunk->getTiles())),
+						$this->pendingFixerFlags[$chunkHash] ?? LoadedChunkData::FIXER_FLAG_NONE,
 					), $chunk->getTerrainDirtyFlags());
 				}finally{
 					$this->timings->syncChunkSave->stopTiming();
@@ -3186,6 +3463,7 @@ class World implements ChunkManager{
 		}
 
 		unset($this->chunks[$chunkHash]);
+		unset($this->pendingFixerFlags[$chunkHash]);
 		$this->blockCacheSize -= count($this->blockCache[$chunkHash] ?? []);
 		unset($this->blockCache[$chunkHash]);
 		unset($this->blockCollisionBoxCache[$chunkHash]);

@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\NeighbourDerivedState;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\WallConnectionType;
 use pocketmine\data\runtime\RuntimeDataDescriber;
@@ -33,7 +34,7 @@ use pocketmine\math\Facing;
 /**
  * @phpstan-type WallConnectionSet array<Facing::NORTH|Facing::EAST|Facing::SOUTH|Facing::WEST, WallConnectionType>
  */
-class Wall extends Transparent{
+class Wall extends Transparent implements NeighbourDerivedState{
 
 	/**
 	 * @var WallConnectionType[]
@@ -88,8 +89,16 @@ class Wall extends Transparent{
 		return $this;
 	}
 
+	public function resolvesBeforeNeighbours() : bool{
+		return false;
+	}
+
+	public function recalculateNeighbourState() : bool{
+		return $this->recalculateConnections();
+	}
+
 	public function onNearbyBlockChange() : void{
-		if($this->recalculateConnections()){
+		if($this->recalculateNeighbourState()){
 			$this->position->getWorld()->setBlock($this->position, $this);
 		}
 	}

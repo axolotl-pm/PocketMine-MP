@@ -25,13 +25,14 @@ namespace pocketmine\block;
 
 use pocketmine\block\utils\HorizontalConnectable;
 use pocketmine\block\utils\HorizontalConnectableTrait;
+use pocketmine\block\utils\NeighbourDerivedState;
 use pocketmine\block\utils\SupportType;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use function count;
 
-class Fence extends Transparent implements HorizontalConnectable{
+class Fence extends Transparent implements HorizontalConnectable, NeighbourDerivedState{
 	use HorizontalConnectableTrait;
 
 	public function getThickness() : float{

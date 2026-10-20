@@ -662,6 +662,7 @@ class LevelDB extends BaseWorldProvider implements WritableWorldProvider{
 		$hasBeenUpgraded = $chunkVersion < self::CURRENT_LEVEL_CHUNK_VERSION;
 
 		switch($chunkVersion){
+			case ChunkVersion::v1_26_50:
 			case ChunkVersion::v1_21_120: //TODO: ???
 			case ChunkVersion::v1_21_40:
 				//TODO: BiomeStates became shorts instead of bytes
@@ -748,11 +749,25 @@ class LevelDB extends BaseWorldProvider implements WritableWorldProvider{
 
 		//TODO: tile ticks, biome states (?)
 
+		$fixerFlags = $this->readFixerFlags($index, $hasBeenUpgraded);
+
 		return new LoadedChunkData(
-			data: new ChunkData($subChunks, $terrainPopulated, $entities, $tiles),
+			data: new ChunkData($subChunks, $terrainPopulated, $entities, $tiles, $fixerFlags),
 			upgraded: $hasBeenUpgraded,
-			fixerFlags: LoadedChunkData::FIXER_FLAG_ALL //TODO: fill this by version rather than just setting all flags
+			fixerFlags: $fixerFlags
 		);
+	}
+
+	/**
+	 * Chunks saved before this key existed don't have it, so for those the chunk version decides.
+	 */
+	private function readFixerFlags(string $index, bool $hasBeenUpgraded) : int{
+		$raw = $this->db->get($index . ChunkDataKey::PM_CHUNK_FIXER_FLAG);
+		if($raw === false){
+			return $hasBeenUpgraded ? LoadedChunkData::FIXER_FLAG_ALL : LoadedChunkData::FIXER_FLAG_NONE;
+		}
+
+		return strlen($raw) === 8 ? Binary::readLLong($raw) : LoadedChunkData::FIXER_FLAG_ALL;
 	}
 
 	public function saveChunk(int $chunkX, int $chunkZ, ChunkData $chunkData, int $dirtyFlags) : void{
@@ -762,6 +777,13 @@ class LevelDB extends BaseWorldProvider implements WritableWorldProvider{
 
 		$write->put($index . ChunkDataKey::NEW_VERSION, chr(self::CURRENT_LEVEL_CHUNK_VERSION));
 		$write->put($index . ChunkDataKey::PM_DATA_VERSION, Binary::writeLLong(VersionInfo::WORLD_DATA_VERSION));
+
+		$fixerFlags = $chunkData->getFixerFlags();
+		if($fixerFlags !== LoadedChunkData::FIXER_FLAG_NONE){
+			$write->put($index . ChunkDataKey::PM_CHUNK_FIXER_FLAG, Binary::writeLLong($fixerFlags));
+		}else{
+			$write->delete($index . ChunkDataKey::PM_CHUNK_FIXER_FLAG);
+		}
 
 		$subChunks = $chunkData->getSubChunks();
 

@@ -43,7 +43,9 @@ final class WorldDataVersions{
 		(60 << 8) | //patch
 		(33); //revision
 
-	public const CHUNK = ChunkVersion::v1_21_120;
+	//Chunks saved before this version have persisted states that are derived from their neighbours, so those states
+	//are recalculated when the chunk is loaded.
+	public const CHUNK = ChunkVersion::v1_26_50;
 	public const SUBCHUNK = SubChunkVersion::PALETTED_MULTI;
 
 	public const STORAGE = 10;
