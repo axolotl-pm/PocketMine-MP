@@ -259,6 +259,7 @@ final class ItemTypeNames{
 	public const FRAME = "minecraft:frame";
 	public const FRIEND_POTTERY_SHERD = "minecraft:friend_pottery_sherd";
 	public const FROG_SPAWN_EGG = "minecraft:frog_spawn_egg";
+	public const FROSTBITE_SPAWN_EGG = "minecraft:frostbite_spawn_egg";
 	public const GHAST_SPAWN_EGG = "minecraft:ghast_spawn_egg";
 	public const GHAST_TEAR = "minecraft:ghast_tear";
 	public const GLASS_BOTTLE = "minecraft:glass_bottle";

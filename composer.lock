@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a89e57aefcb2488e59b2110842c7fe7c",
+    "content-hash": "7f113dc05c5ed83c93ad804e3ca0e025",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -67,16 +67,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-block-upgrade-schema",
-            "version": "5.4.1",
+            "version": "dev-bedrock-1.26.60",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema.git",
-                "reference": "c4d9f5eede5e6fd8c25d38c91987ca6f916fff58"
+                "reference": "6252ad27609185f7be7a594e2b6a863f1743d90e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/c4d9f5eede5e6fd8c25d38c91987ca6f916fff58",
-                "reference": "c4d9f5eede5e6fd8c25d38c91987ca6f916fff58",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/6252ad27609185f7be7a594e2b6a863f1743d90e",
+                "reference": "6252ad27609185f7be7a594e2b6a863f1743d90e",
                 "shasum": ""
             },
             "type": "library",
@@ -87,22 +87,22 @@
             "description": "Schemas describing how to upgrade saved block data in older Minecraft: Bedrock Edition world saves",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/issues",
-                "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/5.4.1"
+                "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/bedrock-1.26.60"
             },
-            "time": "2026-09-17T18:30:31+00:00"
+            "time": "2026-10-01T02:08:45+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-data",
-            "version": "6.9.0+bedrock-1.26.50",
+            "version": "dev-bedrock-1.26.60",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockData.git",
-                "reference": "488f81d2ab95841337fb9331efe9d6b74ceddb07"
+                "reference": "b3a7e2fb98f74130f288603ae43a45906f71363c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockData/zipball/488f81d2ab95841337fb9331efe9d6b74ceddb07",
-                "reference": "488f81d2ab95841337fb9331efe9d6b74ceddb07",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockData/zipball/b3a7e2fb98f74130f288603ae43a45906f71363c",
+                "reference": "b3a7e2fb98f74130f288603ae43a45906f71363c",
                 "shasum": ""
             },
             "type": "library",
@@ -113,9 +113,9 @@
             "description": "Blobs of data generated from Minecraft: Bedrock Edition, used by PocketMine-MP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockData/issues",
-                "source": "https://github.com/axolotl-pm/BedrockData/tree/6.9.0+bedrock-1.26.50"
+                "source": "https://github.com/axolotl-pm/BedrockData/tree/bedrock-1.26.60"
             },
-            "time": "2026-09-17T18:27:03+00:00"
+            "time": "2026-10-20T06:41:45+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-item-upgrade-schema",
@@ -145,16 +145,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-protocol",
-            "version": "63.0.1+bedrock-1.26.50",
+            "version": "dev-bedrock-1.26.60",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "7ff605d5b071d46c694d2b71bc8af4514156dbc2"
+                "reference": "dc65c31d99547a43c45b67bc74f53086a4d8994c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/7ff605d5b071d46c694d2b71bc8af4514156dbc2",
-                "reference": "7ff605d5b071d46c694d2b71bc8af4514156dbc2",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/dc65c31d99547a43c45b67bc74f53086a4d8994c",
+                "reference": "dc65c31d99547a43c45b67bc74f53086a4d8994c",
                 "shasum": ""
             },
             "require": {
@@ -186,9 +186,9 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
-                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/63.0.1+bedrock-1.26.50"
+                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/bedrock-1.26.60"
             },
-            "time": "2026-10-14T20:41:43+00:00"
+            "time": "2026-10-19T01:43:01+00:00"
         },
         {
             "name": "axolotl-pm/nethernet",
@@ -978,16 +978,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v6.4.45",
+            "version": "v6.4.48",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "6dabf41c21957a2060f101bd7bf7e322989866bd"
+                "reference": "e3ff48b19ac71ee79f89021122211710b892ae0b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/6dabf41c21957a2060f101bd7bf7e322989866bd",
-                "reference": "6dabf41c21957a2060f101bd7bf7e322989866bd",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/e3ff48b19ac71ee79f89021122211710b892ae0b",
+                "reference": "e3ff48b19ac71ee79f89021122211710b892ae0b",
                 "shasum": ""
             },
             "require": {
@@ -1024,7 +1024,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v6.4.45"
+                "source": "https://github.com/symfony/filesystem/tree/v6.4.48"
             },
             "funding": [
                 {
@@ -1044,7 +1044,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-23T07:59:31+00:00"
+            "time": "2026-10-06T17:30:58+00:00"
         }
     ],
     "packages-dev": [
@@ -2863,7 +2863,11 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "axolotl-pm/bedrock-block-upgrade-schema": 20,
+        "axolotl-pm/bedrock-data": 20,
+        "axolotl-pm/bedrock-protocol": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

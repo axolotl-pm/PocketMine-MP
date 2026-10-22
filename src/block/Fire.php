@@ -26,7 +26,9 @@ namespace pocketmine\block;
 use pocketmine\block\utils\Ageable;
 use pocketmine\block\utils\AgeableTrait;
 use pocketmine\block\utils\BlockEventHelper;
+use pocketmine\block\utils\HorizontalConnectable;
 use pocketmine\block\utils\SupportType;
+use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\event\block\BlockBurnEvent;
 use pocketmine\math\Facing;
 use pocketmine\world\format\Chunk;
@@ -36,17 +38,56 @@ use function max;
 use function min;
 use function mt_rand;
 
-class Fire extends BaseFire implements Ageable{
+class Fire extends BaseFire implements Ageable, HorizontalConnectable{
 	use AgeableTrait;
 
 	public const MAX_AGE = 15;
+
+	private const CONNECTION_FACES = [Facing::UP, Facing::NORTH, Facing::SOUTH, Facing::WEST, Facing::EAST];
+
+	/** @var int[] facing => facing */
+	protected array $connections = [];
+	protected bool $connectedUp = false;
+
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
+		$w->boundedIntAuto(0, self::MAX_AGE, $this->age);
+		$w->horizontalFacingFlags($this->connections);
+		//Fire only has east, west, south, north, up connections (no down connection)
+		$w->bool($this->connectedUp);
+	}
 
 	protected function getFireDamage() : int{
 		return 1;
 	}
 
+	public function isConnectedAt(int $facing) : bool{
+		return isset($this->connections[$facing]) || ($facing === Facing::UP && $this->connectedUp);
+	}
+
+	public function setConnectedAt(int $facing, bool $connected) : void{
+		if($facing === Facing::UP){
+			$this->connectedUp = $connected;
+		}elseif($connected){
+			$this->connections[$facing] = $facing;
+		}else{
+			unset($this->connections[$facing]);
+		}
+	}
+
 	private function canBeSupportedBy(Block $block) : bool{
 		return $block->getSupportType(Facing::UP) === SupportType::FULL;
+	}
+
+	private function recalculateConnections() : bool{
+		$changed = false;
+		foreach(self::CONNECTION_FACES as $facing){
+			$connected = $this->getSide($facing)->isFlammable();
+			if($connected !== $this->isConnectedAt($facing)){
+				$this->setConnectedAt($facing, $connected);
+				$changed = true;
+			}
+		}
+		return $changed;
 	}
 
 	public function onNearbyBlockChange() : void{
@@ -57,6 +98,9 @@ class Fire extends BaseFire implements Ageable{
 		}elseif(!$this->canBeSupportedBy($this->getSide(Facing::DOWN)) && !$this->hasAdjacentFlammableBlocks()){
 			$world->setBlock($this->position, VanillaBlocks::AIR());
 		}else{
+			if($this->recalculateConnections()){
+				$world->setBlock($this->position, $this);
+			}
 			$world->scheduleDelayedBlockUpdate($this->position, mt_rand(30, 40));
 		}
 	}
