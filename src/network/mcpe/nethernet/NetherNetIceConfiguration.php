@@ -116,7 +116,7 @@ final class NetherNetIceConfiguration extends ThreadSafe{
 	 *
 	 * @phpstan-return array{int|null, int|null}
 	 */
-	private static function parsePortRange(mixed $portRange) : array{
+	public static function parsePortRange(mixed $portRange) : array{
 		if($portRange === null || $portRange === []){
 			return [null, null];
 		}
