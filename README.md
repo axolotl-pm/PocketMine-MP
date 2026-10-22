@@ -18,7 +18,12 @@
 </p>
 
 ## What is this?
-PocketMine-MP is a highly customisable server software for Minecraft: Bedrock Edition, built from scratch in PHP, with over 10 years of history.
+PocketMine-MP is a highly customisable server software for Minecraft: Bedrock Edition, built in PHP.
+A fork of the legacy [pmmp/PocketMine-MP](https://github.com/pmmp/PocketMine-MP) project, it is maintained by the
+[Axolotl-PM](https://github.com/axolotl-pm) Team, which develops and publishes its releases.
+
+Axolotl-PM is made up of contributors who have been part of the PocketMine-MP ecosystem for over 5 years,
+contributing to the original repository. The project builds on the original's 10+ years of history.
 
 If you're looking to create a Minecraft: Bedrock server with **custom functionality**, look no further.
 
@@ -37,10 +42,9 @@ If you just want to play **vanilla survival multiplayer**, consider using the [o
 If that's not an option for you, you may be able to add some of PocketMine-MP's missing features using plugins from [Poggit](https://poggit.pmmp.io/plugins), or write plugins to implement them yourself.
 
 ## Getting Started
-- [Documentation](http://pmmp.readthedocs.org/)
-- [Installation instructions](https://pmmp.readthedocs.io/en/rtfd/installation.html)
-- [Docker image](https://github.com/pmmp/PocketMine-MP/pkgs/container/pocketmine-mp)
-- [Plugin repository](https://poggit.pmmp.io/plugins)
+- [Documentation](https://axolotl-pm.org/docs/)
+- [Installation instructions](https://axolotl-pm.org/docs/installation)
+- [Plugin repository](https://poggit.pmmp.io/plugins) (Poggit, the legacy PocketMine-MP plugin repository; we don't host one yet)
 
 ## Community & Support
 Join our [Discord](https://discord.axolotl-pm.org/) server to chat with other users and developers.
@@ -51,9 +55,8 @@ You can also post questions on [StackOverflow](https://stackoverflow.com/tags/po
 If you want to write your own plugins, the following resources may be useful.
 Don't forget you can always ask our community if you need help.
 
- * [Developer documentation](https://devdoc.pmmp.io) - General documentation for PocketMine-MP plugin developers
- * [Latest release API documentation](https://apidoc.pmmp.io) - Doxygen API documentation generated for each release
- * [Latest bleeding-edge API documentation](https://apidoc-dev.pmmp.io) - Doxygen API documentation generated weekly from `major-next` branch
+ * [Developer documentation](https://axolotl-pm.org/docs/developers/plugin-docs-index) - General documentation for PocketMine-MP plugin developers
+ * [Latest release API documentation](https://apidoc.pmmp.io) - Doxygen API documentation generated for each release of the original project
  * [DevTools](https://github.com/pmmp/DevTools/) - Development tools plugin for creating plugins
  * [ExamplePlugin](https://github.com/pmmp/ExamplePlugin/) - Example plugin demonstrating some basic API features
 
@@ -67,4 +70,4 @@ New here? Check out [issues with the "Easy task" label](https://github.com/axolo
 ## Licensing information
 This project is licensed under LGPL-3.0. Please see the [LICENSE](/LICENSE) file for details.
 
-pmmp/PocketMine are not affiliated with Mojang. All brands and trademarks belong to their respective owners. PocketMine-MP is not a Mojang-approved software, nor is it associated with Mojang.
+Axolotl-PM is not affiliated with Mojang. All brands and trademarks belong to their respective owners. PocketMine-MP is not a Mojang-approved software, nor is it associated with Mojang.
