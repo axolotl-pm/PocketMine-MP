@@ -61,7 +61,7 @@ enum TreeType{
 			self::DARK_OAK => "Dark Oak",
 			self::CRIMSON => "Crimson",
 			self::WARPED => "Warped",
-			self::AZALEA => "Azalea"
+			self::AZALEA => "Azalea",
 		};
 	}
 }
