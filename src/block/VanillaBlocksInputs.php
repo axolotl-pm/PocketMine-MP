@@ -608,7 +608,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 
 	/**
 	 * @phpstan-template TBlock of Block
-	 * @phpstan-param Closure(BID) : TBlock       $createBlock
+	 * @phpstan-param Closure(BID) : TBlock        $createBlock
 	 * @phpstan-param class-string<covariant Tile> $tileClass
 	 * @phpstan-return TBlock
 	 */
