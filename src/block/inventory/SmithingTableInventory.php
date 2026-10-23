@@ -30,6 +30,10 @@ use pocketmine\world\Position;
 final class SmithingTableInventory extends SimpleInventory implements BlockInventory, TemporaryInventory{
 	use BlockInventoryTrait;
 
+	public const SLOT_INPUT = 0;
+	public const SLOT_ADDITION = 1;
+	public const SLOT_TEMPLATE = 2;
+
 	public function __construct(Position $holder){
 		$this->holder = $holder;
 		parent::__construct(3);

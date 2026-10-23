@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\handler;
 
 use pocketmine\block\inventory\EnchantInventory;
+use pocketmine\block\inventory\SmithingTableInventory;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\transaction\action\CreateItemAction;
 use pocketmine\inventory\transaction\action\DestroyItemAction;
@@ -31,6 +32,7 @@ use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\CraftingTransaction;
 use pocketmine\inventory\transaction\EnchantingTransaction;
 use pocketmine\inventory\transaction\InventoryTransaction;
+use pocketmine\inventory\transaction\SmithingTransaction;
 use pocketmine\inventory\transaction\TransactionBuilder;
 use pocketmine\inventory\transaction\TransactionBuilderInventory;
 use pocketmine\item\Durable;
@@ -294,8 +296,38 @@ class ItemStackRequestExecutor{
 	/**
 	 * @throws ItemStackRequestProcessException
 	 */
+	protected function beginSmithing(SmithingTableInventory $window, int $recipeId) : void{
+		if($this->specialTransaction !== null){
+			throw new ItemStackRequestProcessException("Another special transaction is already in progress");
+		}
+		$recipeIndex = $recipeId - InventoryManager::SMITHING_RECIPE_NETWORK_OFFSET;
+		$recipe = $this->player->getServer()->getCraftingManager()->getSmithingRecipeFromIndex($recipeIndex);
+		if($recipe === null){
+			throw new ItemStackRequestProcessException("No such smithing recipe index: $recipeIndex");
+		}
+
+		$template = $window->getItem(SmithingTableInventory::SLOT_TEMPLATE);
+		$input = $window->getItem(SmithingTableInventory::SLOT_INPUT);
+		$addition = $window->getItem(SmithingTableInventory::SLOT_ADDITION);
+
+		$result = $recipe->getResultFor($template, $input, $addition);
+		if($result === null){
+			throw new ItemStackRequestProcessException("Smithing table contents don't match the ingredients of recipe index $recipeIndex");
+		}
+
+		$this->specialTransaction = new SmithingTransaction($this->player, $recipe, $template, $input, $addition);
+		$this->setNextCreatedItem($result);
+	}
+
+	/**
+	 * @throws ItemStackRequestProcessException
+	 */
 	private function assertDoingCrafting() : void{
-		if(!$this->specialTransaction instanceof CraftingTransaction && !$this->specialTransaction instanceof EnchantingTransaction){
+		if(
+			!$this->specialTransaction instanceof CraftingTransaction &&
+			!$this->specialTransaction instanceof EnchantingTransaction &&
+			!$this->specialTransaction instanceof SmithingTransaction
+		){
 			if($this->specialTransaction === null){
 				throw new ItemStackRequestProcessException("Expected CraftRecipe or CraftRecipeAuto action to precede this action");
 			}else{
@@ -348,6 +380,8 @@ class ItemStackRequestExecutor{
 					$this->specialTransaction = new EnchantingTransaction($this->player, $option, $optionId + 1);
 					$this->setNextCreatedItem($window->getOutput($optionId));
 				}
+			}elseif($window instanceof SmithingTableInventory){
+				$this->beginSmithing($window, $action->getRecipeId());
 			}else{
 				$this->beginCrafting($action->getRecipeId(), $action->getRepetitions());
 			}
