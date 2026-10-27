@@ -25,6 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\block\utils\AnalogRedstoneSignalEmitter;
 use pocketmine\block\utils\AnalogRedstoneSignalEmitterTrait;
+use pocketmine\block\utils\RedstoneSignalEmitter;
 use pocketmine\block\utils\RedstoneWireConnectionType;
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\block\utils\SupportType;
@@ -82,8 +83,9 @@ class RedstoneWire extends Flowable implements AnalogRedstoneSignalEmitter{
 	 * @return $this
 	 */
 	public function setConnection(int $facing, RedstoneWireConnectionType $type) : self{
-		if($facing !== Facing::NORTH && $facing !== Facing::SOUTH && $facing !== Facing::WEST && $facing !== Facing::EAST){
-			throw new \InvalidArgumentException("Facing can only be north, east, south or west");
+		$axis = Facing::axis($facing);
+		if($axis !== Axis::X && $axis !== Axis::Z){
+			throw new \InvalidArgumentException("Facing must be horizontal");
 		}
 		$this->connections[$facing] = $type;
 		return $this;
@@ -117,10 +119,9 @@ class RedstoneWire extends Flowable implements AnalogRedstoneSignalEmitter{
 	 */
 	private function updateDiagonalWires() : void{
 		$world = $this->position->getWorld();
-		foreach(Facing::HORIZONTAL as $facing){
-			$side = $this->position->getSide($facing);
-			foreach([Facing::UP, Facing::DOWN] as $vertical){
-				$block = $world->getBlock($side->getSide($vertical));
+		foreach($this->position->sidesAroundAxis(Axis::Y) as $side){
+			foreach([$side->up(), $side->down()] as $diagonal){
+				$block = $world->getBlock($diagonal);
 				if($block instanceof RedstoneWire && $block->recalculateConnections()){
 					$world->setBlock($block->position, $block);
 				}
@@ -129,12 +130,17 @@ class RedstoneWire extends Flowable implements AnalogRedstoneSignalEmitter{
 	}
 
 	private static function isConductor(Block $block) : bool{
+		//TODO: approximation; vanilla has a per-block conductor flag that no existing block property matches
 		return $block->isFullCube() && !$block->isTransparent();
 	}
 
-	/**
-	 * TODO: check connections to nearby other redstone components
-	 */
+	private static function connectsTo(Block $block, int $facing) : bool{
+		if($block instanceof RedstoneRepeater){
+			return Facing::axis($block->getFacing()) === Facing::axis($facing);
+		}
+		return $block instanceof RedstoneSignalEmitter;
+	}
+
 	private function getConnectionTowards(int $facing, bool $conductorAbove) : RedstoneWireConnectionType{
 		$neighbour = $this->getSide($facing);
 		if(!$conductorAbove && $neighbour->getSide(Facing::UP)->hasSameTypeId($this)){
@@ -142,30 +148,39 @@ class RedstoneWire extends Flowable implements AnalogRedstoneSignalEmitter{
 				RedstoneWireConnectionType::UP :
 				RedstoneWireConnectionType::SIDE;
 		}
-		if($neighbour->hasSameTypeId($this) || (!self::isConductor($neighbour) && $neighbour->getSide(Facing::DOWN)->hasSameTypeId($this))){
+
+		if(self::connectsTo($neighbour, $facing)){
 			return RedstoneWireConnectionType::SIDE;
 		}
+
+		//wire stepping down to the one below the neighbour
+		if(!self::isConductor($neighbour) && $neighbour->getSide(Facing::DOWN)->hasSameTypeId($this)){
+			return RedstoneWireConnectionType::SIDE;
+		}
+
 		return RedstoneWireConnectionType::NONE;
 	}
 
 	private function recalculateConnections() : bool{
 		$conductorAbove = self::isConductor($this->getSide(Facing::UP));
 		$connections = [];
+		$connectedAxes = [];
 		foreach(Facing::HORIZONTAL as $facing){
-			$connections[$facing] = $this->getConnectionTowards($facing, $conductorAbove);
-		}
-
-		$northSouth = $connections[Facing::NORTH] !== RedstoneWireConnectionType::NONE || $connections[Facing::SOUTH] !== RedstoneWireConnectionType::NONE;
-		$eastWest = $connections[Facing::EAST] !== RedstoneWireConnectionType::NONE || $connections[Facing::WEST] !== RedstoneWireConnectionType::NONE;
-		foreach(Facing::HORIZONTAL as $facing){
-			$crossAxisConnected = Facing::axis($facing) === Axis::X ? $northSouth : $eastWest;
-			if(!$crossAxisConnected && $connections[$facing] === RedstoneWireConnectionType::NONE){
-				$connections[$facing] = RedstoneWireConnectionType::SIDE;
+			$connection = $this->getConnectionTowards($facing, $conductorAbove);
+			if($connection !== RedstoneWireConnectionType::NONE){
+				$connectedAxes[Facing::axis($facing)] = true;
 			}
+			$connections[$facing] = $connection;
 		}
 
 		$changed = false;
 		foreach($connections as $facing => $connection){
+			//with nothing on the other axis, wire runs straight through (or as a cross when unconnected)
+			$crossAxis = Facing::axis(Facing::rotateY($facing, true));
+			if($connection === RedstoneWireConnectionType::NONE && !isset($connectedAxes[$crossAxis])){
+				$connection = RedstoneWireConnectionType::SIDE;
+			}
+
 			if($connection !== $this->getConnection($facing)){
 				$this->setConnection($facing, $connection);
 				$changed = true;
