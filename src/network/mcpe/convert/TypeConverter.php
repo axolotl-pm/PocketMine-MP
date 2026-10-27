@@ -121,7 +121,7 @@ class TypeConverter{
 	 *
 	 * @internal
 	 */
-	public function coreGameModeToProtocol(GameMode $gamemode) : int{
+	public function coreGameModeToProtocol(GameMode $gamemode) : ProtocolGameMode{
 		return match($gamemode){
 			GameMode::SURVIVAL => ProtocolGameMode::SURVIVAL,
 			//TODO: native spectator support
@@ -130,7 +130,7 @@ class TypeConverter{
 		};
 	}
 
-	public function protocolGameModeToCore(int $gameMode) : ?GameMode{
+	public function protocolGameModeToCore(ProtocolGameMode $gameMode) : ?GameMode{
 		return match($gameMode){
 			ProtocolGameMode::SURVIVAL => GameMode::SURVIVAL,
 			ProtocolGameMode::CREATIVE => GameMode::CREATIVE,

@@ -57,12 +57,11 @@ use pocketmine\network\mcpe\compression\Compressor;
 use pocketmine\network\mcpe\compression\ZlibCompressor;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
-use pocketmine\network\mcpe\EntityEventBroadcaster;
+use pocketmine\network\mcpe\nethernet\NetherNetTransport;
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\PacketBroadcaster;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
-use pocketmine\network\mcpe\raklib\RakLibInterface;
+use pocketmine\network\mcpe\raklib\RakLibTransport;
 use pocketmine\network\mcpe\StandardEntityEventBroadcaster;
 use pocketmine\network\mcpe\StandardPacketBroadcaster;
 use pocketmine\network\Network;
@@ -128,6 +127,7 @@ use pocketmine\YmlServerProperties as Yml;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Filesystem\Path;
 use function array_fill;
+use function array_slice;
 use function array_sum;
 use function base64_encode;
 use function chr;
@@ -135,6 +135,7 @@ use function cli_set_process_title;
 use function copy;
 use function count;
 use function date;
+use function explode;
 use function fclose;
 use function file_exists;
 use function file_put_contents;
@@ -193,6 +194,11 @@ class Server{
 	public const DEFAULT_PORT_IPV4 = 19132;
 	public const DEFAULT_PORT_IPV6 = 19133;
 	public const DEFAULT_MAX_VIEW_DISTANCE = 16;
+
+	/**
+	 * Upper bound on the number of transports read from transport.name in pocketmine.yml.
+	 */
+	private const MAX_ACTIVE_TRANSPORTS = 8;
 
 	/**
 	 * Worlds, network, commands and most other things are polled this many times per second on average.
@@ -1000,6 +1006,8 @@ class Server{
 
 			$this->network = new Network($this->logger);
 			$this->network->setName($this->getMotd());
+			$this->network->registerTransport(RakLibTransport::NAME, new RakLibTransport($this));
+			$this->network->registerTransport(NetherNetTransport::NAME, new NetherNetTransport($this));
 
 			$this->logger->info($this->language->translate(KnownTranslationFactory::pocketmine_server_info(
 				$this->getName(),
@@ -1100,7 +1108,7 @@ class Server{
 			$splash = "\n\n";
 			foreach([
 				KnownTranslationFactory::pocketmine_server_url_discord("{$highlight}https://discord.axolotl-pm.org{$reset}"),
-				KnownTranslationFactory::pocketmine_server_url_docs("{$highlight}https://doc.pmmp.io{$reset}"),
+				KnownTranslationFactory::pocketmine_server_url_docs("{$highlight}https://axolotl-pm.org/docs{$reset}"),
 				KnownTranslationFactory::pocketmine_server_url_sourceCode("{$highlight}{$github}{$reset}"),
 				KnownTranslationFactory::pocketmine_server_url_freePlugins("{$highlight}https://poggit.pmmp.io/plugins{$reset}"),
 				KnownTranslationFactory::pocketmine_server_url_donations("{$highlight}https://patreon.com/pocketminemp{$reset}"),
@@ -1253,58 +1261,52 @@ class Server{
 		return !$anyWorldFailedToLoad;
 	}
 
-	private function startupPrepareConnectableNetworkInterfaces(
-		string $ip,
-		int $port,
-		bool $ipV6,
-		bool $useQuery,
-		PacketBroadcaster $packetBroadcaster,
-		EntityEventBroadcaster $entityEventBroadcaster,
-		TypeConverter $typeConverter
-	) : bool{
+	/**
+	 * Registers a dedicated Query listener on the given address unless already handled by RakLib.
+	 */
+	private function startupPrepareQueryInterface(string $ip, int $port, bool $ipV6) : void{
+		if(!RakLibTransport::isListeningOn($this->network, $ip, $port, $ipV6)){
+			$this->network->registerInterface(new DedicatedQueryNetworkInterface($ip, $port, $ipV6, new \PrefixedLogger($this->logger, "Dedicated Query Interface")));
+		}
 		$prettyIp = $ipV6 ? "[$ip]" : $ip;
-		try{
-			$rakLibRegistered = $this->network->registerInterface(new RakLibInterface($this, $ip, $port, $ipV6, $packetBroadcaster, $entityEventBroadcaster, $typeConverter));
-		}catch(NetworkInterfaceStartException $e){
-			$this->logger->emergency($this->language->translate(KnownTranslationFactory::pocketmine_server_networkStartFailed(
-				$ip,
-				(string) $port,
-				$e->getMessage()
-			)));
-			return false;
-		}
-		if($rakLibRegistered){
-			$this->logger->info($this->language->translate(KnownTranslationFactory::pocketmine_server_networkStart($prettyIp, (string) $port)));
-		}
-		if($useQuery){
-			if(!$rakLibRegistered){
-				//RakLib would normally handle the transport for Query packets
-				//if it's not registered we need to make sure Query still works
-				$this->network->registerInterface(new DedicatedQueryNetworkInterface($ip, $port, $ipV6, new \PrefixedLogger($this->logger, "Dedicated Query Interface")));
-			}
-			$this->logger->info($this->language->translate(KnownTranslationFactory::pocketmine_server_query_running($prettyIp, (string) $port)));
-		}
-		return true;
+		$this->logger->info($this->language->translate(KnownTranslationFactory::pocketmine_server_query_running($prettyIp, (string) $port)));
 	}
 
 	private function startupPrepareNetworkInterfaces() : bool{
-		$useQuery = $this->configGroup->getConfigBool(ServerProperties::ENABLE_QUERY, true);
+		foreach(array_slice(explode(
+			",",
+			$this->configGroup->getPropertyString(Yml::TRANSPORT_NAME, NetherNetTransport::NAME . "," . RakLibTransport::NAME), //TODO: remove raknet
+			limit: self::MAX_ACTIVE_TRANSPORTS + 1
+		), 0, self::MAX_ACTIVE_TRANSPORTS) as $name){
+			$name = strtolower(trim($name));
+			if($name === ""){
+				continue;
+			}
+			if($this->network->getTransport($name) === null){
+				$this->logger->warning($this->language->translate(KnownTranslationFactory::pocketmine_server_transport_unknown($name)));
+				continue;
+			}
+			$this->network->activateTransport($name);
+		}
 
 		$typeConverter = TypeConverter::getInstance();
 		$packetBroadcaster = new StandardPacketBroadcaster($this);
-		$entityEventBroadcaster = new StandardEntityEventBroadcaster($packetBroadcaster, $typeConverter);
-
-		if(
-			!$this->startupPrepareConnectableNetworkInterfaces($this->getIp(), $this->getPort(), false, $useQuery, $packetBroadcaster, $entityEventBroadcaster, $typeConverter) ||
-			(
-				$this->configGroup->getConfigBool(ServerProperties::ENABLE_IPV6, true) &&
-				!$this->startupPrepareConnectableNetworkInterfaces($this->getIpV6(), $this->getPortV6(), true, $useQuery, $packetBroadcaster, $entityEventBroadcaster, $typeConverter)
-			)
-		){
+		try{
+			$this->network->startActiveTransports($packetBroadcaster, new StandardEntityEventBroadcaster($packetBroadcaster, $typeConverter), $typeConverter);
+		}catch(NetworkInterfaceStartException $e){
+			$this->logger->emergency($e->getMessage());
+			return false;
+		}
+		if(count($this->network->getInterfaces()) === 0){
+			$this->logger->emergency($this->language->translate(KnownTranslationFactory::pocketmine_server_transport_noneConfigured()));
 			return false;
 		}
 
-		if($useQuery){
+		if($this->configGroup->getConfigBool(ServerProperties::ENABLE_QUERY, true)){
+			$this->startupPrepareQueryInterface($this->getIp(), $this->getPort(), false);
+			if($this->configGroup->getConfigBool(ServerProperties::ENABLE_IPV6, true)){
+				$this->startupPrepareQueryInterface($this->getIpV6(), $this->getPortV6(), true);
+			}
 			$this->network->registerRawPacketHandler(new QueryHandler($this));
 		}
 
@@ -1313,6 +1315,7 @@ class Server{
 		}
 
 		if($this->configGroup->getPropertyBool(Yml::NETWORK_UPNP_FORWARDING, false)){
+			$this->logger->warning($this->language->translate(KnownTranslationFactory::pocketmine_server_upnp_deprecated()));
 			$this->network->registerInterface(new UPnPNetworkInterface($this->logger, Internet::getInternalIP(), $this->getPort()));
 		}
 
@@ -1461,11 +1464,11 @@ class Server{
 					return $promise;
 				}
 
-				$compressionType = $compressor->getNetworkId();
+				$compressionType = $compressor->getNetworkType();
 				$compressed = $compressor->compress($buffer);
 			}
 
-			return chr($compressionType) . $compressed;
+			return chr($compressionType->value) . $compressed;
 		}finally{
 			$timings->stopTiming();
 		}

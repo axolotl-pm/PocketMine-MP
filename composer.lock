@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d966352f626e9151163d3ed2117dae3a",
+    "content-hash": "a89e57aefcb2488e59b2110842c7fe7c",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -145,16 +145,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-protocol",
-            "version": "62.0.0+bedrock-1.26.50",
+            "version": "63.0.1+bedrock-1.26.50",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "0e13c077d1060ae9e293908eff81fbef600ead5c"
+                "reference": "7ff605d5b071d46c694d2b71bc8af4514156dbc2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/0e13c077d1060ae9e293908eff81fbef600ead5c",
-                "reference": "0e13c077d1060ae9e293908eff81fbef600ead5c",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/7ff605d5b071d46c694d2b71bc8af4514156dbc2",
+                "reference": "7ff605d5b071d46c694d2b71bc8af4514156dbc2",
                 "shasum": ""
             },
             "require": {
@@ -186,9 +186,58 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
-                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/62.0.0+bedrock-1.26.50"
+                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/63.0.1+bedrock-1.26.50"
             },
-            "time": "2026-09-17T18:23:29+00:00"
+            "time": "2026-10-14T20:41:43+00:00"
+        },
+        {
+            "name": "axolotl-pm/nethernet",
+            "version": "0.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/axolotl-pm/NetherNet.git",
+                "reference": "6ecacdaed3b0605a6a523235e5536f9c09ea56fd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/axolotl-pm/NetherNet/zipball/6ecacdaed3b0605a6a523235e5536f9c09ea56fd",
+                "reference": "6ecacdaed3b0605a6a523235e5536f9c09ea56fd",
+                "shasum": ""
+            },
+            "require": {
+                "ext-encoding": "~1.0.0",
+                "ext-hash": "*",
+                "ext-json": "*",
+                "ext-openssl": "*",
+                "ext-sockets": "*",
+                "ext-webrtc": "*",
+                "php": "^8.1",
+                "php-64bit": "*",
+                "php-ipv6": "*",
+                "pocketmine/log": "^0.4.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "2.1.46",
+                "phpstan/phpstan-phpunit": "^2.0.0",
+                "phpstan/phpstan-strict-rules": "^2.0.0",
+                "phpunit/phpunit": "^10.5.24"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "pocketmine\\nethernet\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "description": "A NetherNet (WebRTC) transport implementation written in PHP",
+            "support": {
+                "issues": "https://github.com/axolotl-pm/NetherNet/issues",
+                "source": "https://github.com/axolotl-pm/NetherNet/tree/0.3.1"
+            },
+            "time": "2026-10-16T02:35:36+00:00"
         },
         {
             "name": "axolotl-pm/xoroshiro128pp",
@@ -1000,33 +1049,6 @@
     ],
     "packages-dev": [
         {
-            "name": "axolotl-pm/bedrock-block-palette-archive",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/axolotl-pm/BedrockBlockPaletteArchive.git",
-                "reference": "14175635112b5661ac8e971fc80787c0e1bb1c9b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockPaletteArchive/zipball/14175635112b5661ac8e971fc80787c0e1bb1c9b",
-                "reference": "14175635112b5661ac8e971fc80787c0e1bb1c9b",
-                "shasum": ""
-            },
-            "default-branch": true,
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "CC0-1.0"
-            ],
-            "description": "Archive of previous Minecraft Bedrock block palettes of interest, useful for world format upgrading",
-            "support": {
-                "issues": "https://github.com/axolotl-pm/BedrockBlockPaletteArchive/issues",
-                "source": "https://github.com/axolotl-pm/BedrockBlockPaletteArchive/tree/master"
-            },
-            "time": "2026-09-18T02:09:02+00:00"
-        },
-        {
             "name": "myclabs/deep-copy",
             "version": "1.14.0",
             "source": {
@@ -1744,16 +1766,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.64",
+            "version": "10.5.66",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "0e8c1d19cea35ad97d4887f363d07c78e30fbf06"
+                "reference": "747c9889613d0b3ffa08b74272e50ed3b8fa6d72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/0e8c1d19cea35ad97d4887f363d07c78e30fbf06",
-                "reference": "0e8c1d19cea35ad97d4887f363d07c78e30fbf06",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/747c9889613d0b3ffa08b74272e50ed3b8fa6d72",
+                "reference": "747c9889613d0b3ffa08b74272e50ed3b8fa6d72",
                 "shasum": ""
             },
             "require": {
@@ -1763,7 +1785,7 @@
                 "ext-libxml": "*",
                 "ext-mbstring": "*",
                 "ext-xmlwriter": "*",
-                "myclabs/deep-copy": "^1.13.4",
+                "myclabs/deep-copy": "^1.14.0",
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.1",
@@ -1780,7 +1802,7 @@
                 "sebastian/exporter": "^5.1.4",
                 "sebastian/global-state": "^6.0.2",
                 "sebastian/object-enumerator": "^5.0.0",
-                "sebastian/recursion-context": "^5.0.1",
+                "sebastian/recursion-context": "^5.0.2",
                 "sebastian/type": "^4.0.0",
                 "sebastian/version": "^4.0.1"
             },
@@ -1825,7 +1847,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.64"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.66"
             },
             "funding": [
                 {
@@ -1833,7 +1855,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-07-06T14:50:35+00:00"
+            "time": "2026-10-05T05:46:26+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -2841,9 +2863,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "axolotl-pm/bedrock-block-palette-archive": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
