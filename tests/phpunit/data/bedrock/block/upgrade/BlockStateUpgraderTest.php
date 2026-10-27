@@ -28,7 +28,25 @@ use pocketmine\block\Block;
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\convert\BlockStateDictionary;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\utils\Filesystem;
+use pocketmine\utils\Utils;
+use Symfony\Component\Filesystem\Path;
+use function array_keys;
+use function array_slice;
+use function basename;
+use function count;
+use function file_exists;
+use function glob;
+use function implode;
+use function ksort;
+use function sprintf;
+use function str_starts_with;
 use const PHP_INT_MAX;
+use const pocketmine\BEDROCK_BLOCK_UPGRADE_SCHEMA_PATH;
+use const pocketmine\PATH;
+use const SORT_STRING;
 
 class BlockStateUpgraderTest extends TestCase{
 
@@ -258,5 +276,121 @@ class BlockStateUpgraderTest extends TestCase{
 		$originalStateData = $getStateData();
 
 		self::assertNotSame($shouldChange, $upgradedStateData->equals($originalStateData));
+	}
+
+	private static function paletteArchivePath() : string{
+		$path = Path::join(PATH, 'vendor', 'axolotl-pm', 'bedrock-block-palette-archive');
+		self::assertDirectoryExists($path, "BedrockBlockPaletteArchive is not installed at $path");
+		return $path;
+	}
+
+	/**
+	 * @return string[]
+	 * @phpstan-return list<string>
+	 */
+	private static function paletteFiles(string $archiveDir) : array{
+		$files = glob(Path::join($archiveDir, '*.nbt'));
+		self::assertNotFalse($files, "failed to list palettes in $archiveDir");
+		return $files;
+	}
+
+	private static function currentVersion(string $archiveDir) : string{
+		$version = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
+		if(!file_exists(Path::join($archiveDir, $version . '.nbt'))){
+			foreach(self::paletteFiles($archiveDir) as $file){
+				if(str_starts_with(basename($file), $version . '.')){
+					return basename($file, '.nbt');
+				}
+			}
+		}
+		return $version;
+	}
+
+	private static function canonical(BlockStateData $state) : string{
+		$states = $state->getStates();
+		ksort($states, SORT_STRING);
+		$properties = [];
+		foreach(Utils::stringifyKeys($states) as $name => $tag){
+			$properties[] = $name . "=" . $tag;
+		}
+		return $state->getName() . "[" . implode(",", $properties) . "]";
+	}
+
+	/**
+	 * @param true[][][] $currentProperties
+	 * @phpstan-param array<string, array<string, array<string, true>>> $currentProperties
+	 */
+	private static function describeMismatch(BlockStateData $upgraded, array $currentProperties) : string{
+		$expected = $currentProperties[$upgraded->getName()] ?? null;
+		if($expected === null){
+			return "block does not exist in the current palette";
+		}
+
+		$problems = [];
+		foreach(Utils::stringifyKeys($upgraded->getStates()) as $property => $value){
+			if(!isset($expected[$property])){
+				$problems[] = "unexpected property " . $property;
+			}elseif(!isset($expected[$property][(string) $value])){
+				$problems[] = "invalid value " . $property . "=" . $value . " (expected " . implode("|", array_keys($expected[$property])) . ")";
+			}
+		}
+		foreach(Utils::stringifyKeys($expected) as $property => $values){
+			if($upgraded->getState($property) === null){
+				$problems[] = "missing property " . $property . " (" . implode("|", array_keys($values)) . ")";
+			}
+		}
+
+		return count($problems) === 0 ? "no current state has this combination of property values" : implode(", ", $problems);
+	}
+
+	public function testEveryArchivedStateUpgradesToACurrentState() : void{
+		$archiveDir = self::paletteArchivePath();
+
+		$schemaDir = Path::join(BEDROCK_BLOCK_UPGRADE_SCHEMA_PATH, 'nbt_upgrade_schema');
+		$upgrader = new BlockStateUpgrader(BlockStateUpgradeSchemaUtils::loadSchemas($schemaDir, PHP_INT_MAX));
+
+		$currentVersion = self::currentVersion($archiveDir);
+		$targetFile = Path::join($archiveDir, $currentVersion . '.nbt');
+		self::assertFileExists($targetFile, "palette archive has no palette for the current version ($currentVersion)");
+
+		$current = [];
+		/**
+		 * @var true[][][] $currentProperties
+		 * @phpstan-var array<string, array<string, array<string, true>>> $currentProperties
+		 */
+		$currentProperties = [];
+		foreach(BlockStateDictionary::loadPaletteFromString(Filesystem::fileGetContents($targetFile)) as $state){
+			$current[self::canonical($state)] = true;
+			$currentProperties[$state->getName()] ??= [];
+			foreach(Utils::stringifyKeys($state->getStates()) as $property => $value){
+				$currentProperties[$state->getName()][$property][(string) $value] = true;
+			}
+		}
+
+		$oldStates = [];
+		foreach(self::paletteFiles($archiveDir) as $file){
+			if(basename($file) === $currentVersion . '.nbt'){
+				continue;
+			}
+			foreach(BlockStateDictionary::loadPaletteFromString(Filesystem::fileGetContents($file)) as $state){
+				$oldStates[self::canonical($state)] = new BlockStateData($state->getName(), $state->getStates(), 0);
+			}
+		}
+
+		$failures = [];
+		foreach(Utils::stringifyKeys($oldStates) as $key => $forced){
+			$upgraded = $upgrader->upgrade($forced);
+			$upgradedKey = self::canonical($upgraded);
+			if(!isset($current[$upgradedKey])){
+				$failures[] = ($upgradedKey === $key ? $key : $key . ' -> ' . $upgradedKey) . ': ' . self::describeMismatch($upgraded, $currentProperties);
+			}
+		}
+
+		self::assertSame([], $failures, sprintf(
+			"%d block state(s) do not upgrade to a valid %s state (missing/incomplete upgrade schema):\n%s",
+			count($failures),
+			$currentVersion,
+			implode("\n", array_slice($failures, 0, 40))
+		));
 	}
 }
