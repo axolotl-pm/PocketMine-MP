@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a2936718204b7d2a814fc9558c5ae7f2",
+    "content-hash": "01c34b5648e4177bfa963b48f7da5526",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -67,16 +67,16 @@
         },
         {
             "name": "axolotl-pm/bedrock-block-upgrade-schema",
-            "version": "dev-bedrock-1.26.60",
+            "version": "5.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema.git",
-                "reference": "62d90020d8a1d68a534b7a06cb3cda17a260e103"
+                "reference": "25b40fbb4866caab71d21793ddbe9636acc1fb05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/62d90020d8a1d68a534b7a06cb3cda17a260e103",
-                "reference": "62d90020d8a1d68a534b7a06cb3cda17a260e103",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockBlockUpgradeSchema/zipball/25b40fbb4866caab71d21793ddbe9636acc1fb05",
+                "reference": "25b40fbb4866caab71d21793ddbe9636acc1fb05",
                 "shasum": ""
             },
             "type": "library",
@@ -87,22 +87,22 @@
             "description": "Schemas describing how to upgrade saved block data in older Minecraft: Bedrock Edition world saves",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/issues",
-                "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/bedrock-1.26.60"
+                "source": "https://github.com/axolotl-pm/BedrockBlockUpgradeSchema/tree/5.5.0"
             },
-            "time": "2026-10-27T16:42:40+00:00"
+            "time": "2026-10-27T22:27:16+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-data",
-            "version": "dev-bedrock-1.26.60",
+            "version": "6.10.0+bedrock-1.26.60",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockData.git",
-                "reference": "034ef0a3c3d9c4b21ceb3a835c3baed328490c68"
+                "reference": "aeb5f24894f1873dde6f7b4f39490ad85ce59094"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockData/zipball/034ef0a3c3d9c4b21ceb3a835c3baed328490c68",
-                "reference": "034ef0a3c3d9c4b21ceb3a835c3baed328490c68",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockData/zipball/aeb5f24894f1873dde6f7b4f39490ad85ce59094",
+                "reference": "aeb5f24894f1873dde6f7b4f39490ad85ce59094",
                 "shasum": ""
             },
             "type": "library",
@@ -115,20 +115,20 @@
                 "issues": "https://github.com/axolotl-pm/BedrockData/issues",
                 "source": "https://github.com/axolotl-pm/BedrockData/tree/bedrock-1.26.60"
             },
-            "time": "2026-10-27T16:41:47+00:00"
+            "time": "2026-10-27T22:46:26+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-item-upgrade-schema",
-            "version": "dev-bedrock-1.26.60",
+            "version": "1.20.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema.git",
-                "reference": "c4ba38a3ba2f87921bb3b64ab1bddf2c9d616e40"
+                "reference": "1945fa451cfba4a0aa7b738da697f7e5687d7b45"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockItemUpgradeSchema/zipball/c4ba38a3ba2f87921bb3b64ab1bddf2c9d616e40",
-                "reference": "c4ba38a3ba2f87921bb3b64ab1bddf2c9d616e40",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockItemUpgradeSchema/zipball/1945fa451cfba4a0aa7b738da697f7e5687d7b45",
+                "reference": "1945fa451cfba4a0aa7b738da697f7e5687d7b45",
                 "shasum": ""
             },
             "type": "library",
@@ -139,22 +139,22 @@
             "description": "JSON schemas for upgrading items found in older Minecraft: Bedrock world saves",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/issues",
-                "source": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/tree/bedrock-1.26.60"
+                "source": "https://github.com/axolotl-pm/BedrockItemUpgradeSchema/tree/1.20.0"
             },
-            "time": "2026-10-27T16:43:06+00:00"
+            "time": "2026-10-27T22:38:27+00:00"
         },
         {
             "name": "axolotl-pm/bedrock-protocol",
-            "version": "dev-bedrock-1.26.60",
+            "version": "64.0.0+bedrock-1.26.60",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axolotl-pm/BedrockProtocol.git",
-                "reference": "bed7911d02783ce0bb7cc1ca1bfa4dc622db9a20"
+                "reference": "f9d8b40da3940cef8242b0da34ba41fe49ea7364"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/bed7911d02783ce0bb7cc1ca1bfa4dc622db9a20",
-                "reference": "bed7911d02783ce0bb7cc1ca1bfa4dc622db9a20",
+                "url": "https://api.github.com/repos/axolotl-pm/BedrockProtocol/zipball/f9d8b40da3940cef8242b0da34ba41fe49ea7364",
+                "reference": "f9d8b40da3940cef8242b0da34ba41fe49ea7364",
                 "shasum": ""
             },
             "require": {
@@ -186,9 +186,9 @@
             "description": "An implementation of the Minecraft: Bedrock Edition protocol in PHP",
             "support": {
                 "issues": "https://github.com/axolotl-pm/BedrockProtocol/issues",
-                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/bedrock-1.26.60"
+                "source": "https://github.com/axolotl-pm/BedrockProtocol/tree/64.0.0+bedrock-1.26.60"
             },
-            "time": "2026-10-25T00:12:53+00:00"
+            "time": "2026-10-26T06:25:21+00:00"
         },
         {
             "name": "axolotl-pm/nethernet",
@@ -2863,12 +2863,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "axolotl-pm/bedrock-block-upgrade-schema": 20,
-        "axolotl-pm/bedrock-data": 20,
-        "axolotl-pm/bedrock-item-upgrade-schema": 20,
-        "axolotl-pm/bedrock-protocol": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
