@@ -64,6 +64,9 @@ memory:
     chunk-radius: 4
 
 network:
+  #Use canonical block state hashes for network block IDs instead of sequential palette offsets.
+  #Leave this disabled unless block hash IDs are required by your setup.
+  block-network-ids-are-hashes: false
   #Threshold for batching packets, in bytes. Only these packets will be compressed
   #Set to 0 to compress everything, -1 to disable.
   batch-threshold: 256
