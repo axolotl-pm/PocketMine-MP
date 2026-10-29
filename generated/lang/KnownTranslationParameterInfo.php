@@ -74,7 +74,7 @@ final class KnownTranslationParameterInfo{
 		Keys::COMMANDS_GENERIC_NUM_TOOBIG => ["0", "1"],
 		Keys::COMMANDS_GENERIC_NUM_TOOSMALL => ["0", "1"],
 		Keys::COMMANDS_GENERIC_PLAYER_NOTFOUND => [],
-		Keys::COMMANDS_GENERIC_SYNTAXERROR => ["0", "1"],
+		Keys::COMMANDS_GENERIC_SYNTAX => ["0", "1"],
 		Keys::COMMANDS_GENERIC_USAGE => ["0"],
 		Keys::COMMANDS_GIVE_ITEM_NOTFOUND => ["0"],
 		Keys::COMMANDS_GIVE_SUCCESS => ["0", "1", "2"],

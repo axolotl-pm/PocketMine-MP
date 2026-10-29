@@ -271,8 +271,8 @@ final class KnownTranslationFactory{
 		return new Translatable(KnownTranslationKeys::COMMANDS_GENERIC_PLAYER_NOTFOUND, []);
 	}
 
-	public static function commands_generic_syntaxError(Translatable|string $param0, Translatable|string $param1) : Translatable{
-		return new Translatable(KnownTranslationKeys::COMMANDS_GENERIC_SYNTAXERROR, [
+	public static function commands_generic_syntax(Translatable|string $param0, Translatable|string $param1) : Translatable{
+		return new Translatable(KnownTranslationKeys::COMMANDS_GENERIC_SYNTAX, [
 			0 => $param0,
 			1 => $param1,
 		]);

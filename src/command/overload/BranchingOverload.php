@@ -81,7 +81,7 @@ final class BranchingOverload implements Overload{
 			CommandStringHelper::skipWhitespace($commandLine, $offsetCopy);
 			if($offset < strlen($commandLine)){
 				$childName = CommandStringHelper::parseQuoteAwareSingle($commandLine, $offsetCopy);
-				if(isset($this->namedChildren[$childName])){
+				if($childName !== null && isset($this->namedChildren[$childName])){
 					$offset = $offsetCopy;
 					return $this->namedChildren[$childName]->invoke(
 						$context,

@@ -71,7 +71,7 @@ final class KnownTranslationKeys{
 	public const COMMANDS_GENERIC_NUM_TOOBIG = "commands.generic.num.tooBig";
 	public const COMMANDS_GENERIC_NUM_TOOSMALL = "commands.generic.num.tooSmall";
 	public const COMMANDS_GENERIC_PLAYER_NOTFOUND = "commands.generic.player.notFound";
-	public const COMMANDS_GENERIC_SYNTAXERROR = "commands.generic.syntaxError";
+	public const COMMANDS_GENERIC_SYNTAX = "commands.generic.syntax";
 	public const COMMANDS_GENERIC_USAGE = "commands.generic.usage";
 	public const COMMANDS_GIVE_ITEM_NOTFOUND = "commands.give.item.notFound";
 	public const COMMANDS_GIVE_SUCCESS = "commands.give.success";

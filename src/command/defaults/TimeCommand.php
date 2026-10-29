@@ -25,10 +25,9 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\overload\IntRangeParameter;
 use pocketmine\command\overload\enum\CommandEnum;
 use pocketmine\command\overload\EnumParameter;
-use pocketmine\command\overload\Overload;
+use pocketmine\command\overload\IntRangeParameter;
 use pocketmine\command\overload\OverloadBuilder;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissionNames;

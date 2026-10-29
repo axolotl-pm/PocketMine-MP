@@ -34,13 +34,16 @@ use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\lang\Translatable;
 use pocketmine\permission\PermissionManager;
-use pocketmine\utils\Utils;
 use function array_key_last;
 use function array_slice;
 use function count;
+use function explode;
 use function implode;
 use function is_string;
+use function rtrim;
 use function strlen;
+use function strrpos;
+use function substr;
 use function trigger_error;
 use const E_USER_DEPRECATED;
 
@@ -215,7 +218,7 @@ final class ExecutorOverload implements Overload{
 		$space = $rawArgs !== "" ? " " : "";
 		$executed = "/$aliasUsed" . $space . $before . ">>" . $invalidArg . "<<" . $after;
 
-		return KnownTranslationFactory::commands_generic_syntaxError($invalidArg, $executed);
+		return KnownTranslationFactory::commands_generic_syntax($invalidArg, $executed);
 	}
 
 	/**
