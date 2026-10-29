@@ -77,6 +77,7 @@ class ItemStackRequestExecutor{
 	private ?Item $nextCreatedItem = null;
 	private bool $createdItemFromCreativeInventory = false;
 	private int $createdItemsTakenCount = 0;
+	private bool $createdItemTaken = false;
 
 	public function __construct(
 		private Player $player,
@@ -283,6 +284,7 @@ class ItemStackRequestExecutor{
 		}
 
 		$this->createdItemsTakenCount += $count;
+		$this->createdItemTaken = true;
 		$takenItem = clone $createdItem;
 		$takenItem->setCount($count);
 		if(!$this->createdItemFromCreativeInventory && $this->createdItemsTakenCount >= $createdItem->getCount()){
@@ -355,6 +357,10 @@ class ItemStackRequestExecutor{
 			$this->beginCrafting($action->getRecipeId(), $action->getRepetitions());
 		}elseif($action instanceof CraftingConsumeInputStackRequestAction){
 			$this->assertDoingCrafting();
+			if($this->createdItemTaken){
+				//otherwise recipes which produce one of their own ingredients could consume their own results
+				throw new ItemStackRequestProcessException("Cannot consume crafting inputs after taking a crafting result");
+			}
 			$this->removeItemFromSlot($action->getSource(), $action->getCount()); //output discarded - we allow CraftingTransaction to verify the balance
 
 		}elseif($action instanceof CraftingCreateSpecificResultStackRequestAction){
