@@ -38,15 +38,18 @@ class PlayerResourcePackOfferEvent extends Event{
 	/**
 	 * @param ResourcePack[] $resourcePacks
 	 * @param string[]       $encryptionKeys pack UUID => key, leave unset for any packs that are not encrypted
+	 * @param string[]       $cdnUrls        pack UUID => HTTP(S) download URL, leave unset for server downloads
 	 *
 	 * @phpstan-param list<ResourcePack>    $resourcePacks
 	 * @phpstan-param array<string, string> $encryptionKeys
+	 * @phpstan-param array<string, string> $cdnUrls
 	 */
 	public function __construct(
 		private readonly PlayerInfo $playerInfo,
 		private array $resourcePacks,
 		private array $encryptionKeys,
-		private bool $mustAccept
+		private bool $mustAccept,
+		private array $cdnUrls = []
 	){}
 
 	public function getPlayerInfo() : PlayerInfo{
@@ -57,10 +60,13 @@ class PlayerResourcePackOfferEvent extends Event{
 	 * Adds a resource pack to the top of the stack.
 	 * The resources in this pack will be applied over the top of any existing packs.
 	 */
-	public function addResourcePack(ResourcePack $entry, ?string $encryptionKey = null) : void{
+	public function addResourcePack(ResourcePack $entry, ?string $encryptionKey = null, ?string $cdnUrl = null) : void{
 		array_unshift($this->resourcePacks, $entry);
 		if($encryptionKey !== null){
 			$this->encryptionKeys[$entry->getPackId()] = $encryptionKey;
+		}
+		if($cdnUrl !== null){
+			$this->cdnUrls[$entry->getPackId()] = $cdnUrl;
 		}
 	}
 
@@ -71,13 +77,16 @@ class PlayerResourcePackOfferEvent extends Event{
 	 *
 	 * @param ResourcePack[] $resourcePacks
 	 * @param string[]       $encryptionKeys pack UUID => key, leave unset for any packs that are not encrypted
+	 * @param string[]       $cdnUrls        pack UUID => HTTP(S) download URL, leave unset for server downloads
 	 *
 	 * @phpstan-param list<ResourcePack>    $resourcePacks
 	 * @phpstan-param array<string, string> $encryptionKeys
+	 * @phpstan-param array<string, string> $cdnUrls
 	 */
-	public function setResourcePacks(array $resourcePacks, array $encryptionKeys) : void{
+	public function setResourcePacks(array $resourcePacks, array $encryptionKeys, array $cdnUrls = []) : void{
 		$this->resourcePacks = $resourcePacks;
 		$this->encryptionKeys = $encryptionKeys;
+		$this->cdnUrls = $cdnUrls;
 	}
 
 	/**
@@ -94,6 +103,11 @@ class PlayerResourcePackOfferEvent extends Event{
 	 */
 	public function getEncryptionKeys() : array{
 		return $this->encryptionKeys;
+	}
+
+	/** @return array<string, string> pack UUID => HTTP(S) download URL */
+	public function getCdnUrls() : array{
+		return $this->cdnUrls;
 	}
 
 	public function setMustAccept(bool $mustAccept) : void{
