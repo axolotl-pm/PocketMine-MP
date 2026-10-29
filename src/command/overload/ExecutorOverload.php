@@ -31,8 +31,10 @@ use DaveRandom\CallbackValidator\Type\NamedType;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\CommandStringHelper;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
+use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\lang\Translatable;
 use pocketmine\permission\PermissionManager;
+use pocketmine\utils\Utils;
 use function array_key_last;
 use function array_slice;
 use function count;
@@ -195,6 +197,25 @@ final class ExecutorOverload implements Overload{
 		}
 
 		return new Translatable("/$aliasUsed " . implode(" ", $templates), $args);
+	}
+
+	public function getInvalidSyntaxMessage(string $aliasUsed, string $rawArgs, int $offset) : Translatable{
+		$trimmedArgs = rtrim($rawArgs);
+
+		if($offset >= strlen($trimmedArgs) && $trimmedArgs !== ""){
+			$lastSpace = strrpos($trimmedArgs, ' ');
+			$offset = $lastSpace !== false ? $lastSpace + 1 : 0;
+		}
+
+		$invalidArg = explode(' ', substr($rawArgs, $offset), 2)[0];
+
+		$before = substr($rawArgs, 0, $offset);
+		$after = substr($rawArgs, $offset + strlen($invalidArg));
+
+		$space = $rawArgs !== "" ? " " : "";
+		$executed = "/$aliasUsed" . $space . $before . ">>" . $invalidArg . "<<" . $after;
+
+		return KnownTranslationFactory::commands_generic_syntaxError($invalidArg, $executed);
 	}
 
 	/**

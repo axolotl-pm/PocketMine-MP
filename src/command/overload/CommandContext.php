@@ -78,6 +78,8 @@ final class CommandContext{
 		}
 	}
 
+	public function getMostSuccessfulFailedParseOffset() : int{ return $this->mostSuccessfulFailedParseOffset; }
+
 	/**
 	 * @return ExecutorOverload[]
 	 * @phpstan-return list<ExecutorOverload>

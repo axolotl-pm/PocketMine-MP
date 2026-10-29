@@ -91,10 +91,34 @@ class Command{
 			return false;
 		}
 
-		foreach($mostSuccessful as $overload){
-			$usageMessage = $overload->getUsage($aliasUsed);
-			$sender->sendMessage($sender->getLanguage()->translate(KnownTranslationFactory::commands_generic_usage($usageMessage)));
+		$reasons = $context->getMostSuccessfulFailedOverloadReasons();
+		//if no reasons given, then the most successful overloads were all denied permissions, so we can just show usage messages instead
+		if(count($reasons) === 0){
+			foreach($mostSuccessful as $overload){
+				$usageMessage = $overload->getUsage($aliasUsed);
+				$sender->sendMessage($sender->getLanguage()->translate(KnownTranslationFactory::commands_generic_usage($usageMessage)));
+			}
+			return false;
 		}
+		$notSent = [];
+		$offset = $context->getMostSuccessfulFailedParseOffset();
+		foreach($mostSuccessful as $i => $overload){
+			//any of overloads matched the input but some of them were invalid
+			//so just send the reasons for the most successful overloads that failed
+			if($overload->getRequiredParameterCount() < $context->getMostSuccessfulFailedParseOffset()){
+				$sender->sendMessage($sender->getLanguage()->translate($overload->getInvalidSyntaxMessage($aliasUsed, $rawArgs, $offset)->prefix(TextFormat::RED)));
+				//do not send more messages here - the first one takes priority anyway
+				break;
+			}
+			$notSent[] = $overload;
+		}
+		//none of overloads matched the input - send all usage messages for the most successful overloads that failed
+		if(count($notSent) === count($mostSuccessful)){
+			foreach($mostSuccessful as $i => $overload){
+				$sender->sendMessage($sender->getLanguage()->translate(KnownTranslationFactory::commands_generic_usage($overload->getUsage($aliasUsed))));
+			}
+		}
+
 		return false;
 	}
 
