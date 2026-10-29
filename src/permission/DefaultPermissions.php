@@ -80,6 +80,7 @@ abstract class DefaultPermissions{
 			Names::COMMAND_BAN_IP,
 			Names::COMMAND_BAN_LIST,
 			Names::COMMAND_BAN_PLAYER,
+			Names::COMMAND_CLEAR_SELF,
 			Names::COMMAND_CLEAR_OTHER,
 			Names::COMMAND_CMDALIAS_EDIT_GLOBAL,
 			Names::COMMAND_DEFAULTGAMEMODE,
@@ -142,7 +143,6 @@ abstract class DefaultPermissions{
 			Names::COMMAND_ME,
 			Names::COMMAND_HELP,
 			Names::BROADCAST_USER,
-			Names::COMMAND_CLEAR_SELF,
 			Names::COMMAND_TELL,
 			Names::COMMAND_VERSION,
 		] as $permission){
