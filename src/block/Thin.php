@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\HorizontalConnectable;
+use pocketmine\block\utils\HorizontalConnectableTrait;
+use pocketmine\block\utils\HorizontalFacingOption;
 use pocketmine\block\utils\SupportType;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
@@ -32,25 +35,21 @@ use function count;
 /**
  * Thin blocks behave like glass panes. They connect to full-cube blocks horizontally adjacent to them if possible.
  */
-class Thin extends Transparent{
-	/** @var bool[] facing => dummy */
-	protected array $connections = [];
+class Thin extends Transparent implements HorizontalConnectable{
+	use HorizontalConnectableTrait;
 
-	public function readStateFromWorld() : Block{
-		parent::readStateFromWorld();
-
-		$this->collisionBoxes = null;
-
+	protected function recalculateConnections() : bool{
+		$changed = false;
 		foreach(Facing::HORIZONTAL as $facing){
+			$horizontalFacing = HorizontalFacingOption::fromFacing($facing);
 			$side = $this->getSide($facing);
-			if($side instanceof Thin || $side instanceof Wall || $side->getSupportType(Facing::opposite($facing)) === SupportType::FULL){
-				$this->connections[$facing->value] = true;
-			}else{
-				unset($this->connections[$facing->value]);
+			$connected = $side instanceof Thin || $side instanceof Wall || $side->getSupportType(Facing::opposite($facing)) === SupportType::FULL;
+			if($connected !== $this->isConnectedAt($horizontalFacing)){
+				$this->setConnectedAt($horizontalFacing, $connected);
+				$changed = true;
 			}
 		}
-
-		return $this;
+		return $changed;
 	}
 
 	protected function recalculateCollisionBoxes() : array{
@@ -58,23 +57,23 @@ class Thin extends Transparent{
 
 		$bbs = [];
 
-		if(isset($this->connections[Facing::WEST->value]) || isset($this->connections[Facing::EAST->value])){
+		if($this->isConnectedAt(HorizontalFacingOption::WEST) || $this->isConnectedAt(HorizontalFacingOption::EAST)){
 			$bb = AxisAlignedBB::one()->squashedCopy(Axis::Z, $inset);
 
-			if(!isset($this->connections[Facing::WEST->value])){
+			if(!$this->isConnectedAt(HorizontalFacingOption::WEST)){
 				$bb = $bb->trimmedCopy(Facing::WEST, $inset);
-			}elseif(!isset($this->connections[Facing::EAST->value])){
+			}elseif(!$this->isConnectedAt(HorizontalFacingOption::EAST)){
 				$bb = $bb->trimmedCopy(Facing::EAST, $inset);
 			}
 			$bbs[] = $bb;
 		}
 
-		if(isset($this->connections[Facing::NORTH->value]) || isset($this->connections[Facing::SOUTH->value])){
+		if($this->isConnectedAt(HorizontalFacingOption::NORTH) || $this->isConnectedAt(HorizontalFacingOption::SOUTH)){
 			$bb = AxisAlignedBB::one()->squashedCopy(Axis::X, $inset);
 
-			if(!isset($this->connections[Facing::NORTH->value])){
+			if(!$this->isConnectedAt(HorizontalFacingOption::NORTH)){
 				$bb = $bb->trimmedCopy(Facing::NORTH, $inset);
-			}elseif(!isset($this->connections[Facing::SOUTH->value])){
+			}elseif(!$this->isConnectedAt(HorizontalFacingOption::SOUTH)){
 				$bb = $bb->trimmedCopy(Facing::SOUTH, $inset);
 			}
 			$bbs[] = $bb;

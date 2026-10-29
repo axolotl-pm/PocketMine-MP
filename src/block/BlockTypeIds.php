@@ -855,8 +855,59 @@ final class BlockTypeIds{
 	public const AZALEA = 10825;
 	public const FLOWERING_AZALEA = 10826;
 	public const HEAVY_CORE = 10827;
+	public const SULFUR = 10828;
+	public const SULFUR_SLAB = 10829;
+	public const SULFUR_STAIRS = 10830;
+	public const SULFUR_WALL = 10831;
+	public const CHISELED_SULFUR = 10832;
+	public const POLISHED_SULFUR = 10833;
+	public const POLISHED_SULFUR_SLAB = 10834;
+	public const POLISHED_SULFUR_STAIRS = 10835;
+	public const POLISHED_SULFUR_WALL = 10836;
+	public const SULFUR_BRICKS = 10837;
+	public const SULFUR_BRICK_SLAB = 10838;
+	public const SULFUR_BRICK_STAIRS = 10839;
+	public const SULFUR_BRICK_WALL = 10840;
+	public const POTENT_SULFUR = 10841;
+	public const WET_POTENT_SULFUR = 10842;
+	public const CONTINUOUS_POTENT_SULFUR = 10843;
+	public const CYCLING_POTENT_SULFUR = 10844;
 
-	public const FIRST_UNUSED_BLOCK_ID = 10828;
+	public const CINNABAR = 10845;
+	public const CINNABAR_SLAB = 10846;
+	public const CINNABAR_STAIRS = 10847;
+	public const CINNABAR_WALL = 10848;
+	public const CHISELED_CINNABAR = 10849;
+	public const POLISHED_CINNABAR = 10850;
+	public const POLISHED_CINNABAR_SLAB = 10851;
+	public const POLISHED_CINNABAR_STAIRS = 10852;
+	public const POLISHED_CINNABAR_WALL = 10853;
+	public const CINNABAR_BRICKS = 10854;
+	public const CINNABAR_BRICK_SLAB = 10855;
+	public const CINNABAR_BRICK_STAIRS = 10856;
+	public const CINNABAR_BRICK_WALL = 10857;
+
+	public const POPLAR_BUTTON = 10858;
+	public const POPLAR_CEILING_CENTER_HANGING_SIGN = 10859;
+	public const POPLAR_CEILING_EDGES_HANGING_SIGN = 10860;
+	public const POPLAR_DOOR = 10861;
+	public const POPLAR_FENCE = 10862;
+	public const POPLAR_FENCE_GATE = 10863;
+	public const POPLAR_LOG = 10864;
+	public const POPLAR_PLANKS = 10865;
+	public const POPLAR_PRESSURE_PLATE = 10866;
+	public const POPLAR_SIGN = 10867;
+	public const POPLAR_SLAB = 10868;
+	public const POPLAR_STAIRS = 10869;
+	public const POPLAR_TRAPDOOR = 10870;
+	public const POPLAR_WALL_HANGING_SIGN = 10871;
+	public const POPLAR_WALL_SIGN = 10872;
+	public const POPLAR_WOOD = 10873;
+	public const ORANGE_POPLAR_LEAVES = 10874;
+	public const RED_POPLAR_LEAVES = 10875;
+	public const YELLOW_POPLAR_LEAVES = 10876;
+
+	public const FIRST_UNUSED_BLOCK_ID = 10877;
 
 	private static int $nextDynamicId = self::FIRST_UNUSED_BLOCK_ID;
 
