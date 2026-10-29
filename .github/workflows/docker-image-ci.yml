@@ -31,7 +31,7 @@ jobs:
         tags: local-pocketmine-mp
         build-args: |
           GIT_HASH=${{ github.sha }}
-          COMPILE_SH_ARGS=-f -g -P5 -z 8.4
+          COMPILE_SH_ARGS=-f -g -P5 -z 8.5
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
