@@ -23,27 +23,52 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\HorizontalConnectable;
+use pocketmine\block\utils\HorizontalFacingOption;
 use pocketmine\block\utils\StaticSupportTrait;
+use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use function mt_rand;
+use function spl_object_id;
 
-final class ChorusPlant extends Flowable{
+final class ChorusPlant extends Flowable implements HorizontalConnectable{
 	use StaticSupportTrait;
 
-	/**
-	 * @var true[]
-	 * @phpstan-var array<int, true>
-	 */
+	/** @var Facing[] spl_object_id(Facing) => Facing */
 	protected array $connections = [];
+
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
+		$w->enumSet($this->connections, Facing::cases());
+	}
+
+	public function isConnectedAt(HorizontalFacingOption $facing) : bool{
+		return $this->isConnectedTowards($facing->toFacing());
+	}
+
+	public function setConnectedAt(HorizontalFacingOption $facing, bool $connected) : void{
+		$this->setConnectedTowards($facing->toFacing(), $connected);
+	}
+
+	public function isConnectedTowards(Facing $facing) : bool{
+		return isset($this->connections[spl_object_id($facing)]);
+	}
+
+	public function setConnectedTowards(Facing $facing, bool $connected) : void{
+		if($connected){
+			$this->connections[spl_object_id($facing)] = $facing;
+		}else{
+			unset($this->connections[spl_object_id($facing)]);
+		}
+	}
 
 	protected function recalculateCollisionBoxes() : array{
 		$bb = AxisAlignedBB::one();
 		foreach(Facing::ALL as $facing){
-			if(!isset($this->connections[$facing->value])){
+			if(!$this->isConnectedTowards($facing)){
 				$bb = $bb->trimmedCopy($facing, 2 / 16);
 			}
 		}
@@ -51,24 +76,29 @@ final class ChorusPlant extends Flowable{
 		return [$bb];
 	}
 
-	public function readStateFromWorld() : Block{
-		parent::readStateFromWorld();
-
-		$this->collisionBoxes = null;
-
+	private function recalculateConnections() : bool{
+		$changed = false;
 		foreach(Facing::ALL as $facing){
 			$block = $this->getSide($facing);
-			if(match($block->getTypeId()){
-				BlockTypeIds::END_STONE, BlockTypeIds::CHORUS_FLOWER, $this->getTypeId() => true,
+			$connected = match($block->getTypeId()){
+				BlockTypeIds::CHORUS_FLOWER, $this->getTypeId() => true,
+				BlockTypeIds::END_STONE => $facing === Facing::DOWN,
 				default => false
-			}){
-				$this->connections[$facing->value] = true;
-			}else{
-				unset($this->connections[$facing->value]);
+			};
+			if($connected !== $this->isConnectedTowards($facing)){
+				$this->setConnectedTowards($facing, $connected);
+				$changed = true;
 			}
 		}
+		return $changed;
+	}
 
-		return $this;
+	public function onNearbyBlockChange() : void{
+		if(!$this->canBeSupportedAt($this)){
+			$this->position->getWorld()->useBreakOn($this->position);
+		}elseif($this->recalculateConnections()){
+			$this->position->getWorld()->setBlock($this->position, $this);
+		}
 	}
 
 	private function canBeSupportedBy(Block $block) : bool{

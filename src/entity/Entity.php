@@ -1537,7 +1537,8 @@ abstract class Entity{
 			}, array_values($this->attributeMap->getAll())),
 			$this->getAllNetworkData(),
 			new PropertySyncData([], []),
-			[] //TODO: entity links
+			[], //TODO: entity links
+			null //TODO: cushion
 		));
 	}
 
