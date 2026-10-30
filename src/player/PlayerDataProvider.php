@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\player;
 
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\promise\Promise;
 
 /**
  * Handles storage of player data. Implementations must treat player names in a case-insensitive manner.
@@ -36,12 +37,12 @@ interface PlayerDataProvider{
 	public function hasData(string $name) : bool;
 
 	/**
-	 * Returns the data associated with the given player name, or null if there is no data.
-	 * TODO: we need an async version of this
+	 * Returns a Promise that resolves to the data for the given player name.
 	 *
+	 * @phpstan-return Promise<CompoundTag>
 	 * @throws PlayerDataLoadException
 	 */
-	public function loadData(string $name) : ?CompoundTag;
+	public function loadData(string $name) : Promise;
 
 	/**
 	 * Saves data for the give player name.

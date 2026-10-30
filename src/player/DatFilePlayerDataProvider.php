@@ -28,6 +28,8 @@ use pocketmine\nbt\BigEndianNbtSerializer;
 use pocketmine\nbt\NbtDataException;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\TreeRoot;
+use pocketmine\promise\Promise;
+use pocketmine\promise\PromiseResolver;
 use pocketmine\utils\Filesystem;
 use pocketmine\utils\Utils;
 use Symfony\Component\Filesystem\Path;
@@ -60,12 +62,15 @@ final class DatFilePlayerDataProvider implements PlayerDataProvider{
 		return file_exists($this->getPlayerDataPath($name));
 	}
 
-	public function loadData(string $name) : ?CompoundTag{
+	public function loadData(string $name) : Promise{
+		/** @var PromiseResolver<CompoundTag> $resolver */
+		$resolver = new PromiseResolver();
 		$name = strtolower($name);
 		$path = $this->getPlayerDataPath($name);
 
 		if(!file_exists($path)){
-			return null;
+			$resolver->reject();
+			return $resolver->getPromise();
 		}
 
 		try{
@@ -74,6 +79,7 @@ final class DatFilePlayerDataProvider implements PlayerDataProvider{
 			throw new PlayerDataLoadException("Failed to read player data file \"$path\": " . $e->getMessage(), 0, $e);
 		}
 		try{
+			/** @var string $decompressed */
 			$decompressed = ErrorToExceptionHandler::trapAndRemoveFalse(fn() => zlib_decode($contents));
 		}catch(\ErrorException $e){
 			$this->handleCorruptedPlayerData($name);
@@ -81,7 +87,8 @@ final class DatFilePlayerDataProvider implements PlayerDataProvider{
 		}
 
 		try{
-			return (new BigEndianNbtSerializer())->read($decompressed)->mustGetCompoundTag();
+			$resolver->resolve((new BigEndianNbtSerializer())->read($decompressed)->mustGetCompoundTag());
+			return $resolver->getPromise();
 		}catch(NbtDataException $e){ //corrupt data
 			$this->handleCorruptedPlayerData($name);
 			throw new PlayerDataLoadException("Failed to decode NBT data for \"$name\": " . $e->getMessage(), 0, $e);

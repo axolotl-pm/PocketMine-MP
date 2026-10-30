@@ -74,9 +74,7 @@ use pocketmine\permission\BanList;
 use pocketmine\permission\DefaultPermissions;
 use pocketmine\player\DatFilePlayerDataProvider;
 use pocketmine\player\GameMode;
-use pocketmine\player\OfflinePlayer;
 use pocketmine\player\Player;
-use pocketmine\player\PlayerDataLoadException;
 use pocketmine\player\PlayerDataProvider;
 use pocketmine\player\PlayerDataSaveException;
 use pocketmine\player\PlayerInfo;
@@ -518,34 +516,12 @@ class Server{
 		return $this->configGroup->getPropertyBool(Yml::PLAYER_SAVE_PLAYER_DATA, true);
 	}
 
-	public function getOfflinePlayer(string $name) : Player|OfflinePlayer|null{
-		$name = strtolower($name);
-		$result = $this->getPlayerExact($name);
-
-		if($result === null){
-			$result = new OfflinePlayer($name, $this->getOfflinePlayerData($name));
-		}
-
-		return $result;
+	public function getPlayerDataProvider() : PlayerDataProvider{
+		return $this->playerDataProvider;
 	}
 
-	/**
-	 * Returns whether the server has stored any saved data for this player.
-	 */
-	public function hasOfflinePlayerData(string $name) : bool{
-		return $this->playerDataProvider->hasData($name);
-	}
-
-	public function getOfflinePlayerData(string $name) : ?CompoundTag{
-		return Timings::$syncPlayerDataLoad->time(function() use ($name) : ?CompoundTag{
-			try{
-				return $this->playerDataProvider->loadData($name);
-			}catch(PlayerDataLoadException $e){
-				$this->logger->debug("Failed to load player data for $name: " . $e->getMessage());
-				$this->logger->error($this->language->translate(KnownTranslationFactory::pocketmine_data_playerCorrupted($name)));
-				return null;
-			}
-		});
+	public function setPlayerDataProvider(PlayerDataProvider $provider) : void{
+		$this->playerDataProvider = $provider;
 	}
 
 	public function saveOfflinePlayerData(string $name, CompoundTag $nbtTag) : void{

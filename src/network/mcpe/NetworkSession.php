@@ -1002,11 +1002,16 @@ class NetworkSession{
 			}
 		}
 
-		//TODO: make player data loading async
-		//TODO: we shouldn't be loading player data here at all, but right now we don't have any choice :(
-		$this->cachedOfflinePlayerData = $this->server->getOfflinePlayerData($this->info->getUsername());
+		$this->server->getPlayerDataProvider()->loadData($this->info->getUsername())->onCompletion(function(CompoundTag $nbt) use ($checkXUID, $kickForXUIDMismatch, $clientPubKey) : void{
+			$this->cachedOfflinePlayerData = $nbt;
+			$this->continueServerLogin($checkXUID, $kickForXUIDMismatch, $clientPubKey);
+		}, fn() => $this->continueServerLogin($checkXUID, $kickForXUIDMismatch, $clientPubKey));
+	}
+
+	/** @phpstan-param \Closure(string) : bool $kickForXUIDMismatch */
+	private function continueServerLogin(bool $checkXUID, \Closure $kickForXUIDMismatch, string $clientPubKey) : void{
 		if($checkXUID){
-			$recordedXUID = $this->cachedOfflinePlayerData !== null ? $this->cachedOfflinePlayerData->getTag(Player::TAG_LAST_KNOWN_XUID) : null;
+			$recordedXUID = $this->cachedOfflinePlayerData?->getTag(Player::TAG_LAST_KNOWN_XUID);
 			if(!($recordedXUID instanceof StringTag)){
 				$this->logger->debug("No previous XUID recorded, no choice but to trust this player");
 			}elseif(!$kickForXUIDMismatch($recordedXUID->getValue())){
