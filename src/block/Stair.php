@@ -43,6 +43,11 @@ class Stair extends Transparent implements HorizontalFacing{
 	protected bool $upsideDown = false;
 	protected StairShape $shape = StairShape::STRAIGHT;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::EAST;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->facing);
 		$w->bool($this->upsideDown);

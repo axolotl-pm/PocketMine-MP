@@ -27,6 +27,7 @@ use pocketmine\block\tile\ChiseledBookshelf as TileChiseledBookshelf;
 use pocketmine\block\utils\ChiseledBookshelfSlot;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\HorizontalFacing;
+use pocketmine\block\utils\HorizontalFacingOption;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Book;
@@ -52,6 +53,11 @@ class ChiseledBookshelf extends Opaque implements HorizontalFacing{
 	private array $slots = [];
 
 	private ?ChiseledBookshelfSlot $lastInteractedSlot = null;
+
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
 
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->facing);

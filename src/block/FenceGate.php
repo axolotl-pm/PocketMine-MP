@@ -28,6 +28,7 @@ use pocketmine\block\utils\HorizontalFacingOption;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\WoodMaterial;
+use pocketmine\block\utils\WoodType;
 use pocketmine\block\utils\WoodTypeTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
@@ -44,6 +45,12 @@ class FenceGate extends Transparent implements HorizontalFacing, WoodMaterial{
 
 	protected bool $open = false;
 	protected bool $inWall = false;
+
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo, WoodType $woodType){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		$this->woodType = $woodType;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
 
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->facing);

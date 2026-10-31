@@ -38,6 +38,11 @@ use pocketmine\world\BlockTransaction;
 abstract class BaseBigDripleaf extends Transparent implements HorizontalFacing{
 	use HorizontalFacingTrait;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	abstract protected function isHead() : bool;
 
 	private function canBeSupportedBy(Block $block, bool $head) : bool{

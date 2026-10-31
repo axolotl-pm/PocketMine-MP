@@ -50,6 +50,11 @@ final class AmethystCluster extends Transparent implements AnyFacing{
 
 	private int $stage = self::STAGE_CLUSTER;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = Facing::UP;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	public function describeBlockItemState(RuntimeDataDescriber $w) : void{
 		$w->boundedIntAuto(self::STAGE_SMALL_BUD, self::STAGE_CLUSTER, $this->stage);
 	}

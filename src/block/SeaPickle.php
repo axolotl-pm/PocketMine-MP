@@ -36,7 +36,7 @@ class SeaPickle extends Transparent{
 	public const MAX_COUNT = 4;
 
 	protected int $count = self::MIN_COUNT;
-	protected bool $underwater = false;
+	protected bool $underwater = true;
 
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->boundedIntAuto(self::MIN_COUNT, self::MAX_COUNT, $this->count);

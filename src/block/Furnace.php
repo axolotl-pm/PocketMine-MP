@@ -29,6 +29,7 @@ use pocketmine\block\utils\Container;
 use pocketmine\block\utils\ContainerTrait;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\HorizontalFacing;
+use pocketmine\block\utils\HorizontalFacingOption;
 use pocketmine\block\utils\Lightable;
 use pocketmine\block\utils\LightableTrait;
 use pocketmine\crafting\FurnaceType;
@@ -48,6 +49,7 @@ class Furnace extends Opaque implements Container, Lightable, HorizontalFacing{
 
 	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo, FurnaceType $furnaceType){
 		$this->furnaceType = $furnaceType;
+		$this->facing = HorizontalFacingOption::SOUTH;
 		parent::__construct($idInfo, $name, $typeInfo);
 	}
 

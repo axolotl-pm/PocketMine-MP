@@ -36,7 +36,7 @@ use pocketmine\world\sound\RedstonePowerOffSound;
 use pocketmine\world\sound\RedstonePowerOnSound;
 
 class Lever extends Flowable implements RedstoneSignalEmitter{
-	protected LeverFacing $facing = LeverFacing::UP_AXIS_X;
+	protected LeverFacing $facing = LeverFacing::DOWN_AXIS_X;
 	protected bool $activated = false;
 
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{

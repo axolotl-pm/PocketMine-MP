@@ -47,6 +47,11 @@ class PinkPetals extends Flowable implements HorizontalFacing{
 
 	protected int $count = self::MIN_COUNT;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->facing);
 		$w->boundedIntAuto(self::MIN_COUNT, self::MAX_COUNT, $this->count);

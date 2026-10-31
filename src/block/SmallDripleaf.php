@@ -43,6 +43,11 @@ class SmallDripleaf extends Transparent implements HorizontalFacing{
 
 	protected bool $top = false;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::EAST;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	public function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->facing);
 		$w->bool($this->top);

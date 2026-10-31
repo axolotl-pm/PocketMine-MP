@@ -40,6 +40,11 @@ class TripwireHook extends Flowable implements HorizontalFacing, RedstoneSignalE
 	protected bool $connected = false;
 	protected bool $powered = false;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->facing);
 		$w->bool($this->connected);

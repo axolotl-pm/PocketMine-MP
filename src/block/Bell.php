@@ -45,6 +45,11 @@ final class Bell extends Transparent implements HorizontalFacing{
 
 	private BellAttachmentType $attachmentType = BellAttachmentType::FLOOR;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->enum($this->attachmentType);
 		$w->enum($this->facing);

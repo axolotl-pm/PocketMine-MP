@@ -26,6 +26,7 @@ namespace pocketmine\block;
 use pocketmine\block\inventory\window\LoomInventoryWindow;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\HorizontalFacing;
+use pocketmine\block\utils\HorizontalFacingOption;
 use pocketmine\block\utils\MenuAccessor;
 use pocketmine\block\utils\MenuAccessorTrait;
 use pocketmine\player\Player;
@@ -34,6 +35,11 @@ use pocketmine\world\Position;
 final class Loom extends Opaque implements HorizontalFacing, MenuAccessor{
 	use FacesOppositePlacingPlayerTrait;
 	use MenuAccessorTrait;
+
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
 
 	protected function newMenu(Player $player, Position $position) : LoomInventoryWindow{
 		return new LoomInventoryWindow($player, $position);

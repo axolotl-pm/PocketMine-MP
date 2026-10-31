@@ -57,6 +57,11 @@ class Anvil extends Transparent implements Fallable, HorizontalFacing, MenuAcces
 
 	private int $damage = self::UNDAMAGED;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		$this->facing = HorizontalFacingOption::SOUTH;
+		parent::__construct($idInfo, $name, $typeInfo);
+	}
+
 	public function describeBlockItemState(RuntimeDataDescriber $w) : void{
 		$w->boundedIntAuto(self::UNDAMAGED, self::VERY_DAMAGED, $this->damage);
 	}
