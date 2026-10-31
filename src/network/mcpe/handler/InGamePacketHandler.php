@@ -978,7 +978,7 @@ class InGamePacketHandler extends PacketHandler{
 				return false;
 			}
 			try{
-				$responseData = json_decode($packet->formData, true, self::MAX_FORM_RESPONSE_DEPTH, JSON_THROW_ON_ERROR);
+				$responseData = json_decode($packet->formData, false, self::MAX_FORM_RESPONSE_DEPTH, JSON_THROW_ON_ERROR);
 			}catch(\JsonException $e){
 				throw PacketHandlingException::wrap($e, "Failed to decode form response data");
 			}
