@@ -73,12 +73,6 @@ class Campfire extends Transparent implements Lightable, HorizontalFacing{
 	private const UPDATE_INTERVAL_TICKS = 10;
 
 	/**
-	 * @deprecated This was added by mistake. It can't be relied on as the inventory won't be initialized if this block
-	 * has never been set in the world.
-	 */
-	protected ?Inventory $inventory = null;
-
-	/**
 	 * @var int[] slot => ticks
 	 * @phpstan-var array<int, int>
 	 */
@@ -93,10 +87,8 @@ class Campfire extends Transparent implements Lightable, HorizontalFacing{
 		parent::readStateFromWorld();
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TileCampfire){
-			$this->inventory = $tile->getInventory();
 			$this->cookingTimes = $tile->getCookingTimes();
 		}else{
-			$this->inventory = null;
 			$this->cookingTimes = [];
 		}
 
@@ -137,12 +129,12 @@ class Campfire extends Transparent implements Lightable, HorizontalFacing{
 		return [AxisAlignedBB::one()->trimmedCopy(Facing::UP, 9 / 16)];
 	}
 
-	/**
-	 * @deprecated This was added by mistake. It can't be relied on as the inventory won't be initialized if this block
-	 * has never been set in the world.
-	 */
 	public function getInventory() : ?Inventory{
-		return $this->inventory;
+		$tile = $this->position->getWorld()->getTile($this->position);
+		if($tile instanceof TileCampfire){
+			return $tile->getInventory();
+		}
+		return null;
 	}
 
 	protected function getFurnaceType() : FurnaceType{
@@ -204,8 +196,12 @@ class Campfire extends Transparent implements Lightable, HorizontalFacing{
 			return true;
 		}
 
-		$inventory = $this->inventory;
-		if($inventory !== null && $this->position->getWorld()->getServer()->getCraftingManager()->getFurnaceRecipeManager($this->getFurnaceType())->match($item) !== null){
+		$tile = $this->position->getWorld()->getTile($this->position);
+		if(!($tile instanceof TileCampfire)){
+			return false;
+		}
+		$inventory = $tile->getInventory();
+		if($this->position->getWorld()->getServer()->getCraftingManager()->getFurnaceRecipeManager($this->getFurnaceType())->match($item) !== null){
 			$ingredient = clone $item;
 			$ingredient->setCount(1);
 			if(count($inventory->addItem($ingredient)) === 0){
@@ -243,7 +239,9 @@ class Campfire extends Transparent implements Lightable, HorizontalFacing{
 	}
 
 	public function onScheduledUpdate() : void{
-		if($this->lit && ($inventory = $this->inventory) !== null){
+		$inventory = $this->getInventory();
+
+		if($this->lit && $inventory !== null){
 			$items = $inventory->getContents();
 			$furnaceType = $this->getFurnaceType();
 			$maxCookDuration = $furnaceType->getCookDurationTicks();
