@@ -123,9 +123,9 @@ final class NetherNetTransport implements Transport{
 				$useQuery &&
 				$iceUdpMuxEnabled &&
 				$minPort !== null && $maxPort !== null &&
-				$minPort <= $serverPort && $serverPort <= $maxPort
+				$minPort === $maxPort && $minPort === $serverPort
 			){
-				return "GS4 Query is enabled, but ICE UDP multiplexing is enabled with a port range that includes the server port. This will cause a port conflict, change port range or disable GS4 query or ICE UDP multiplexing.";
+				return "GS4 Query is enabled, but ICE UDP multiplexing is enabled with a port range that is same as the server port. This will cause a port conflict, change port range or disable GS4 query or ICE UDP multiplexing.";
 			}
 		}catch(\InvalidArgumentException $e){
 			return $e->getMessage();
