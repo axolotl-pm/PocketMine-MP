@@ -114,22 +114,6 @@ final class NetherNetTransport implements Transport{
 		if($version !== false && (version_compare($version, self::MIN_WEBRTC_VERSION, "<") || version_compare($version, self::MAX_WEBRTC_VERSION, ">="))){
 			return "ext-webrtc ^" . self::MIN_WEBRTC_VERSION . " is required (found $version)";
 		}
-		try{
-			$useQuery = $this->server->getConfigGroup()->getConfigBool(ServerProperties::ENABLE_QUERY, true);
-			$iceUdpMuxEnabled = $this->server->getConfigGroup()->getPropertyBool(Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX, false);
-			[$minPort, $maxPort] = NetherNetIceConfiguration::parsePortRange($this->server->getConfigGroup()->getProperty(Yml::TRANSPORT_NETHERNET_PORT_RANGE));
-			$serverPort = $this->server->getPort();
-			if(
-				$useQuery &&
-				$iceUdpMuxEnabled &&
-				$minPort !== null && $maxPort !== null &&
-				$minPort === $maxPort && $minPort === $serverPort
-			){
-				return "GS4 Query is enabled, but ICE UDP multiplexing is enabled with a port range that is same as the server port. This will cause a port conflict, change port range or disable GS4 query or ICE UDP multiplexing.";
-			}
-		}catch(\InvalidArgumentException $e){
-			return $e->getMessage();
-		}
 		return null;
 	}
 
@@ -164,6 +148,14 @@ final class NetherNetTransport implements Transport{
 				$bindAddress === "0.0.0.0" ? null : $bindAddress,
 				$configGroup->getProperty(Yml::TRANSPORT_NETHERNET_ADVERTISE_ADDRESSES)
 			);
+			if(
+				$configGroup->getConfigBool(ServerProperties::ENABLE_QUERY, true) &&
+				$iceConfig->isUdpMux() &&
+				$iceConfig->getPortRangeBegin() === $this->server->getPort() &&
+				$iceConfig->getPortRangeEnd() === $this->server->getPort()
+			){
+				throw new NetworkInterfaceStartException(Yml::TRANSPORT_NETHERNET_PORT_RANGE . " cannot be only the server port while " . ServerProperties::ENABLE_QUERY . " and " . Yml::TRANSPORT_NETHERNET_ICE_UDP_MUX . " are enabled, as the query port is already in use");
+			}
 			$mtu = $configGroup->getPropertyInt(Yml::TRANSPORT_NETHERNET_MTU, WebRtcTransportFactory::DEFAULT_MTU);
 			if($mtu < WebRtcTransportFactory::MIN_MTU || $mtu > WebRtcTransportFactory::MAX_MTU){
 				throw new \InvalidArgumentException("mtu must be between " . WebRtcTransportFactory::MIN_MTU . " and " . WebRtcTransportFactory::MAX_MTU . ", got $mtu");
