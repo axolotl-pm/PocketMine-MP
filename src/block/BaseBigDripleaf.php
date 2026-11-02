@@ -75,7 +75,7 @@ abstract class BaseBigDripleaf extends Transparent implements HorizontalFacing, 
 		}
 		if($block instanceof BaseBigDripleaf){
 			$this->facing = $block->facing;
-			$tx->addBlock($block->position, VanillaBlocks::BIG_DRIPLEAF_STEM()->setFacing($this->facing));
+			$tx->addBlock($block->position, VanillaBlocks::BIG_DRIPLEAF_STEM()->setFacing($this->facing)->setContainedWater($block->getContainedWater()));
 		}
 		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
 			return false;

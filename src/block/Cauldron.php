@@ -48,6 +48,10 @@ final class Cauldron extends Transparent implements Waterloggable{
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(WaterHelper::isWater($blockReplace)){
+			$tx->addBlock($blockReplace->position, VanillaBlocks::WATER_CAULDRON()->setFillLevel(FillableCauldron::MAX_FILL_LEVEL));
+			return true;
+		}
 		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
 			return false;
 		}

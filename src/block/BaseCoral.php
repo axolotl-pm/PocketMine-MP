@@ -27,6 +27,7 @@ use pocketmine\block\utils\BlockEventHelper;
 use pocketmine\block\utils\CoralMaterial;
 use pocketmine\block\utils\CoralTypeTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\WaterHelper;
 use pocketmine\block\utils\Waterloggable;
 use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
@@ -62,7 +63,16 @@ abstract class BaseCoral extends WaterloggableFlowable implements CoralMaterial,
 	public function isSolid() : bool{ return false; }
 
 	protected function isCoveredWithWater() : bool{
-		return $this->containedWater !== null;
+		if($this->containedWater !== null){
+			return true;
+		}
+		$world = $this->position->getWorld();
+		foreach($this->position->sides() as $vector3){
+			if(WaterHelper::isWater($world->getBlock($vector3))){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected function recalculateCollisionBoxes() : array{ return []; }

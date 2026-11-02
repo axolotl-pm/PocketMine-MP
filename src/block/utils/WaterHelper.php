@@ -41,6 +41,6 @@ final class WaterHelper{
 		if($block instanceof Water){
 			return $block;
 		}
-		return $block instanceof Waterloggable && ($water = $block->getContainedWater()) !== null ? $water : null;
+		return $block instanceof Waterloggable ? $block->getContainedWater() : null;
 	}
 }

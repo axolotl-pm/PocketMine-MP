@@ -125,6 +125,9 @@ class Candle extends Transparent implements Lightable, Waterloggable{
 		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
 			return false;
 		}
+		if($this->containedWater !== null){
+			$this->lit = false;
+		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 

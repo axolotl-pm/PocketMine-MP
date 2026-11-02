@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\WaterHelper;
 use pocketmine\block\utils\Waterloggable;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityCombustByBlockEvent;
@@ -72,7 +73,7 @@ class Lava extends Liquid{
 			return false;
 		}
 		foreach($this->getAdjacentBlocksExceptDown() as $colliding){
-			if($colliding instanceof Water || $colliding instanceof Waterloggable && $colliding->getContainedWater() !== null){
+			if(WaterHelper::isWater($colliding)){
 				if($this->decay === 0){
 					$this->liquidCollide($colliding, VanillaBlocks::OBSIDIAN());
 					return true;

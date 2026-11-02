@@ -27,6 +27,7 @@ use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterHelper;
 use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\event\block\StructureGrowEvent;
@@ -85,17 +86,18 @@ class SmallDripleaf extends Transparent implements HorizontalFacing, Waterloggab
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		$block = $blockReplace->getSide(Facing::UP);
-		if($block->getTypeId() !== BlockTypeIds::AIR || !$this->canBeSupportedBy($blockReplace->getSide(Facing::DOWN))){
+		if(($block->getTypeId() !== BlockTypeIds::AIR && !WaterHelper::isWater($block)) || !$this->canBeSupportedBy($blockReplace->getSide(Facing::DOWN))){
 			return false;
 		}
 		if($player !== null){
 			$this->facing = Facing::opposite($player->getHorizontalFacing());
 		}
 
-		$tx->addBlock($block->position, VanillaBlocks::SMALL_DRIPLEAF()
+		$topHalf = VanillaBlocks::SMALL_DRIPLEAF()
 			->setFacing($this->facing)
-			->setTop(true)
-		);
+			->setTop(true);
+		$topHalf->waterPlace($tx, $item, $block, $blockClicked, $face, $clickVector, $player);
+		$tx->addBlock($block->position, $topHalf);
 		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
 			return false;
 		}

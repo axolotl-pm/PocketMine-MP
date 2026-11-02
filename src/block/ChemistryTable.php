@@ -28,7 +28,6 @@ use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\Waterloggable;
 use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\item\Item;
-use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
@@ -41,13 +40,10 @@ final class ChemistryTable extends Opaque implements HorizontalFacing, Waterlogg
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
-		if($player !== null){
-			$this->facing = Facing::opposite($player->getHorizontalFacing());
-		}
 		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
 			return false;
 		}
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		return $this->facingPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{

@@ -49,6 +49,7 @@ class Bed extends Transparent implements Colored, HorizontalFacing, Waterloggabl
 	use ColoredTrait;
 	use HorizontalFacingTrait;
 	use WaterloggableTrait{
+		place as waterPlace;
 		readStateFromWorld as readWaterStateFromWorld;
 		onNearbyBlockChange as onWaterBlockChange;
 	}
@@ -188,14 +189,12 @@ class Bed extends Transparent implements Colored, HorizontalFacing, Waterloggabl
 
 			$next = $this->getSide($this->getOtherHalfSide());
 			if($next->canBeReplaced() && $this->canBeSupportedAt($next)){
+				$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+
 				$nextState = clone $this;
 				$nextState->head = true;
-				if($blockReplace instanceof Water && $blockReplace->isSource()){
-					$this->containedWater = clone $blockReplace;
-				}
-				if($next instanceof Water && $next->isSource()){
-					$nextState->containedWater = clone $next;
-				}
+				$nextState->containedWater = null;
+				$nextState->waterPlace($tx, $item, $next, $blockClicked, $face, $clickVector, $player);
 				$tx->addBlock($blockReplace->position, $this)->addBlock($next->position, $nextState);
 				return true;
 			}

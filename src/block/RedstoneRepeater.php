@@ -30,8 +30,6 @@ use pocketmine\block\utils\PoweredByRedstoneTrait;
 use pocketmine\block\utils\RedstoneSignalEmitter;
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\block\utils\SupportType;
-use pocketmine\block\utils\Waterloggable;
-use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
@@ -40,15 +38,11 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class RedstoneRepeater extends WaterloggableFlowable implements RedstoneSignalEmitter, PoweredByRedstone, HorizontalFacing, Waterloggable{
+class RedstoneRepeater extends WaterloggableFlowable implements RedstoneSignalEmitter, PoweredByRedstone, HorizontalFacing{
 	use HorizontalFacingTrait;
 	use PoweredByRedstoneTrait;
 	use StaticSupportTrait{
 		StaticSupportTrait::onNearbyBlockChange as onSupportBlockChange;
-	}
-	use WaterloggableTrait{
-		place as waterPlace;
-		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
 	}
 
 	public const MIN_DELAY = 1;
@@ -81,10 +75,6 @@ class RedstoneRepeater extends WaterloggableFlowable implements RedstoneSignalEm
 		if($player !== null){
 			$this->facing = Facing::opposite($player->getHorizontalFacing());
 		}
-
-		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
-			return false;
-		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
@@ -97,7 +87,7 @@ class RedstoneRepeater extends WaterloggableFlowable implements RedstoneSignalEm
 	}
 
 	public function onNearbyBlockChange() : void{
-		$this->onWaterBlockChange();
+		parent::onNearbyBlockChange();
 		$this->onSupportBlockChange();
 	}
 

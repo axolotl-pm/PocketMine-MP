@@ -41,8 +41,7 @@ abstract class Flowable extends Transparent{
 	}
 
 	public function canBePlacedAt(Block $blockReplace, Vector3 $clickVector, int $face, bool $isClickedBlock) : bool{
-		return
-			(!$this->canBeFlowedInto() || !$blockReplace instanceof Liquid) &&
+		return (!$this->canBeFlowedInto() || !$blockReplace instanceof Liquid) &&
 			parent::canBePlacedAt($blockReplace, $clickVector, $face, $isClickedBlock);
 	}
 

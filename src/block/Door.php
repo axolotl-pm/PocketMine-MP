@@ -40,6 +40,7 @@ use pocketmine\world\sound\DoorSound;
 class Door extends Transparent implements HorizontalFacing, Waterloggable{
 	use HorizontalFacingTrait;
 	use WaterloggableTrait{
+		place as waterPlace;
 		readStateFromWorld as readWaterStateFromWorld;
 		onNearbyBlockChange as onWaterBlockChange;
 	}
@@ -139,15 +140,12 @@ class Door extends Transparent implements HorizontalFacing, Waterloggable{
 				$this->hingeRight = true;
 			}
 
+			$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+
 			$topHalf = clone $this;
 			$topHalf->top = true;
-
-			if($blockReplace instanceof Water && $blockReplace->isSource()){
-				$this->containedWater = clone $blockReplace;
-			}
-			if($blockUp instanceof Water && $blockUp->isSource()){
-				$topHalf->containedWater = clone $blockUp;
-			}
+			$topHalf->containedWater = null;
+			$topHalf->waterPlace($tx, $item, $blockUp, $blockClicked, $face, $clickVector, $player);
 
 			$tx->addBlock($blockReplace->position, $this)->addBlock($blockUp->position, $topHalf);
 			return true;
