@@ -41,10 +41,13 @@ use function count;
  * Thin blocks behave like glass panes. They connect to full-cube blocks horizontally adjacent to them if possible.
  */
 class Thin extends Transparent implements Waterloggable, HorizontalConnectable{
-	use HorizontalConnectableTrait;
+	use HorizontalConnectableTrait{
+		HorizontalConnectableTrait::onNearbyBlockChange as onConnectionBlockChange;
+	}
 	use WaterloggableTrait{
 		place as waterPlace;
 		readStateFromWorld as readWaterStateFromWorld;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
@@ -52,6 +55,11 @@ class Thin extends Transparent implements Waterloggable, HorizontalConnectable{
 			return false;
 		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onConnectionBlockChange();
 	}
 
 	/** @var bool[] facing => dummy */
@@ -63,6 +71,8 @@ class Thin extends Transparent implements Waterloggable, HorizontalConnectable{
 		$this->recalculateConnections();
 		$this->readWaterStateFromWorld();
 		$this->collisionBoxes = null;
+
+		return $this;
 	}
 
 	protected function recalculateConnections() : bool{

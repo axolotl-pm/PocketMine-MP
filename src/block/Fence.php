@@ -38,10 +38,13 @@ use pocketmine\world\BlockTransaction;
 use function count;
 
 class Fence extends Transparent implements HorizontalConnectable, Waterloggable{
-	use HorizontalConnectableTrait;
+	use HorizontalConnectableTrait{
+		HorizontalConnectableTrait::onNearbyBlockChange as onConnectionBlockChange;
+	}
 	use WaterloggableTrait{
 		place as waterPlace;
 		readStateFromWorld as readWaterStateFromWorld;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
@@ -49,6 +52,11 @@ class Fence extends Transparent implements HorizontalConnectable, Waterloggable{
 			return false;
 		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onConnectionBlockChange();
 	}
 
 	/** @var bool[] facing => dummy */
