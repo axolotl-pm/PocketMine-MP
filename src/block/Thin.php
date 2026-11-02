@@ -62,9 +62,6 @@ class Thin extends Transparent implements Waterloggable, HorizontalConnectable{
 		$this->onConnectionBlockChange();
 	}
 
-	/** @var bool[] facing => dummy */
-	protected array $connections = [];
-
 	public function readStateFromWorld() : Block{
 		parent::readStateFromWorld();
 

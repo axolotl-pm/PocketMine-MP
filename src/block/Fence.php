@@ -59,9 +59,6 @@ class Fence extends Transparent implements HorizontalConnectable, Waterloggable{
 		$this->onConnectionBlockChange();
 	}
 
-	/** @var bool[] facing => dummy */
-	protected array $connections = [];
-
 	public function getThickness() : float{
 		return 0.25;
 	}
