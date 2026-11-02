@@ -87,6 +87,12 @@ final class BlockStateStringValues{
 	public const MC_CARDINAL_DIRECTION_SOUTH = "south";
 	public const MC_CARDINAL_DIRECTION_WEST = "west";
 
+	public const MC_CORNER_INNER_LEFT = "inner_left";
+	public const MC_CORNER_INNER_RIGHT = "inner_right";
+	public const MC_CORNER_NONE = "none";
+	public const MC_CORNER_OUTER_LEFT = "outer_left";
+	public const MC_CORNER_OUTER_RIGHT = "outer_right";
+
 	public const MC_FACING_DIRECTION_DOWN = "down";
 	public const MC_FACING_DIRECTION_EAST = "east";
 	public const MC_FACING_DIRECTION_NORTH = "north";
@@ -139,6 +145,22 @@ final class BlockStateStringValues{
 	public const POTENT_SULFUR_STATE_DRY = "dry";
 	public const POTENT_SULFUR_STATE_ERUPTING = "erupting";
 	public const POTENT_SULFUR_STATE_WET = "wet";
+
+	public const REDSTONE_EAST_NONE = "none";
+	public const REDSTONE_EAST_SIDE = "side";
+	public const REDSTONE_EAST_UP = "up";
+
+	public const REDSTONE_NORTH_NONE = "none";
+	public const REDSTONE_NORTH_SIDE = "side";
+	public const REDSTONE_NORTH_UP = "up";
+
+	public const REDSTONE_SOUTH_NONE = "none";
+	public const REDSTONE_SOUTH_SIDE = "side";
+	public const REDSTONE_SOUTH_UP = "up";
+
+	public const REDSTONE_WEST_NONE = "none";
+	public const REDSTONE_WEST_SIDE = "side";
+	public const REDSTONE_WEST_UP = "up";
 
 	public const SEA_GRASS_TYPE_DEFAULT = "default";
 	public const SEA_GRASS_TYPE_DOUBLE_BOT = "double_bot";

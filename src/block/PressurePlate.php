@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\RedstoneSignalEmitter;
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\Waterloggable;
@@ -40,7 +41,7 @@ use pocketmine\world\sound\PressurePlateActivateSound;
 use pocketmine\world\sound\PressurePlateDeactivateSound;
 use function count;
 
-abstract class PressurePlate extends Transparent implements Waterloggable{
+abstract class PressurePlate extends Transparent implements RedstoneSignalEmitter, Waterloggable{
 	use StaticSupportTrait{
 		StaticSupportTrait::onNearbyBlockChange as onSupportBlockChange;
 	}

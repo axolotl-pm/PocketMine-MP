@@ -259,6 +259,7 @@ final class ItemTypeNames{
 	public const FRAME = "minecraft:frame";
 	public const FRIEND_POTTERY_SHERD = "minecraft:friend_pottery_sherd";
 	public const FROG_SPAWN_EGG = "minecraft:frog_spawn_egg";
+	public const FROSTBITE_SPAWN_EGG = "minecraft:frostbite_spawn_egg";
 	public const GHAST_SPAWN_EGG = "minecraft:ghast_spawn_egg";
 	public const GHAST_TEAR = "minecraft:ghast_tear";
 	public const GLASS_BOTTLE = "minecraft:glass_bottle";
@@ -315,6 +316,7 @@ final class ItemTypeNames{
 	public const HOST_ARMOR_TRIM_SMITHING_TEMPLATE = "minecraft:host_armor_trim_smithing_template";
 	public const HOWL_POTTERY_SHERD = "minecraft:howl_pottery_sherd";
 	public const HUSK_SPAWN_EGG = "minecraft:husk_spawn_egg";
+	public const ICE_BALL = "minecraft:ice_ball";
 	public const ICE_BOMB = "minecraft:ice_bomb";
 	public const INK_SAC = "minecraft:ink_sac";
 	public const IRON_AXE = "minecraft:iron_axe";
@@ -462,6 +464,7 @@ final class ItemTypeNames{
 	public const PARROT_SPAWN_EGG = "minecraft:parrot_spawn_egg";
 	public const PHANTOM_MEMBRANE = "minecraft:phantom_membrane";
 	public const PHANTOM_SPAWN_EGG = "minecraft:phantom_spawn_egg";
+	public const PHOTO_ITEM = "minecraft:photo_item";
 	public const PIG_SPAWN_EGG = "minecraft:pig_spawn_egg";
 	public const PIGLIN_BANNER_PATTERN = "minecraft:piglin_banner_pattern";
 	public const PIGLIN_BRUTE_SPAWN_EGG = "minecraft:piglin_brute_spawn_egg";
@@ -483,6 +486,7 @@ final class ItemTypeNames{
 	public const POPLAR_SIGN = "minecraft:poplar_sign";
 	public const POPPED_CHORUS_FRUIT = "minecraft:popped_chorus_fruit";
 	public const PORKCHOP = "minecraft:porkchop";
+	public const PORTFOLIO = "minecraft:portfolio";
 	public const POTATO = "minecraft:potato";
 	public const POTION = "minecraft:potion";
 	public const POWDER_SNOW_BUCKET = "minecraft:powder_snow_bucket";

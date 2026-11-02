@@ -29,6 +29,7 @@ use pocketmine\block\utils\CopperMaterial;
 use pocketmine\block\utils\CopperTrait;
 use pocketmine\block\utils\Waterloggable;
 use pocketmine\block\utils\WaterloggableTrait;
+use pocketmine\block\utils\RedstoneSignalEmitter;
 use pocketmine\item\Item;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
@@ -37,7 +38,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-final class LightningRod extends Transparent implements AnyFacing, CopperMaterial, Waterloggable{
+final class LightningRod extends Transparent implements AnyFacing, CopperMaterial, RedstoneSignalEmitter, Waterloggable{
 	use CopperTrait;
 	use AnyFacingTrait;
 	use WaterloggableTrait{

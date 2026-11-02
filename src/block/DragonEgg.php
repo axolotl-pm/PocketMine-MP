@@ -35,7 +35,6 @@ use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 use pocketmine\world\particle\DragonEggTeleportParticle;
-use pocketmine\world\World;
 use function max;
 use function min;
 use function mt_rand;
@@ -82,7 +81,7 @@ class DragonEgg extends Transparent implements Fallable, Waterloggable{
 		for($tries = 0; $tries < 16; ++$tries){
 			$block = $world->getBlockAt(
 				$this->position->x + mt_rand(-16, 16),
-				max(World::Y_MIN, min(World::Y_MAX - 1, $this->position->y + mt_rand(-8, 8))),
+				max($world->getMinY(), min($world->getMaxY() - 1, $this->position->y + mt_rand(-8, 8))),
 				$this->position->z + mt_rand(-16, 16)
 			);
 			if($block instanceof Air){

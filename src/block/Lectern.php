@@ -26,6 +26,7 @@ namespace pocketmine\block;
 use pocketmine\block\tile\Lectern as TileLectern;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\HorizontalFacing;
+use pocketmine\block\utils\RedstoneSignalEmitter;
 use pocketmine\block\utils\SupportType;
 use pocketmine\block\utils\Waterloggable;
 use pocketmine\block\utils\WaterloggableTrait;
@@ -40,7 +41,7 @@ use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\LecternPlaceBookSound;
 use function count;
 
-class Lectern extends Transparent implements HorizontalFacing, Waterloggable{
+class Lectern extends Transparent implements HorizontalFacing, RedstoneSignalEmitter, Waterloggable{
 	use FacesOppositePlacingPlayerTrait, WaterloggableTrait{
 		WaterloggableTrait::place insteadof FacesOppositePlacingPlayerTrait;
 		WaterloggableTrait::place as waterPlace;

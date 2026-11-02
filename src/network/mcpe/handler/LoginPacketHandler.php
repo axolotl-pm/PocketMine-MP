@@ -83,6 +83,7 @@ class LoginPacketHandler extends PacketHandler{
 
 	public function handleLogin(LoginPacket $packet) : bool{
 		$authInfo = $this->parseAuthInfo($packet->authInfoJson);
+		$clientData = $this->parseClientData($packet->clientDataJwt);
 
 		if($authInfo->AuthenticationType === AuthenticationType::FULL->value){
 			try{
@@ -97,7 +98,7 @@ class LoginPacketHandler extends PacketHandler{
 			$username = $claims->xname;
 			$xuid = $claims->xid;
 
-			$authRequired = $this->processLoginCommon($packet, $username, $legacyUuid, $xuid);
+			$authRequired = $this->processLoginCommon($packet, $username, $legacyUuid, $xuid, $clientData);
 			if($authRequired === null){
 				//plugin cancelled
 				return true;
@@ -124,7 +125,11 @@ class LoginPacketHandler extends PacketHandler{
 				throw new PacketHandlingException("Invalid self-signed key");
 			}
 
-			$authRequired = $this->processLoginCommon($packet, $username, $legacyUuid, $xuid);
+			if($username === ""){ //TODO: workaround for player name being empty in offline mode as of 1.26.40+
+				$username = $clientData->ThirdPartyName;
+			}
+
+			$authRequired = $this->processLoginCommon($packet, $username, $legacyUuid, $xuid, $clientData);
 			if($authRequired === null){
 				//plugin cancelled
 				return true;
@@ -137,14 +142,12 @@ class LoginPacketHandler extends PacketHandler{
 		return true;
 	}
 
-	private function processLoginCommon(LoginPacket $packet, string $username, UuidInterface $legacyUuid, string $xuid) : ?bool{
+	private function processLoginCommon(LoginPacket $packet, string $username, UuidInterface $legacyUuid, string $xuid, ClientData $clientData) : ?bool{
 		if(!Player::isValidUserName($username)){
 			$this->session->disconnectWithError(KnownTranslationFactory::disconnectionScreen_invalidName());
 
 			return null;
 		}
-
-		$clientData = $this->parseClientData($packet->clientDataJwt);
 
 		try{
 			$skin = $this->session->getTypeConverter()->getSkinAdapter()->fromSkinData(ClientDataToSkinDataHelper::fromClientData($clientData));

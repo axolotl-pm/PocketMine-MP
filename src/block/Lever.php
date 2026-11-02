@@ -26,6 +26,7 @@ namespace pocketmine\block;
 use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\Waterloggable;
 use pocketmine\block\utils\WaterloggableTrait;
+use pocketmine\block\utils\RedstoneSignalEmitter;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\Axis;
@@ -37,7 +38,7 @@ use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\RedstonePowerOffSound;
 use pocketmine\world\sound\RedstonePowerOnSound;
 
-class Lever extends WaterloggableFlowable implements Waterloggable{
+class Lever extends WaterloggableFlowable implements RedstoneSignalEmitter, Waterloggable{
 	use WaterloggableTrait{
 		place as waterPlace;
 		onNearbyBlockChange as onWaterBlockChange;
