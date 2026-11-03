@@ -66,6 +66,7 @@ use pocketmine\command\defaults\VersionCommand;
 use pocketmine\command\defaults\WhitelistCommand;
 use pocketmine\command\defaults\XpCommand;
 use pocketmine\command\overload\enum\CommandEnum;
+use pocketmine\command\overload\enum\CommandSoftEnum;
 use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\utils\CommandStringHelper;
 use pocketmine\lang\KnownTranslationFactory;
@@ -107,10 +108,22 @@ class SimpleCommandMap implements CommandMap{
 	 */
 	private array $enums = [];
 
+	/**
+	 * @var CommandSoftEnum[]
+	 * @phpstan-var array<string, CommandSoftEnum<mixed>>
+	 */
+	private array $dirtySoftEnums = [];
+
+	/** @phpstan-var \Closure(CommandSoftEnum<mixed>) : void */
+	private \Closure $markSoftEnumDirty;
+
 	private CommandAliasMap $aliasMap;
 
 	public function __construct(private Server $server){
 		$this->aliasMap = new CommandAliasMap();
+		$this->markSoftEnumDirty = function(CommandSoftEnum $enum) : void{
+			$this->dirtySoftEnums[$enum->getName()] = $enum;
+		};
 		$this->setDefaultCommands();
 	}
 
@@ -184,6 +197,9 @@ class SimpleCommandMap implements CommandMap{
 				$this->enums[$enumName][1]++;
 			}else{
 				$this->enums[$enumName] = [$enum, 1];
+				if($enum instanceof CommandSoftEnum){
+					$enum->getChangeHooks()->add($this->markSoftEnumDirty);
+				}
 			}
 		}
 
@@ -201,7 +217,7 @@ class SimpleCommandMap implements CommandMap{
 			foreach(self::collectEnums($command) as $enum){
 				$enumName = $enum->getName();
 				if(isset($this->enums[$enumName]) && --$this->enums[$enumName][1] <= 0){
-					unset($this->enums[$enumName]);
+					$this->releaseEnum($enumName);
 				}
 			}
 		}
@@ -293,7 +309,33 @@ class SimpleCommandMap implements CommandMap{
 	public function clearCommands() : void{
 		$this->aliasMap = new CommandAliasMap();
 		$this->uniqueCommands = [];
+		foreach(Utils::stringifyKeys($this->enums) as $enumName => $_){
+			$this->releaseEnum($enumName);
+		}
 		$this->setDefaultCommands();
+	}
+
+	private function releaseEnum(string $enumName) : void{
+		$enum = $this->enums[$enumName][0];
+		if($enum instanceof CommandSoftEnum){
+			$enum->getChangeHooks()->remove($this->markSoftEnumDirty);
+			unset($this->dirtySoftEnums[$enumName]);
+		}
+		unset($this->enums[$enumName]);
+	}
+
+	/**
+	 * Retrieves and clears all dirty soft enums that need to be synced with clients.
+	 *
+	 * @internal
+	 *
+	 * @return CommandSoftEnum[]
+	 * @phpstan-return array<string, CommandSoftEnum<mixed>>
+	 */
+	public function pollDirtySoftEnums() : array{
+		$dirty = $this->dirtySoftEnums;
+		$this->dirtySoftEnums = [];
+		return $dirty;
 	}
 
 	public function getCommand(string $name, ?CommandAliasMap $senderAliasMap = null) : Command|array|null{

@@ -108,7 +108,7 @@ abstract class CommandEnum{
 	 * an otherwise named value, and other redundant spellings.
 	 *
 	 * @param mixed[]  $entries
-	 * @param string   $valueType Type of the mapped values, e.g. "int" or GameMode::class
+	 * @param string   $valueType Type of the mapped values, e.g. "int" or GameMode::class. See {@link BuiltInType} for native types.
 	 * @param string[] $aliasKeys
 	 *
 	 * @phpstan-template TMapped
@@ -157,5 +157,24 @@ abstract class CommandEnum{
 	 */
 	public static function parser(string $name, \Closure $parserProvider, string $valueType) : self{
 		return new ParserBackedCommandEnum($name, $parserProvider, new NamedType($valueType));
+	}
+
+	/**
+	 * Creates an enum whose entries can be changed at runtime with {@link CommandSoftEnum::set()}. Clients that
+	 * have already received the enum are updated without resending the whole command list.
+	 *
+	 * Unlike hard enums, alias keys are not sent to the client.
+	 *
+	 * @param mixed[]  $entries
+	 * @param string   $valueType Type of the mapped values, e.g. "int" or GameMode::class. See {@link BuiltInType} for native types.
+	 * @param string[] $aliasKeys
+	 *
+	 * @phpstan-template TMapped
+	 * @phpstan-param array<array-key, TMapped> $entries
+	 * @phpstan-param list<string>              $aliasKeys
+	 * @phpstan-return CommandSoftEnum<TMapped>
+	 */
+	public static function soft(string $name, string $valueType, array $entries = [], array $aliasKeys = []) : CommandSoftEnum{
+		return new CommandSoftEnum($name, new NamedType($valueType), $entries, $aliasKeys);
 	}
 }

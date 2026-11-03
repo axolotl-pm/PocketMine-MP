@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe;
 use pmmp\encoding\ByteBufferReader;
 use pmmp\encoding\ByteBufferWriter;
 use pmmp\encoding\DataDecodeException;
+use pocketmine\command\overload\enum\CommandSoftEnum;
 use pocketmine\command\overload\EnumParameter;
 use pocketmine\command\overload\FloatRangeParameter;
 use pocketmine\command\overload\IntRangeParameter;
@@ -102,6 +103,7 @@ use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameterTypes;
 use pocketmine\network\mcpe\protocol\types\command\CommandPermissions;
+use pocketmine\network\mcpe\protocol\types\command\CommandSoftEnum as ProtocolCommandSoftEnum;
 use pocketmine\network\mcpe\protocol\types\command\ConstrainedEnumValue;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
@@ -109,6 +111,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
+use pocketmine\network\mcpe\protocol\UpdateSoftEnumPacket;
 use pocketmine\network\NetworkSessionManager;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\network\TransportIdentityException;
@@ -127,11 +130,14 @@ use pocketmine\timings\Timings;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\ObjectSet;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use pocketmine\world\Position;
 use pocketmine\world\World;
 use pocketmine\YmlServerProperties;
+use function array_fill_keys;
 use function array_filter;
+use function array_keys;
 use function array_map;
 use function array_slice;
 use function array_values;
@@ -216,6 +222,12 @@ class NetworkSession{
 	 * @phpstan-var ObjectSet<\Closure() : void>
 	 */
 	private ObjectSet $disposeHooks;
+
+	/**
+	 * @var true[]
+	 * @phpstan-var array<string, true>
+	 */
+	private array $syncedSoftEnums = [];
 
 	private string $noisyPacketBuffer = "";
 	private int $noisyPacketsDropped = 0;
@@ -1219,6 +1231,7 @@ class NetworkSession{
 
 		$literals = [];
 		$enums = [];
+		$softEnums = [];
 		foreach($this->server->getCommandMap()->getUniqueCommands() as $command){
 			$overloads = $command->getPermittedOverloads($this->player);
 			if(count($overloads) === 0){
@@ -1257,6 +1270,15 @@ class NetworkSession{
 						if($parameter instanceof EnumParameter){
 							$enum = $parameter->getEnum();
 							$enumName = $enum->getName();
+							if($enum instanceof CommandSoftEnum){
+								$parameters[] = CommandParameter::softEnum(
+									$translated,
+									$softEnums[$enumName] ??= new ProtocolCommandSoftEnum($enumName, $enum->getKeys()),
+									flags: 0,
+									optional: $k >= $required
+								);
+								continue;
+							}
 							$aliasKeys = $enum->getAliasKeys();
 							$networkEnum = $enums[$enumName] ??= new CommandHardEnum($enumName, [
 								...$enum->getKeys(),
@@ -1315,6 +1337,7 @@ class NetworkSession{
 		}
 
 		$this->sendDataPacket(AvailableCommandsPacketAssembler::assemble($commandData, [], []));
+		$this->syncedSoftEnums = array_fill_keys(array_keys($softEnums), true);
 	}
 
 	/**
@@ -1438,6 +1461,19 @@ class NetworkSession{
 
 	public function syncWorldDifficulty(int $worldDifficulty) : void{
 		$this->sendDataPacket(SetDifficultyPacket::create($worldDifficulty));
+	}
+
+	/**
+	 * @param CommandSoftEnum[] $dirtyEnums
+	 *
+	 * @phpstan-param array<string, CommandSoftEnum<mixed>> $dirtyEnums
+	 */
+	public function syncSoftEnums(array $dirtyEnums) : void{
+		foreach(Utils::stringifyKeys($dirtyEnums) as $name => $enum){
+			if(isset($this->syncedSoftEnums[$name])){
+				$this->sendDataPacket(UpdateSoftEnumPacket::create($name, $enum->getKeys(), UpdateSoftEnumPacket::TYPE_SET));
+			}
+		}
 	}
 
 	public function getInvManager() : ?InventoryManager{
