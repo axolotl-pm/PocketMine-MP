@@ -48,10 +48,13 @@ class RedstoneRepeater extends Flowable implements PoweredByRedstone, Horizontal
 
 	protected int $delay = self::MIN_DELAY;
 
+	private bool $locked = false;
+
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->horizontalFacing($this->facing);
 		$w->boundedIntAuto(self::MIN_DELAY, self::MAX_DELAY, $this->delay);
 		$w->bool($this->powered);
+		$w->bool($this->locked);
 	}
 
 	public function getDelay() : int{ return $this->delay; }
@@ -62,6 +65,13 @@ class RedstoneRepeater extends Flowable implements PoweredByRedstone, Horizontal
 			throw new \InvalidArgumentException("Delay must be in range " . self::MIN_DELAY . " ... " . self::MAX_DELAY);
 		}
 		$this->delay = $delay;
+		return $this;
+	}
+
+	public function isLocked() : bool{ return $this->locked; }
+
+	public function setLocked(bool $locked) : self{
+		$this->locked = $locked;
 		return $this;
 	}
 

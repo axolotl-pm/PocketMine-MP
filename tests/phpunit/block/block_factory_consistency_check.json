@@ -671,7 +671,7 @@
         "REDSTONE_COMPARATOR": 16,
         "REDSTONE_LAMP": 2,
         "REDSTONE_ORE": 2,
-        "REDSTONE_REPEATER": 32,
+        "REDSTONE_REPEATER": 64,
         "REDSTONE_TORCH": 10,
         "REDSTONE_WIRE": 1296,
         "RED_MUSHROOM": 1,

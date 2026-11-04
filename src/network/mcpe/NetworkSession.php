@@ -98,6 +98,7 @@ use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\command\CommandPermissions;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
+use pocketmine\network\mcpe\protocol\types\DisconnectReason;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
@@ -833,7 +834,8 @@ class NetworkSession{
 		}else{
 			$translated = $message;
 		}
-		$this->sendDataPacket(DisconnectPacket::create(0, $translated, ""));
+		//TODO: this should give different reason rather than UNKNOWN
+		$this->sendDataPacket(DisconnectPacket::create(DisconnectReason::UNKNOWN, $translated, ""));
 	}
 
 	/**
@@ -877,7 +879,8 @@ class NetworkSession{
 	public function transfer(string $ip, int $port, Translatable|string|null $reason = null) : void{
 		$reason ??= KnownTranslationFactory::pocketmine_disconnect_transfer();
 		$this->tryDisconnect(function() use ($ip, $port, $reason) : void{
-			$this->sendDataPacket(TransferPacket::create($ip, $port, false, null), true);
+			//TODO: API for serverTransferSettings
+			$this->sendDataPacket(TransferPacket::create($ip, $port, false, null, null), true);
 			if($this->player !== null){
 				$this->player->onPostDisconnect($reason, null);
 			}
