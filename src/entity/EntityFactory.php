@@ -48,6 +48,7 @@ use pocketmine\entity\projectile\IceBomb;
 use pocketmine\entity\projectile\Snowball;
 use pocketmine\entity\projectile\SplashPotion;
 use pocketmine\entity\projectile\Trident;
+use pocketmine\item\EggType;
 use pocketmine\item\Item;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
@@ -97,7 +98,7 @@ final class EntityFactory{
 		}, ['Arrow', 'minecraft:arrow']);
 
 		$this->register(Egg::class, function(World $world, CompoundTag $nbt) : Egg{
-			return new Egg(Helper::parseLocation($nbt, $world), null, $nbt);
+			return new Egg(Helper::parseLocation($nbt, $world), null, null, $nbt);
 		}, ['Egg', 'minecraft:egg']);
 
 		$this->register(EndCrystal::class, function(World $world, CompoundTag $nbt) : EndCrystal{

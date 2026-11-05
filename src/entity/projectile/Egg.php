@@ -23,19 +23,73 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\projectile;
 
+use pocketmine\entity\Entity;
+use pocketmine\entity\Location;
 use pocketmine\event\entity\ProjectileHitEvent;
+use pocketmine\item\EggType;
 use pocketmine\item\VanillaItems;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\world\particle\ItemBreakParticle;
 
 class Egg extends Throwable{
 	public static function getNetworkTypeId() : string{ return EntityIds::EGG; }
 
+	public const TAG_TYPE = "type"; // TAG_String
+
+	private EggType $eggType = EggType::NORMAL;
+
+	public function __construct(Location $location, ?Entity $shootingEntity, ?EggType $eggType = null, ?CompoundTag $nbt = null){
+		parent::__construct($location, $shootingEntity, $nbt);
+		if($eggType !== null){
+			$this->setEggType($eggType);
+		}
+	}
+
+	protected function initEntity(CompoundTag $nbt) : void{
+		parent::initEntity($nbt);
+
+		$typeName = $nbt->getString(self::TAG_TYPE, "temperate");
+		$this->eggType = match($typeName){
+			"warm" => EggType::BROWN,
+			"cold" => EggType::BLUE,
+			default => EggType::NORMAL,
+		};
+	}
+
+	public function saveNBT() : CompoundTag{
+		$nbt = parent::saveNBT();
+		$nbt->setString(self::TAG_TYPE, match($this->eggType) {
+			EggType::BROWN => "warm",
+			EggType::BLUE => "cold",
+			default => "temperate"
+		});
+		return $nbt;
+	}
+
+	/**
+	 * @return EggType
+	 */
+	public function getEggType() : EggType{
+		return $this->eggType;
+	}
+
+	/**
+	 * @param EggType $eggType
+	 */
+	public function setEggType(EggType $eggType) : void{
+		$this->eggType = $eggType;
+	}
+
 	//TODO: spawn chickens on collision
 
 	protected function onHit(ProjectileHitEvent $event) : void{
 		for($i = 0; $i < 6; ++$i){
-			$this->getWorld()->addParticle($this->location, new ItemBreakParticle(VanillaItems::EGG()));
+			$this->getWorld()->addParticle($this->location, new ItemBreakParticle(match ($this->eggType) {
+				EggType::BLUE => VanillaItems::BLUE_EGG(),
+				EggType::BROWN => VanillaItems::BROWN_EGG(),
+				EggType::NORMAL => VanillaItems::EGG(),
+			}));
 		}
 	}
 }
