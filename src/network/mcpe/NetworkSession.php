@@ -1042,17 +1042,22 @@ class NetworkSession{
 		$packManager = $this->server->getResourcePackManager();
 		$resourcePacks = $packManager->getResourceStack();
 		$keys = [];
+		$cdnUrls = [];
 		foreach($resourcePacks as $resourcePack){
 			$key = $packManager->getPackEncryptionKey($resourcePack->getPackId());
 			if($key !== null){
 				$keys[$resourcePack->getPackId()] = $key;
 			}
+			$cdnUrl = $packManager->getPackCdnUrl($resourcePack->getPackId());
+			if($cdnUrl !== null){
+				$cdnUrls[$resourcePack->getPackId()] = $cdnUrl;
+			}
 		}
-		$event = new PlayerResourcePackOfferEvent($this->info, $resourcePacks, $keys, $packManager->resourcePacksRequired());
+		$event = new PlayerResourcePackOfferEvent($this->info, $resourcePacks, $keys, $packManager->resourcePacksRequired(), $cdnUrls);
 		$event->call();
 		$this->setHandler(new ResourcePacksPacketHandler($this, $event->getResourcePacks(), $event->getEncryptionKeys(), $event->mustAccept(), function() : void{
 			$this->createPlayer();
-		}));
+		}, $event->getCdnUrls()));
 	}
 
 	private function beginSpawnSequence() : void{

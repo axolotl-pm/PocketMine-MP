@@ -32,17 +32,22 @@ use function array_keys;
 use function copy;
 use function count;
 use function file_exists;
+use function filter_var;
 use function gettype;
+use function in_array;
 use function is_array;
 use function is_dir;
 use function is_float;
 use function is_int;
 use function is_string;
 use function mkdir;
+use function parse_url;
 use function rtrim;
 use function strlen;
 use function strtolower;
 use const DIRECTORY_SEPARATOR;
+use const FILTER_VALIDATE_URL;
+use const PHP_URL_SCHEME;
 
 class ResourcePackManager{
 	private string $path;
@@ -65,6 +70,9 @@ class ResourcePackManager{
 	 * @phpstan-var array<string, string>
 	 */
 	private array $encryptionKeys = [];
+
+	/** @var array<string, string> pack UUID => download URL */
+	private array $cdnUrls = [];
 
 	/**
 	 * @param string $path Path to resource-packs directory.
@@ -94,6 +102,10 @@ class ResourcePackManager{
 		if(!is_array($resourceStack)){
 			throw new \InvalidArgumentException("\"resource_stack\" key should contain a list of pack names");
 		}
+		$cdnUrls = $resourcePacksConfig->get("cdn_urls", []);
+		if(!is_array($cdnUrls)){
+			throw new \InvalidArgumentException("\"cdn_urls\" key should contain a map of pack filenames to HTTP(S) URLs");
+		}
 
 		foreach(Utils::promoteKeys($resourceStack) as $pos => $pack){
 			if(!is_string($pack) && !is_int($pack) && !is_float($pack)){
@@ -112,6 +124,17 @@ class ResourcePackManager{
 				}
 				$this->uuidList[$index] = $newPack;
 				$this->resourcePacks[] = $newPack;
+
+				if(isset($cdnUrls[$pack])){
+					try{
+						if(!is_string($cdnUrls[$pack])){
+							throw new \InvalidArgumentException("URL must be a string");
+						}
+						$this->setPackCdnUrl($index, $cdnUrls[$pack]);
+					}catch(\InvalidArgumentException $e){
+						$logger->warning("Invalid CDN URL for resource pack \"$pack\": " . $e->getMessage() . "; using server downloads");
+					}
+				}
 
 				$keyPath = Path::join($this->path, $pack . ".key");
 				if(file_exists($keyPath)){
@@ -231,6 +254,27 @@ class ResourcePackManager{
 	 */
 	public function getPackEncryptionKey(string $id) : ?string{
 		return $this->encryptionKeys[strtolower($id)] ?? null;
+	}
+
+	public function getPackCdnUrl(string $id) : ?string{
+		return $this->cdnUrls[strtolower($id)] ?? null;
+	}
+
+	/**
+	 * Sets an HTTP(S) URL from which the client can download this pack. The URL must serve the same ZIP as the local pack.
+	 * Passing null restores server downloads. PocketMine-MP does not fetch or host the URL.
+	 */
+	public function setPackCdnUrl(string $id, ?string $url) : void{
+		$id = strtolower($id);
+		if($url === null){
+			unset($this->cdnUrls[$id]);
+		}elseif(!isset($this->uuidList[$id])){
+			throw new \InvalidArgumentException("Unknown pack ID $id");
+		}elseif(filter_var($url, FILTER_VALIDATE_URL) === false || !in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ["http", "https"], true)){
+			throw new \InvalidArgumentException("URL must be an absolute HTTP(S) URL");
+		}else{
+			$this->cdnUrls[$id] = $url;
+		}
 	}
 
 	/**

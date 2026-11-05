@@ -97,9 +97,11 @@ class ResourcePacksPacketHandler extends PacketHandler{
 	/**
 	 * @param ResourcePack[] $resourcePackStack
 	 * @param string[]       $encryptionKeys    pack UUID => key, leave unset for any packs that are not encrypted
+	 * @param string[]       $cdnUrls           pack UUID => HTTP(S) download URL, leave unset for server downloads
 	 *
 	 * @phpstan-param list<ResourcePack>    $resourcePackStack
 	 * @phpstan-param array<string, string> $encryptionKeys
+	 * @phpstan-param array<string, string> $cdnUrls
 	 * @phpstan-param \Closure() : void     $completionCallback
 	 */
 	public function __construct(
@@ -107,7 +109,8 @@ class ResourcePacksPacketHandler extends PacketHandler{
 		private array $resourcePackStack,
 		private array $encryptionKeys,
 		private bool $mustAccept,
-		private \Closure $completionCallback
+		private \Closure $completionCallback,
+		private array $cdnUrls = []
 	){
 		$this->requestQueue = new \SplQueue();
 		foreach($resourcePackStack as $pack){
@@ -130,7 +133,8 @@ class ResourcePacksPacketHandler extends PacketHandler{
 				$this->encryptionKeys[$pack->getPackId()] ?? "",
 				"",
 				$pack->getPackId(),
-				false
+				false,
+				cdnUrl: $this->cdnUrls[$pack->getPackId()] ?? ""
 			);
 		}, $this->resourcePackStack);
 		//TODO: support forcing server packs
