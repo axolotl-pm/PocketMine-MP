@@ -107,6 +107,7 @@ class ResourcePacksPacketHandler extends PacketHandler{
 		private array $resourcePackStack,
 		private array $encryptionKeys,
 		private bool $mustAccept,
+		private bool $forceDisableVibrantVisuals,
 		private \Closure $completionCallback
 	){
 		$this->requestQueue = new \SplQueue();
@@ -141,7 +142,7 @@ class ResourcePacksPacketHandler extends PacketHandler{
 			hasScripts: false,
 			worldTemplateId: Uuid::fromString(Uuid::NIL),
 			worldTemplateVersion: "",
-			forceDisableVibrantVisuals: true,
+			forceDisableVibrantVisuals: $this->forceDisableVibrantVisuals
 		));
 		$this->session->getLogger()->debug("Waiting for client to accept resource packs");
 	}
