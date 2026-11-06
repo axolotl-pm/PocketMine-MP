@@ -24,10 +24,12 @@ declare(strict_types=1);
 namespace pocketmine\world\particle;
 
 use pocketmine\block\Block;
+use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelEvent;
+use pocketmine\utils\AssumptionFailedError;
 
 /**
  * This particle appears when a player is attacking a block face in survival mode attempting to break it.
@@ -39,6 +41,20 @@ class BlockPunchParticle implements Particle{
 	){}
 
 	public function encode(Vector3 $pos) : array{
-		return [LevelEventPacket::create(LevelEvent::PARTICLE_PUNCH_BLOCK, TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId($this->block->getStateId()) | ($this->face << 24), $pos)];
+		$blockTranslator = TypeConverter::getInstance()->getBlockTranslator();
+		$networkId = $blockTranslator->internalIdToNetworkId($this->block->getStateId());
+		if($blockTranslator->useBlockNetworkIdsHashes()){
+			$eventId = match($this->face){
+				Facing::DOWN => LevelEvent::PARTICLE_PUNCH_BLOCK_DOWN,
+				Facing::UP => LevelEvent::PARTICLE_PUNCH_BLOCK_UP,
+				Facing::NORTH => LevelEvent::PARTICLE_PUNCH_BLOCK_NORTH,
+				Facing::SOUTH => LevelEvent::PARTICLE_PUNCH_BLOCK_SOUTH,
+				Facing::WEST => LevelEvent::PARTICLE_PUNCH_BLOCK_WEST,
+				Facing::EAST => LevelEvent::PARTICLE_PUNCH_BLOCK_EAST,
+				default => throw new AssumptionFailedError("Invalid block face")
+			};
+			return [LevelEventPacket::create($eventId, $networkId, $pos)];
+		}
+		return [LevelEventPacket::create(LevelEvent::PARTICLE_PUNCH_BLOCK, $networkId | ($this->face << 24), $pos)];
 	}
 }

@@ -53,7 +53,7 @@ class ChunkRequestTask extends AsyncTask{
 	/**
 	 * @phpstan-param DimensionIds::* $dimensionId
 	 */
-	public function __construct(int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, CompressBatchPromise $promise, Compressor $compressor){
+	public function __construct(int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, CompressBatchPromise $promise, Compressor $compressor, private bool $blockNetworkIdsAreHashes = false){
 		$this->compressor = new NonThreadSafeValue($compressor);
 
 		$this->chunk = FastChunkSerializer::serializeTerrain($chunk);
@@ -71,6 +71,9 @@ class ChunkRequestTask extends AsyncTask{
 
 		$subCount = ChunkSerializer::getSubChunkCount($chunk, $dimensionId);
 		$converter = TypeConverter::getInstance();
+		if($converter->getBlockTranslator()->useBlockNetworkIdsHashes() !== $this->blockNetworkIdsAreHashes){
+			TypeConverter::setInstance($converter = new TypeConverter($this->blockNetworkIdsAreHashes));
+		}
 		$payload = ChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getBlockTranslator(), $this->tiles);
 
 		$stream = new ByteBufferWriter();
