@@ -26,6 +26,13 @@ namespace pocketmine\network\mcpe;
 use pmmp\encoding\ByteBufferReader;
 use pmmp\encoding\ByteBufferWriter;
 use pmmp\encoding\DataDecodeException;
+use pocketmine\command\overload\enum\CommandSoftEnum;
+use pocketmine\command\overload\EnumParameter;
+use pocketmine\command\overload\FloatRangeParameter;
+use pocketmine\command\overload\IntRangeParameter;
+use pocketmine\command\overload\RawParameter;
+use pocketmine\command\overload\RelativeFloatParameter;
+use pocketmine\command\overload\RelativeXYZParameter;
 use pocketmine\entity\effect\EffectInstance;
 use pocketmine\event\player\PlayerDuplicateLoginEvent;
 use pocketmine\event\player\PlayerIdentityVerifyEvent;
@@ -60,7 +67,6 @@ use pocketmine\network\mcpe\handler\PreSpawnPacketHandler;
 use pocketmine\network\mcpe\handler\ResourcePacksPacketHandler;
 use pocketmine\network\mcpe\handler\SessionStartPacketHandler;
 use pocketmine\network\mcpe\handler\SpawnResponsePacketHandler;
-use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\ChunkRadiusUpdatedPacket;
 use pocketmine\network\mcpe\protocol\ClientboundCloseFormPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
@@ -95,13 +101,17 @@ use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameterTypes;
 use pocketmine\network\mcpe\protocol\types\command\CommandPermissions;
+use pocketmine\network\mcpe\protocol\types\command\CommandSoftEnum as ProtocolCommandSoftEnum;
+use pocketmine\network\mcpe\protocol\types\command\ConstrainedEnumValue;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
+use pocketmine\network\mcpe\protocol\UpdateSoftEnumPacket;
 use pocketmine\network\NetworkSessionManager;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\network\TransportIdentityException;
@@ -120,11 +130,14 @@ use pocketmine\timings\Timings;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\ObjectSet;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use pocketmine\world\Position;
 use pocketmine\world\World;
 use pocketmine\YmlServerProperties;
+use function array_fill_keys;
 use function array_filter;
+use function array_keys;
 use function array_map;
 use function array_slice;
 use function array_values;
@@ -209,6 +222,12 @@ class NetworkSession{
 	 * @phpstan-var ObjectSet<\Closure() : void>
 	 */
 	private ObjectSet $disposeHooks;
+
+	/**
+	 * @var true[]
+	 * @phpstan-var array<string, true>
+	 */
+	private array $syncedSoftEnums = [];
 
 	private string $noisyPacketBuffer = "";
 	private int $noisyPacketsDropped = 0;
@@ -1215,8 +1234,14 @@ class NetworkSession{
 		$commandData = [];
 		$globalAliasMap = $this->server->getCommandMap()->getAliasMap();
 		$userAliasMap = $this->player->getCommandAliasMap();
+		$language = $this->player->getLanguage();
+
+		$literals = [];
+		$enums = [];
+		$softEnums = [];
 		foreach($this->server->getCommandMap()->getUniqueCommands() as $command){
-			if(!$command->testPermissionSilent($this->player)){
+			$overloads = $command->getPermittedOverloads($this->player);
+			if(count($overloads) === 0){
 				continue;
 			}
 
@@ -1230,18 +1255,88 @@ class NetworkSession{
 			//use filtered aliases for command name discovery - this allows /help to still be shown as /pocketmine:help
 			//on the client without conflicting with the client's built-in /help command
 			$lname = strtolower($firstNetworkAlias);
-			$aliasObj = new CommandHardEnum(ucfirst($firstNetworkAlias) . "Aliases", $aliases);
+			$aliasObj = count($aliases) > 1 ? new CommandHardEnum(ucfirst($firstNetworkAlias) . "Aliases", $aliases) : null;
+
+			$overloadData = [];
+			foreach($overloads as $overload){
+				$parameters = [];
+				$required = $overload->getRequiredParameterCount();
+				foreach($overload->getParameters() as $k => $parameter){
+					if(is_string($parameter)){
+						$literalEnum = $literals[$parameter] ??= new CommandHardEnum("Literal_$parameter", [$parameter]);
+						$parameters[] = CommandParameter::enum(
+							$parameter,
+							$literalEnum,
+							flags: CommandParameter::FLAG_FORCE_COLLAPSE_ENUM,
+							optional: $k >= $required
+						);
+					}else{
+						$name = $parameter->getPrintableName();
+						$translated = $name instanceof Translatable ? $language->translate($name) : $name;
+
+						if($parameter instanceof EnumParameter){
+							$enum = $parameter->getEnum();
+							$enumName = $enum->getName();
+							if($enum instanceof CommandSoftEnum){
+								$parameters[] = CommandParameter::softEnum(
+									$translated,
+									$softEnums[$enumName] ??= new ProtocolCommandSoftEnum($enumName, $enum->getKeys()),
+									flags: 0,
+									optional: $k >= $required
+								);
+								continue;
+							}
+							$aliasKeys = $enum->getAliasKeys();
+							$networkEnum = $enums[$enumName] ??= new CommandHardEnum($enumName, [
+								...$enum->getKeys(),
+								//the client accepts these but keeps them out of its completion list
+								...array_map(
+									fn(string $alias) => new ConstrainedEnumValue($alias, [ConstrainedEnumValue::REQUIRES_ALLOW_ALIASES]),
+									$aliasKeys
+								)
+							]);
+							$parameters[] = CommandParameter::enum(
+								$translated,
+								$networkEnum,
+								flags: count($aliasKeys) > 0 ? CommandParameter::FLAG_HAS_ENUM_CONSTRAINT : 0,
+								optional: $k >= $required
+							);
+							continue;
+						}
+
+						$simpleArgType = match(true){
+							$parameter instanceof FloatRangeParameter => CommandParameterTypes::VAL,
+							$parameter instanceof IntRangeParameter => CommandParameterTypes::INT,
+							$parameter instanceof RawParameter => CommandParameterTypes::RAWTEXT,
+							$parameter instanceof RelativeFloatParameter => CommandParameterTypes::RVAL,
+							$parameter instanceof RelativeXYZParameter => CommandParameterTypes::POSITION_FLOAT,
+							default => CommandParameterTypes::ID //string
+						};
+						$suffix = $parameter->getSuffix();
+						if($suffix !== ""){
+							//umm... client only allows suffixes on integer params???
+							//TODO: as of 1.21.111, the client crashes if we try to provide actual suffixes for /xp.
+							//The cause for this seems to be undefined behaviour on the client linked to the order and
+							//number of certain hardcoded enums like GameMode, IntParam etc which we don't provide. I
+							//wasn't able to make a reliable workaround, so this gets disabled for now. SAD!
+							//$parameters[] = CommandParameter::postfixed($translated, strtolower($suffix), optional: $k >= $required);
+							$parameters[] = CommandParameter::standard($translated, CommandParameterTypes::ID, optional: $k >= $required);
+						}else{
+							$parameters[] = CommandParameter::standard($translated, $simpleArgType, optional: $k >= $required);
+						}
+					}
+				}
+				$overloadData[] = new CommandOverload(chaining: false, parameters: $parameters);
+			}
 
 			$description = $command->getDescription();
 			$data = new CommandData(
 				$lname, //TODO: commands containing uppercase letters in the name crash 1.9.0 client
-				$description instanceof Translatable ? $this->player->getLanguage()->translate($description) : $description,
+				$description instanceof Translatable ? $language->translate($description) : $description,
 				0,
 				CommandPermissions::NORMAL,
 				$aliasObj,
-				[
-					new CommandOverload(chaining: false, parameters: [CommandParameter::standard("args", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, true)])
-				],
+				$overloadData,
 				chainedSubCommandData: []
 			);
 
@@ -1249,6 +1344,7 @@ class NetworkSession{
 		}
 
 		$this->sendDataPacket(AvailableCommandsPacketAssembler::assemble($commandData, [], []));
+		$this->syncedSoftEnums = array_fill_keys(array_keys($softEnums), true);
 	}
 
 	/**
@@ -1372,6 +1468,19 @@ class NetworkSession{
 
 	public function syncWorldDifficulty(int $worldDifficulty) : void{
 		$this->sendDataPacket(SetDifficultyPacket::create($worldDifficulty));
+	}
+
+	/**
+	 * @param CommandSoftEnum[] $dirtyEnums
+	 *
+	 * @phpstan-param array<string, CommandSoftEnum<mixed>> $dirtyEnums
+	 */
+	public function syncSoftEnums(array $dirtyEnums) : void{
+		foreach(Utils::stringifyKeys($dirtyEnums) as $name => $enum){
+			if(isset($this->syncedSoftEnums[$name])){
+				$this->sendDataPacket(UpdateSoftEnumPacket::create($name, $enum->getKeys(), UpdateSoftEnumPacket::TYPE_SET));
+			}
+		}
 	}
 
 	public function getInvManager() : ?InventoryManager{

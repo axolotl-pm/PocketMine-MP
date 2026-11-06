@@ -1954,6 +1954,15 @@ class Server{
 			Timings::$serverCommand->stopTiming();
 		}
 
+		Timings::$softEnumSync->startTiming();
+		$dirtyEnums = $this->commandMap->pollDirtySoftEnums();
+		if($dirtyEnums !== []){
+			foreach($this->getOnlinePlayers() as $player){
+				$player->getNetworkSession()->syncSoftEnums($dirtyEnums);
+			}
+		}
+		Timings::$softEnumSync->stopTiming();
+
 		Timings::$serverTick->stopTiming();
 
 		$now = microtime(true);
