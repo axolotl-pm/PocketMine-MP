@@ -34,7 +34,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class TripwireHook extends Flowable implements HorizontalFacing, RedstoneSignalEmitter{
+class TripwireHook extends WaterloggableFlowable implements HorizontalFacing, RedstoneSignalEmitter{
 	use HorizontalFacingTrait;
 
 	protected bool $connected = false;

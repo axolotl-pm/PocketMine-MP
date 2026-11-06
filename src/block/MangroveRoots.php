@@ -23,7 +23,24 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-final class MangroveRoots extends Transparent{
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
+use pocketmine\item\Item;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
+
+final class MangroveRoots extends Transparent implements Waterloggable{
+	use WaterloggableTrait{
+		place as waterPlace;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
 
 	public function getFlammability() : int{ return 5; }
 

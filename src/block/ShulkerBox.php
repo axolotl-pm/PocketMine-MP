@@ -27,14 +27,20 @@ use pocketmine\block\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\block\utils\AnyFacing;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class ShulkerBox extends Opaque implements AnyFacing{
+class ShulkerBox extends Opaque implements AnyFacing, Waterloggable{
 	use AnyFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		readStateFromWorld as readWaterStateFromWorld;
+	}
 
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		//NOOP - we don't read or write facing here, because the tile persists it
@@ -50,6 +56,8 @@ class ShulkerBox extends Opaque implements AnyFacing{
 
 	public function readStateFromWorld() : Block{
 		parent::readStateFromWorld();
+		$this->readWaterStateFromWorld();
+
 		$shulker = $this->position->getWorld()->getTile($this->position);
 		if($shulker instanceof TileShulkerBox){
 			$this->facing = $shulker->getFacing();
@@ -65,6 +73,9 @@ class ShulkerBox extends Opaque implements AnyFacing{
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		$this->facing = $face;
 
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 

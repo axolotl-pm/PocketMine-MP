@@ -41,7 +41,7 @@ use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 use function assert;
 
-class RedstoneComparator extends Flowable implements AnalogRedstoneSignalEmitter, PoweredByRedstone, HorizontalFacing{
+class RedstoneComparator extends WaterloggableFlowable implements AnalogRedstoneSignalEmitter, PoweredByRedstone, HorizontalFacing{
 	use HorizontalFacingTrait;
 	use AnalogRedstoneSignalEmitterTrait;
 	use PoweredByRedstoneTrait;

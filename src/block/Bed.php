@@ -30,6 +30,8 @@ use pocketmine\block\utils\DyeColor;
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
@@ -43,9 +45,14 @@ use pocketmine\utils\TextFormat;
 use pocketmine\world\BlockTransaction;
 use pocketmine\world\World;
 
-class Bed extends Transparent implements Colored, HorizontalFacing{
+class Bed extends Transparent implements Colored, HorizontalFacing, Waterloggable{
 	use ColoredTrait;
 	use HorizontalFacingTrait;
+	use WaterloggableTrait{
+		place as waterPlace;
+		readStateFromWorld as readWaterStateFromWorld;
+		onNearbyBlockChange as onWaterBlockChange;
+	}
 
 	protected bool $occupied = false;
 	protected bool $head = false;
@@ -58,6 +65,8 @@ class Bed extends Transparent implements Colored, HorizontalFacing{
 
 	public function readStateFromWorld() : Block{
 		parent::readStateFromWorld();
+		$this->readWaterStateFromWorld();
+
 		//read extra state information from the tile - this is an ugly hack
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TileBed){
@@ -158,6 +167,8 @@ class Bed extends Transparent implements Colored, HorizontalFacing{
 	}
 
 	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+
 		if(!$this->head && ($other = $this->getOtherHalf()) !== null && $other->occupied !== $this->occupied){
 			$this->occupied = $other->occupied;
 			$this->position->getWorld()->setBlock($this->position, $this);
@@ -178,8 +189,12 @@ class Bed extends Transparent implements Colored, HorizontalFacing{
 
 			$next = $this->getSide($this->getOtherHalfSide());
 			if($next->canBeReplaced() && $this->canBeSupportedAt($next)){
+				$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+
 				$nextState = clone $this;
 				$nextState->head = true;
+				$nextState->containedWater = null;
+				$nextState->waterPlace($tx, $item, $next, $blockClicked, $face, $clickVector, $player);
 				$tx->addBlock($blockReplace->position, $this)->addBlock($next->position, $nextState);
 				return true;
 			}

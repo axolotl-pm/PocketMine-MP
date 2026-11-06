@@ -28,7 +28,7 @@ use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 
-final class Light extends Flowable{
+final class Light extends WaterloggableFlowable{
 	public const MIN_LIGHT_LEVEL = 0;
 	public const MAX_LIGHT_LEVEL = 15;
 

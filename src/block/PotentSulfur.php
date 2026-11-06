@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\WaterHelper;
 use pocketmine\math\Facing;
 
 class PotentSulfur extends Opaque{
@@ -51,8 +52,8 @@ class PotentSulfur extends Opaque{
 	}
 
 	private function computeVariant() : PotentSulfur{
-		$above = $this->getSide(Facing::UP);
-		if(!($above instanceof Water) || !$above->isSource()){ //TODO: waterlogging!
+		$water = WaterHelper::getWater($this->getSide(Facing::UP));
+		if($water === null || !$water->isSource()){
 			return VanillaBlocks::POTENT_SULFUR();
 		}
 
