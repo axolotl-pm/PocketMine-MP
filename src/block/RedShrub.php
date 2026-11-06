@@ -23,8 +23,15 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\BlockEventHelper;
 use pocketmine\block\utils\StaticSupportTrait;
+use pocketmine\item\Fertilizer;
+use pocketmine\item\Item;
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use function array_rand;
+use function count;
 
 final class RedShrub extends Flowable{
 	use StaticSupportTrait;
@@ -41,5 +48,27 @@ final class RedShrub extends Flowable{
 		$supportBlock = $block->getSide(Facing::DOWN);
 		//TODO: moss
 		return $supportBlock->hasTypeTag(BlockTypeTags::DIRT) || $supportBlock->hasTypeTag(BlockTypeTags::MUD);
+	}
+
+	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
+		if($item instanceof Fertilizer){
+			$validSides = [];
+			foreach(Facing::HORIZONTAL as $side){
+				$neighbor = $this->getSide($side);
+
+				if($neighbor->getTypeId() === BlockTypeIds::AIR && $this->canBeSupportedAt($neighbor)){
+					$validSides[] = $neighbor;
+				}
+			}
+
+			if(count($validSides) > 0){
+				BlockEventHelper::grow($validSides[array_rand($validSides)], VanillaBlocks::RED_SHRUB(), $player);
+			}
+
+			$item->pop();
+			return true;
+		}
+
+		return parent::onInteract($item, $face, $clickVector, $player, $returnedItems);
 	}
 }
