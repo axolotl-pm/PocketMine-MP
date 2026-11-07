@@ -200,6 +200,38 @@ final class BlockSerializerDeserializerRegistrar{
 	}
 
 	/**
+	 * @phpstan-template TBlock of Slab&Colored
+	 * @phpstan-param TBlock $block
+	 */
+	public function mapColoredSlab(Slab $block, string $idPrefix) : void{
+		$this->mapFlattenedId(FlattenedIdModel::create($block)
+			->idComponents([
+				"minecraft:",
+				CommonProperties::getInstance()->dyeColorIdInfix,
+				"_" . $idPrefix . "_",
+				CommonProperties::getInstance()->slabIdInfix,
+				"slab"
+			])
+			->properties([CommonProperties::getInstance()->slabPositionProperty])
+		);
+	}
+
+	/**
+	 * @phpstan-template TBlock of Stair&Colored
+	 * @phpstan-param TBlock $block
+	 */
+	public function mapColoredStairs(Stair $block, string $idPrefix) : void{
+		$this->mapFlattenedId(FlattenedIdModel::create($block)
+			->idComponents([
+				"minecraft:",
+				CommonProperties::getInstance()->dyeColorIdInfix,
+				"_" . $idPrefix . "_stairs"
+			])
+			->properties(CommonProperties::getInstance()->stairProperties)
+		);
+	}
+
+	/**
 	 * @phpstan-template TBlock of Block&HorizontalConnectable
 	 * @phpstan-param TBlock $block
 	 */
