@@ -41,6 +41,7 @@ use pocketmine\block\Candle;
 use pocketmine\block\CaveVines;
 use pocketmine\block\ChiseledBookshelf;
 use pocketmine\block\ChorusFlower;
+use pocketmine\block\ChorusPlant;
 use pocketmine\block\CocoaBlock;
 use pocketmine\block\Copper;
 use pocketmine\block\CopperLantern;
@@ -77,6 +78,7 @@ use pocketmine\block\RedMushroomBlock;
 use pocketmine\block\RedstoneComparator;
 use pocketmine\block\RedstoneRepeater;
 use pocketmine\block\RedstoneTorch;
+use pocketmine\block\RedstoneWire;
 use pocketmine\block\RespawnAnchor;
 use pocketmine\block\Sapling;
 use pocketmine\block\SeaPickle;
@@ -103,6 +105,7 @@ use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\MobHeadType;
 use pocketmine\block\utils\MushroomBlockType;
 use pocketmine\block\utils\PoweredByRedstone;
+use pocketmine\block\utils\RedstoneWireConnectionType;
 use pocketmine\block\VanillaBlocks as Blocks;
 use pocketmine\block\Vine;
 use pocketmine\data\bedrock\block\BlockLegacyMetadata;
@@ -184,7 +187,6 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::CHISELED_STONE_BRICKS(), Ids::CHISELED_STONE_BRICKS);
 		$reg->mapSimple(Blocks::CHISELED_TUFF(), Ids::CHISELED_TUFF);
 		$reg->mapSimple(Blocks::CHISELED_TUFF_BRICKS(), Ids::CHISELED_TUFF_BRICKS);
-		$reg->mapSimple(Blocks::CHORUS_PLANT(), Ids::CHORUS_PLANT);
 		$reg->mapSimple(Blocks::CLAY(), Ids::CLAY);
 		$reg->mapSimple(Blocks::COAL(), Ids::COAL_BLOCK);
 		$reg->mapSimple(Blocks::COAL_ORE(), Ids::COAL_ORE);
@@ -554,8 +556,11 @@ final class VanillaBlockMappings{
 			Ids::JUNGLE_LEAVES => Blocks::JUNGLE_LEAVES(),
 			Ids::MANGROVE_LEAVES => Blocks::MANGROVE_LEAVES(),
 			Ids::OAK_LEAVES => Blocks::OAK_LEAVES(),
+			Ids::ORANGE_POPLAR_LEAVES => Blocks::ORANGE_POPLAR_LEAVES(),
 			Ids::PALE_OAK_LEAVES => Blocks::PALE_OAK_LEAVES(),
-			Ids::SPRUCE_LEAVES => Blocks::SPRUCE_LEAVES()
+			Ids::RED_POPLAR_LEAVES => Blocks::RED_POPLAR_LEAVES(),
+			Ids::SPRUCE_LEAVES => Blocks::SPRUCE_LEAVES(),
+			Ids::YELLOW_POPLAR_LEAVES => Blocks::YELLOW_POPLAR_LEAVES(),
 		] as $id => $block){
 			$reg->mapModel(Model::create($block, $id)->properties($properties));
 		}
@@ -1040,6 +1045,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_BUTTON(), Ids::MANGROVE_BUTTON],
 			[Blocks::OAK_BUTTON(), Ids::WOODEN_BUTTON],
 			[Blocks::PALE_OAK_BUTTON(), Ids::PALE_OAK_BUTTON],
+			[Blocks::POPLAR_BUTTON(), Ids::POPLAR_BUTTON],
 			[Blocks::SPRUCE_BUTTON(), Ids::SPRUCE_BUTTON],
 			[Blocks::WARPED_BUTTON(), Ids::WARPED_BUTTON]
 		] as [$block, $id]){
@@ -1058,6 +1064,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_DOOR(), Ids::MANGROVE_DOOR],
 			[Blocks::OAK_DOOR(), Ids::WOODEN_DOOR],
 			[Blocks::PALE_OAK_DOOR(), Ids::PALE_OAK_DOOR],
+			[Blocks::POPLAR_DOOR(), Ids::POPLAR_DOOR],
 			[Blocks::SPRUCE_DOOR(), Ids::SPRUCE_DOOR],
 			[Blocks::WARPED_DOOR(), Ids::WARPED_DOOR]
 		] as [$block, $id]){
@@ -1075,6 +1082,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_FENCE(), Ids::MANGROVE_FENCE],
 			[Blocks::OAK_FENCE(), Ids::OAK_FENCE],
 			[Blocks::PALE_OAK_FENCE(), Ids::PALE_OAK_FENCE],
+			[Blocks::POPLAR_FENCE(), Ids::POPLAR_FENCE],
 			[Blocks::SPRUCE_FENCE(), Ids::SPRUCE_FENCE],
 			[Blocks::CRIMSON_FENCE(), Ids::CRIMSON_FENCE],
 			[Blocks::WARPED_FENCE(), Ids::WARPED_FENCE]
@@ -1092,6 +1100,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_FENCE_GATE(), Ids::MANGROVE_FENCE_GATE],
 			[Blocks::OAK_FENCE_GATE(), Ids::FENCE_GATE],
 			[Blocks::PALE_OAK_FENCE_GATE(), Ids::PALE_OAK_FENCE_GATE],
+			[Blocks::POPLAR_FENCE_GATE(), Ids::POPLAR_FENCE_GATE],
 			[Blocks::SPRUCE_FENCE_GATE(), Ids::SPRUCE_FENCE_GATE],
 			[Blocks::CRIMSON_FENCE_GATE(), Ids::CRIMSON_FENCE_GATE],
 			[Blocks::WARPED_FENCE_GATE(), Ids::WARPED_FENCE_GATE]
@@ -1109,6 +1118,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_SIGN(), Ids::MANGROVE_STANDING_SIGN],
 			[Blocks::OAK_SIGN(), Ids::STANDING_SIGN],
 			[Blocks::PALE_OAK_SIGN(), Ids::PALE_OAK_STANDING_SIGN],
+			[Blocks::POPLAR_SIGN(), Ids::POPLAR_STANDING_SIGN],
 			[Blocks::SPRUCE_SIGN(), Ids::SPRUCE_STANDING_SIGN],
 			[Blocks::CRIMSON_SIGN(), Ids::CRIMSON_STANDING_SIGN],
 			[Blocks::WARPED_SIGN(), Ids::WARPED_STANDING_SIGN]
@@ -1126,6 +1136,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_LOG(), "mangrove_log"],
 			[Blocks::OAK_LOG(), "oak_log"],
 			[Blocks::PALE_OAK_LOG(), "pale_oak_log"],
+			[Blocks::POPLAR_LOG(), "poplar_log"],
 			[Blocks::SPRUCE_LOG(), "spruce_log"],
 			[Blocks::CRIMSON_STEM(), "crimson_stem"],
 			[Blocks::WARPED_STEM(), "warped_stem"],
@@ -1139,6 +1150,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_WOOD(), "mangrove_wood"],
 			[Blocks::OAK_WOOD(), "oak_wood"],
 			[Blocks::PALE_OAK_WOOD(), "pale_oak_wood"],
+			[Blocks::POPLAR_WOOD(), "poplar_wood"],
 			[Blocks::SPRUCE_WOOD(), "spruce_wood"],
 			[Blocks::CRIMSON_HYPHAE(), "crimson_hyphae"],
 			[Blocks::WARPED_HYPHAE(), "warped_hyphae"],
@@ -1164,6 +1176,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_PLANKS(), Ids::MANGROVE_PLANKS],
 			[Blocks::OAK_PLANKS(), Ids::OAK_PLANKS],
 			[Blocks::PALE_OAK_PLANKS(), Ids::PALE_OAK_PLANKS],
+			[Blocks::POPLAR_PLANKS(), Ids::POPLAR_PLANKS],
 			[Blocks::SPRUCE_PLANKS(), Ids::SPRUCE_PLANKS],
 			[Blocks::CRIMSON_PLANKS(), Ids::CRIMSON_PLANKS],
 			[Blocks::WARPED_PLANKS(), Ids::WARPED_PLANKS]
@@ -1182,6 +1195,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_PRESSURE_PLATE(), Ids::MANGROVE_PRESSURE_PLATE],
 			[Blocks::OAK_PRESSURE_PLATE(), Ids::WOODEN_PRESSURE_PLATE],
 			[Blocks::PALE_OAK_PRESSURE_PLATE(), Ids::PALE_OAK_PRESSURE_PLATE],
+			[Blocks::POPLAR_PRESSURE_PLATE(), Ids::POPLAR_PRESSURE_PLATE],
 			[Blocks::SPRUCE_PRESSURE_PLATE(), Ids::SPRUCE_PRESSURE_PLATE],
 			[Blocks::CRIMSON_PRESSURE_PLATE(), Ids::CRIMSON_PRESSURE_PLATE],
 			[Blocks::WARPED_PRESSURE_PLATE(), Ids::WARPED_PRESSURE_PLATE]
@@ -1201,6 +1215,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_SLAB(), "mangrove"],
 			[Blocks::OAK_SLAB(), "oak"],
 			[Blocks::PALE_OAK_SLAB(), "pale_oak"],
+			[Blocks::POPLAR_SLAB(), "poplar"],
 			[Blocks::SPRUCE_SLAB(), "spruce"],
 			[Blocks::CRIMSON_SLAB(), "crimson"],
 			[Blocks::WARPED_SLAB(), "warped"]
@@ -1220,6 +1235,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_STAIRS(), Ids::MANGROVE_STAIRS],
 			[Blocks::OAK_STAIRS(), Ids::OAK_STAIRS],
 			[Blocks::PALE_OAK_STAIRS(), Ids::PALE_OAK_STAIRS],
+			[Blocks::POPLAR_STAIRS(), Ids::POPLAR_STAIRS],
 			[Blocks::SPRUCE_STAIRS(), Ids::SPRUCE_STAIRS],
 			[Blocks::CRIMSON_STAIRS(), Ids::CRIMSON_STAIRS],
 			[Blocks::WARPED_STAIRS(), Ids::WARPED_STAIRS]
@@ -1238,6 +1254,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_TRAPDOOR(), Ids::MANGROVE_TRAPDOOR],
 			[Blocks::OAK_TRAPDOOR(), Ids::TRAPDOOR],
 			[Blocks::PALE_OAK_TRAPDOOR(), Ids::PALE_OAK_TRAPDOOR],
+			[Blocks::POPLAR_TRAPDOOR(), Ids::POPLAR_TRAPDOOR],
 			[Blocks::SPRUCE_TRAPDOOR(), Ids::SPRUCE_TRAPDOOR],
 			[Blocks::CRIMSON_TRAPDOOR(), Ids::CRIMSON_TRAPDOOR],
 			[Blocks::WARPED_TRAPDOOR(), Ids::WARPED_TRAPDOOR]
@@ -1256,6 +1273,7 @@ final class VanillaBlockMappings{
 			[Blocks::MANGROVE_WALL_SIGN(), Ids::MANGROVE_WALL_SIGN],
 			[Blocks::OAK_WALL_SIGN(), Ids::WALL_SIGN],
 			[Blocks::PALE_OAK_WALL_SIGN(), Ids::PALE_OAK_WALL_SIGN],
+			[Blocks::POPLAR_WALL_SIGN(), Ids::POPLAR_WALL_SIGN],
 			[Blocks::SPRUCE_WALL_SIGN(), Ids::SPRUCE_WALL_SIGN],
 			[Blocks::CRIMSON_WALL_SIGN(), Ids::CRIMSON_WALL_SIGN],
 			[Blocks::WARPED_WALL_SIGN(), Ids::WARPED_WALL_SIGN]
@@ -1371,6 +1389,11 @@ final class VanillaBlockMappings{
 		$reg->mapModel(Model::create(Blocks::CHORUS_FLOWER(), Ids::CHORUS_FLOWER)->properties([
 			new IntProperty(StateNames::AGE, ChorusFlower::MIN_AGE, ChorusFlower::MAX_AGE, fn(ChorusFlower $b) => $b->getAge(), fn(ChorusFlower $b, int $v) => $b->setAge($v))
 		]));
+		$reg->mapModel(Model::create(Blocks::CHORUS_PLANT(), Ids::CHORUS_PLANT)->properties([
+			...$commonProperties->horizontalConnectionProperties,
+			new BoolProperty(StateNames::MC_CONNECTION_DOWN, fn(ChorusPlant $b) => $b->isConnectedAt(Facing::DOWN), fn(ChorusPlant $b, bool $v) => $b->setConnectedAt(Facing::DOWN, $v)),
+			new BoolProperty(StateNames::MC_CONNECTION_UP, fn(ChorusPlant $b) => $b->isConnectedAt(Facing::UP), fn(ChorusPlant $b, bool $v) => $b->setConnectedAt(Facing::UP, $v)),
+		]));
 		$reg->mapModel(Model::create(Blocks::COCOA_POD(), Ids::COCOA)->properties([
 			new IntProperty(StateNames::AGE, 0, 2, fn(CocoaBlock $b) => $b->getAge(), fn(CocoaBlock $b, int $v) => $b->setAge($v)),
 			$commonProperties->horizontalFacingSWNEInverted
@@ -1398,7 +1421,9 @@ final class VanillaBlockMappings{
 			new IntProperty(StateNames::MOISTURIZED_AMOUNT, 0, 7, fn(Farmland $b) => $b->getWetness(), fn(Farmland $b, int $v) => $b->setWetness($v))
 		]));
 		$reg->mapModel(Model::create(Blocks::FIRE(), Ids::FIRE)->properties([
-			new IntProperty(StateNames::AGE, 0, 15, fn(Fire $b) => $b->getAge(), fn(Fire $b, int $v) => $b->setAge($v))
+			new IntProperty(StateNames::AGE, 0, 15, fn(Fire $b) => $b->getAge(), fn(Fire $b, int $v) => $b->setAge($v)),
+			...$commonProperties->horizontalConnectionProperties,
+			new BoolProperty(StateNames::MC_CONNECTION_UP, fn(Fire $b) => $b->isConnectedAt(Facing::UP), fn(Fire $b, bool $v) => $b->setConnectedAt(Facing::UP, $v)),
 		]));
 		$reg->mapModel(Model::create(Blocks::FLOWER_POT(), Ids::FLOWER_POT)->properties([
 			BoolProperty::unused(StateNames::UPDATE_BIT, false)
@@ -1487,7 +1512,19 @@ final class VanillaBlockMappings{
 		$reg->mapModel(Model::create(Blocks::RAIL(), Ids::RAIL)->properties([
 			new IntProperty(StateNames::RAIL_DIRECTION, 0, 9, fn(Rail $b) => $b->getShape(), fn(Rail $b, int $v) => $b->setShape($v))
 		]));
-		$reg->mapModel(Model::create(Blocks::REDSTONE_WIRE(), Ids::REDSTONE_WIRE)->properties([$commonProperties->analogRedstoneSignal]));
+		$redstoneWireConnection = fn(string $stateName, int $facing) => new ValueFromStringProperty(
+			$stateName,
+			ValueMappings::getInstance()->redstoneWireConnectionType,
+			fn(RedstoneWire $b) => $b->getConnection($facing),
+			fn(RedstoneWire $b, RedstoneWireConnectionType $v) => $b->setConnection($facing, $v)
+		);
+		$reg->mapModel(Model::create(Blocks::REDSTONE_WIRE(), Ids::REDSTONE_WIRE)->properties([
+			$commonProperties->analogRedstoneSignal,
+			$redstoneWireConnection(StateNames::REDSTONE_EAST, Facing::EAST),
+			$redstoneWireConnection(StateNames::REDSTONE_NORTH, Facing::NORTH),
+			$redstoneWireConnection(StateNames::REDSTONE_SOUTH, Facing::SOUTH),
+			$redstoneWireConnection(StateNames::REDSTONE_WEST, Facing::WEST),
+		]));
 		$reg->mapModel(Model::create(Blocks::RESPAWN_ANCHOR(), Ids::RESPAWN_ANCHOR)->properties([
 			new IntProperty(StateNames::RESPAWN_ANCHOR_CHARGE, 0, 4, fn(RespawnAnchor $b) => $b->getCharges(), fn(RespawnAnchor $b, int $v) => $b->setCharges($v))
 		]));
@@ -1693,6 +1730,7 @@ final class VanillaBlockMappings{
 			Ids::MANGROVE_HANGING_SIGN => [Blocks::MANGROVE_CEILING_CENTER_HANGING_SIGN(), Blocks::MANGROVE_CEILING_EDGES_HANGING_SIGN(), Blocks::MANGROVE_WALL_HANGING_SIGN()],
 			Ids::OAK_HANGING_SIGN => [Blocks::OAK_CEILING_CENTER_HANGING_SIGN(), Blocks::OAK_CEILING_EDGES_HANGING_SIGN(), Blocks::OAK_WALL_HANGING_SIGN()],
 			Ids::PALE_OAK_HANGING_SIGN => [Blocks::PALE_OAK_CEILING_CENTER_HANGING_SIGN(), Blocks::PALE_OAK_CEILING_EDGES_HANGING_SIGN(), Blocks::PALE_OAK_WALL_HANGING_SIGN()],
+			Ids::POPLAR_HANGING_SIGN => [Blocks::POPLAR_CEILING_CENTER_HANGING_SIGN(), Blocks::POPLAR_CEILING_EDGES_HANGING_SIGN(), Blocks::POPLAR_WALL_HANGING_SIGN()],
 			Ids::SPRUCE_HANGING_SIGN => [Blocks::SPRUCE_CEILING_CENTER_HANGING_SIGN(), Blocks::SPRUCE_CEILING_EDGES_HANGING_SIGN(), Blocks::SPRUCE_WALL_HANGING_SIGN()],
 			Ids::WARPED_HANGING_SIGN => [Blocks::WARPED_CEILING_CENTER_HANGING_SIGN(), Blocks::WARPED_CEILING_EDGES_HANGING_SIGN(), Blocks::WARPED_WALL_HANGING_SIGN()],
 		] as $id => [$center, $edges, $wall]){

@@ -158,6 +158,9 @@ class Leaves extends Transparent{
 				LeavesType::AZALEA => VanillaBlocks::AZALEA(),
 				LeavesType::FLOWERING_AZALEA => VanillaBlocks::FLOWERING_AZALEA(),
 				LeavesType::CHERRY => null, //TODO: cherry
+				LeavesType::RED_POPLAR => null, //TODO: red poplar
+				LeavesType::ORANGE_POPLAR => null, //TODO: orange poplar
+				LeavesType::YELLOW_POPLAR => null, //TODO: yellow poplar
 				LeavesType::PALE_OAK => null, //TODO: pale oak
 			})?->asItem();
 			if($sapling !== null){
