@@ -659,6 +659,8 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("cinnabar_brick_stairs", fn(BID $id) => new Stair($id, "Cinnabar Brick Stairs", $cinnabarBreakInfo));
 		self::register("cinnabar_brick_wall", fn(BID $id) => new Wall($id, "Cinnabar Brick Wall", $cinnabarBreakInfo));
 
+		self::register("red_shrub", fn(BID $id) => new RedShrub($id, "Red Shrub", new Info(BreakInfo::instant())));
+
 		self::registerBlocksR13();
 		self::registerBlocksR14();
 		self::registerBlocksR16();

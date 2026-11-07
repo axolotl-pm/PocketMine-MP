@@ -473,6 +473,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::NETHER_SPROUTS(), Ids::NETHER_SPROUTS);
 		$reg->mapSimple(Blocks::CRIMSON_NYLIUM(), Ids::CRIMSON_NYLIUM);
 		$reg->mapSimple(Blocks::WARPED_NYLIUM(), Ids::WARPED_NYLIUM);
+		$reg->mapSimple(Blocks::RED_SHRUB(), Ids::RED_SHRUB);
 
 		$reg->mapSimple(Blocks::SULFUR(), Ids::SULFUR);
 		$reg->mapSimple(Blocks::POLISHED_SULFUR(), Ids::POLISHED_SULFUR);
