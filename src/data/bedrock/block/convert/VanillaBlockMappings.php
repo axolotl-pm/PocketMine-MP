@@ -492,6 +492,8 @@ final class VanillaBlockMappings{
 		$reg->mapColored(Blocks::CARPET(), "minecraft:", "_carpet");
 		$reg->mapColored(Blocks::CONCRETE(), "minecraft:", "_concrete");
 		$reg->mapColored(Blocks::CONCRETE_POWDER(), "minecraft:", "_concrete_powder");
+		$reg->mapColoredSlab(Blocks::CONCRETE_SLAB(), "concrete");
+		$reg->mapColoredStairs(Blocks::CONCRETE_STAIRS(), "concrete");
 		$reg->mapColored(Blocks::DYED_SHULKER_BOX(), "minecraft:", "_shulker_box");
 		$reg->mapColored(Blocks::STAINED_CLAY(), "minecraft:", "_terracotta");
 		$reg->mapColored(Blocks::STAINED_GLASS(), "minecraft:", "_stained_glass");

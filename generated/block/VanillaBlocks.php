@@ -212,6 +212,8 @@ final class VanillaBlocks{
 	private static ChemistryTable $_mCOMPOUND_CREATOR;
 	private static Concrete $_mCONCRETE;
 	private static ConcretePowder $_mCONCRETE_POWDER;
+	private static ConcreteSlab $_mCONCRETE_SLAB;
+	private static ConcreteStairs $_mCONCRETE_STAIRS;
 	private static ContinuousPotentSulfur $_mCONTINUOUS_POTENT_SULFUR;
 	private static Copper $_mCOPPER;
 	private static CopperBars $_mCOPPER_BARS;
@@ -1096,6 +1098,8 @@ final class VanillaBlocks{
 			"compound_creator" => fn(ChemistryTable $v) => self::$_mCOMPOUND_CREATOR = $v,
 			"concrete" => fn(Concrete $v) => self::$_mCONCRETE = $v,
 			"concrete_powder" => fn(ConcretePowder $v) => self::$_mCONCRETE_POWDER = $v,
+			"concrete_slab" => fn(ConcreteSlab $v) => self::$_mCONCRETE_SLAB = $v,
+			"concrete_stairs" => fn(ConcreteStairs $v) => self::$_mCONCRETE_STAIRS = $v,
 			"continuous_potent_sulfur" => fn(ContinuousPotentSulfur $v) => self::$_mCONTINUOUS_POTENT_SULFUR = $v,
 			"copper" => fn(Copper $v) => self::$_mCOPPER = $v,
 			"copper_bars" => fn(CopperBars $v) => self::$_mCOPPER_BARS = $v,
@@ -2678,6 +2682,16 @@ final class VanillaBlocks{
 	public static function CONCRETE_POWDER() : ConcretePowder{
 		if(!isset(self::$_mCONCRETE_POWDER)){ self::init(); }
 		return clone self::$_mCONCRETE_POWDER;
+	}
+
+	public static function CONCRETE_SLAB() : ConcreteSlab{
+		if(!isset(self::$_mCONCRETE_SLAB)){ self::init(); }
+		return clone self::$_mCONCRETE_SLAB;
+	}
+
+	public static function CONCRETE_STAIRS() : ConcreteStairs{
+		if(!isset(self::$_mCONCRETE_STAIRS)){ self::init(); }
+		return clone self::$_mCONCRETE_STAIRS;
 	}
 
 	public static function CONTINUOUS_POTENT_SULFUR() : ContinuousPotentSulfur{

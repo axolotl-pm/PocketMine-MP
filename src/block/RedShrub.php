@@ -44,12 +44,6 @@ final class RedShrub extends Flowable{
 		return 100;
 	}
 
-	private function canBeSupportedAt(Block $block) : bool{
-		$supportBlock = $block->getSide(Facing::DOWN);
-		//TODO: moss
-		return $supportBlock->hasTypeTag(BlockTypeTags::DIRT) || $supportBlock->hasTypeTag(BlockTypeTags::MUD);
-	}
-
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($item instanceof Fertilizer){
 			$validSides = [];
@@ -70,5 +64,11 @@ final class RedShrub extends Flowable{
 		}
 
 		return parent::onInteract($item, $face, $clickVector, $player, $returnedItems);
+	}
+
+	private function canBeSupportedAt(Block $block) : bool{
+		$supportBlock = $block->getSide(Facing::DOWN);
+		//TODO: moss
+		return $supportBlock->hasTypeTag(BlockTypeTags::DIRT) || $supportBlock->hasTypeTag(BlockTypeTags::MUD);
 	}
 }
