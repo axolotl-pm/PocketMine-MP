@@ -499,6 +499,8 @@ final class VanillaBlockMappings{
 		$reg->mapColored(Blocks::STAINED_GLASS(), "minecraft:", "_stained_glass");
 		$reg->mapColoredHorizontalConnections(Blocks::STAINED_GLASS_PANE(), "minecraft:", "_stained_glass_pane");
 		$reg->mapColored(Blocks::WOOL(), "minecraft:", "_wool");
+		$reg->mapColoredSlab(Blocks::WOOL_SLAB(), "wool");
+		$reg->mapColoredStairs(Blocks::WOOL_STAIRS(), "wool");
 
 		$reg->mapFlattenedId(FlattenedIdModel::create(Blocks::GLAZED_TERRACOTTA())
 			->idComponents([

@@ -851,6 +851,8 @@
         "WHITE_TULIP": 1,
         "WITHER_ROSE": 1,
         "WOOL": 16,
+        "WOOL_SLAB": 48,
+        "WOOL_STAIRS": 640,
         "YELLOW_POPLAR_LEAVES": 4
     },
     "tiles": {
