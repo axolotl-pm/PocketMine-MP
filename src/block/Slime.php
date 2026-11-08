@@ -25,6 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
+use pocketmine\entity\object\ItemEntity;
 
 final class Slime extends Transparent{
 
@@ -33,10 +34,13 @@ final class Slime extends Transparent{
 	}
 
 	public function onEntityLand(Entity $entity) : ?float{
-		if($entity instanceof Living && $entity->isSneaking()){
+		if(!$entity instanceof Living && !$entity instanceof ItemEntity){
 			return null;
 		}
 		$entity->resetFallDistance();
+		if($entity instanceof Living && $entity->isSneaking()){
+			return null;
+		}
 		return -$entity->getMotion()->y;
 	}
 
