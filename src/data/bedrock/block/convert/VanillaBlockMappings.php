@@ -473,6 +473,7 @@ final class VanillaBlockMappings{
 		$reg->mapSimple(Blocks::NETHER_SPROUTS(), Ids::NETHER_SPROUTS);
 		$reg->mapSimple(Blocks::CRIMSON_NYLIUM(), Ids::CRIMSON_NYLIUM);
 		$reg->mapSimple(Blocks::WARPED_NYLIUM(), Ids::WARPED_NYLIUM);
+		$reg->mapSimple(Blocks::RED_SHRUB(), Ids::RED_SHRUB);
 
 		$reg->mapSimple(Blocks::SULFUR(), Ids::SULFUR);
 		$reg->mapSimple(Blocks::POLISHED_SULFUR(), Ids::POLISHED_SULFUR);
@@ -491,11 +492,15 @@ final class VanillaBlockMappings{
 		$reg->mapColored(Blocks::CARPET(), "minecraft:", "_carpet");
 		$reg->mapColored(Blocks::CONCRETE(), "minecraft:", "_concrete");
 		$reg->mapColored(Blocks::CONCRETE_POWDER(), "minecraft:", "_concrete_powder");
+		$reg->mapColoredSlab(Blocks::CONCRETE_SLAB(), "concrete");
+		$reg->mapColoredStairs(Blocks::CONCRETE_STAIRS(), "concrete");
 		$reg->mapColored(Blocks::DYED_SHULKER_BOX(), "minecraft:", "_shulker_box");
 		$reg->mapColored(Blocks::STAINED_CLAY(), "minecraft:", "_terracotta");
 		$reg->mapColored(Blocks::STAINED_GLASS(), "minecraft:", "_stained_glass");
 		$reg->mapColoredHorizontalConnections(Blocks::STAINED_GLASS_PANE(), "minecraft:", "_stained_glass_pane");
 		$reg->mapColored(Blocks::WOOL(), "minecraft:", "_wool");
+		$reg->mapColoredSlab(Blocks::WOOL_SLAB(), "wool");
+		$reg->mapColoredStairs(Blocks::WOOL_STAIRS(), "wool");
 
 		$reg->mapFlattenedId(FlattenedIdModel::create(Blocks::GLAZED_TERRACOTTA())
 			->idComponents([
