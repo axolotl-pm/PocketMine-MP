@@ -60,7 +60,7 @@ class RecordSound implements Sound{
 				RecordType::DISK_WARD => LevelSoundEvent::RECORD_WARD,
 				RecordType::DISK_11 => LevelSoundEvent::RECORD_11,
 				RecordType::DISK_WAIT => LevelSoundEvent::RECORD_WAIT
-			}, $pos->x, $pos->y, $pos->z, 1, 1, 0, true, $this->serverSoundHandleId, null, null),
+			}, $pos->x, $pos->y, $pos->z, 1, 1, 0, true, $this->serverSoundHandleId, null, null, null),
 			RecordStartedPacket::create(BlockPosition::fromVector3($pos), $this->serverSoundHandleId),
 		];
 	}

@@ -27,6 +27,10 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\NetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\RequestNetworkSettingsPacket;
+use pocketmine\network\mcpe\protocol\types\SCTPRecoveryProfile;
+use pocketmine\Server;
+use pocketmine\YmlServerProperties;
+use function strtolower;
 
 final class SessionStartPacketHandler extends PacketHandler{
 
@@ -34,6 +38,7 @@ final class SessionStartPacketHandler extends PacketHandler{
 	 * @phpstan-param \Closure() : void $onSuccess
 	 */
 	public function __construct(
+		private Server $server,
 		private NetworkSession $session,
 		private \Closure $onSuccess
 	){}
@@ -46,13 +51,20 @@ final class SessionStartPacketHandler extends PacketHandler{
 			return true;
 		}
 
+		$recoveryProfile = match(strtolower($this->server->getConfigGroup()->getConfigString(YmlServerProperties::TRANSPORT_NETHERNET_SCTP_RECOVERY_PROFILE, "DEFAULT"))){
+			"balanced" => SCTPRecoveryProfile::BALANCED,
+			"fast" => SCTPRecoveryProfile::FAST,
+			default => SCTPRecoveryProfile::DEFAULT
+		};
+
 		//TODO: we're filling in the defaults to get pre-1.19.30 behaviour back for now, but we should explore the new options in the future
 		$this->session->sendDataPacket(NetworkSettingsPacket::create(
 			NetworkSettingsPacket::COMPRESS_EVERYTHING,
 			$this->session->getCompressor()->getNetworkType(),
 			false,
 			0,
-			0
+			0,
+			$recoveryProfile
 		));
 		($this->onSuccess)();
 

@@ -129,5 +129,6 @@ final class YmlServerProperties{
 	public const TRANSPORT_NETHERNET_KEY_FILE = 'transport.nethernet.key-file';
 	public const TRANSPORT_NETHERNET_MTU = 'transport.nethernet.mtu';
 	public const TRANSPORT_NETHERNET_PORT_RANGE = 'transport.nethernet.port-range';
+	public const TRANSPORT_NETHERNET_SCTP_RECOVERY_PROFILE = 'transport.nethernet.sctp-recovery-profile';
 	public const WORLDS = 'worlds';
 }

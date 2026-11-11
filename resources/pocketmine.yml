@@ -137,6 +137,15 @@ transport:
       #  username: <username for the TURN server>
       #  password: <password for the TURN server>
 
+    #SCTP recovery profile for client WebRTC data channels.
+    #Valid options: DEFAULT, BALANCED, FAST (case-insensitive)
+    #Controls how quickly the client retransmits lost packets.
+    #DEFAULT: Vanilla behavior. Waits longest before retransmitting and offers highest stability, but lost packets can cause brief stalls.
+    #BALANCED: Retransmits and acknowledges faster than DEFAULT while maintaining jitter tolerance. Reduces stalls with minimal downside.
+    #FAST: Retransmits and acknowledges almost immediately,
+    #with lower retry delays. Minimizes stalls on packet loss, but may trigger unnecessary retransmissions on jittery connections, reducing throughput.
+    sctp-recovery-profile: DEFAULT
+
     #Built-in signaling channels: HTTP signaling endpoint (GET/POST /v1/join) and LAN broadcast discovery.
     builtin-signaling:
       #Disable if signaling is handled externally (e.g. by a custom signaling plugin using NetherNetInterface::acceptOffer()).

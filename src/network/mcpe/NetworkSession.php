@@ -239,6 +239,7 @@ class NetworkSession{
 		$this->gamePacketLimiter = new PacketRateLimiter("Game Packets", self::INCOMING_GAME_PACKETS_PER_TICK, self::INCOMING_GAME_PACKETS_BUFFER_TICKS);
 
 		$this->setHandler(new SessionStartPacketHandler(
+			$this->server,
 			$this,
 			$this->onSessionStartSuccess(...)
 		));
