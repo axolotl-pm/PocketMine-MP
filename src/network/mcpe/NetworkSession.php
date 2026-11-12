@@ -1055,9 +1055,16 @@ class NetworkSession{
 		}
 		$event = new PlayerResourcePackOfferEvent($this->info, $resourcePacks, $keys, $packManager->resourcePacksRequired());
 		$event->call();
-		$this->setHandler(new ResourcePacksPacketHandler($this, $event->getResourcePacks(), $event->getEncryptionKeys(), $event->mustAccept(), function() : void{
-			$this->createPlayer();
-		}));
+		$this->setHandler(new ResourcePacksPacketHandler(
+			$this,
+			$event->getResourcePacks(),
+			$event->getEncryptionKeys(),
+			$event->mustAccept(),
+			$this->server->getConfigGroup()->getConfigBool(YmlServerProperties::PLAYER_FORCE_DISABLE_VIBRANT_VISUALS, true),
+			function() : void{
+				$this->createPlayer();
+			}
+		));
 	}
 
 	private function beginSpawnSequence() : void{
