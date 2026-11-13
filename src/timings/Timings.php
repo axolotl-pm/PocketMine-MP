@@ -82,6 +82,8 @@ abstract class Timings{
 	public static TimingsHandler $syncPlayerDataLoad;
 	public static TimingsHandler $syncPlayerDataSave;
 
+	public static TimingsHandler $softEnumSync;
+
 	/** @var TimingsHandler[] */
 	public static array $entityTypeTimingMap = [];
 	/** @var TimingsHandler[] */
@@ -186,6 +188,8 @@ abstract class Timings{
 
 		self::$playerCommand = new TimingsHandler("Player Command");
 		self::$craftingDataCacheRebuild = new TimingsHandler("Build CraftingDataPacket Cache");
+
+		self::$softEnumSync = new TimingsHandler("Soft Enum Sync");
 
 	}
 
