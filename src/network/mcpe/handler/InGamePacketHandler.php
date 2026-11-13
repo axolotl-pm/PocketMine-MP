@@ -30,6 +30,7 @@ use pocketmine\block\utils\SignText;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\InvalidSkinException;
 use pocketmine\event\player\PlayerEditBookEvent;
+use pocketmine\form\FormCloseReason;
 use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionBuilder;
@@ -970,8 +971,12 @@ class InGamePacketHandler extends PacketHandler{
 
 	public function handleModalFormResponse(ModalFormResponsePacket $packet) : bool{
 		if($packet->cancelReason !== null){
-			//TODO: make APIs for this to allow plugins to use this information
-			return $this->player->onFormSubmit($packet->formId, null);
+			$reason = match($packet->cancelReason){
+				ModalFormResponsePacket::CANCEL_REASON_CLOSED => FormCloseReason::CLOSED,
+				ModalFormResponsePacket::CANCEL_REASON_USER_BUSY => FormCloseReason::CLIENT_BUSY,
+				default => throw new PacketHandlingException("Unknown cancel reason $packet->cancelReason in ModalFormResponsePacket")
+			};
+			return $this->player->onFormClose($packet->formId, $reason);
 		}elseif($packet->formData !== null){
 			if(strlen($packet->formData) > self::MAX_FORM_RESPONSE_SIZE){
 				throw new PacketHandlingException("Form response data too large, refusing to decode (received" . strlen($packet->formData) . " bytes, max " . self::MAX_FORM_RESPONSE_SIZE . " bytes)");

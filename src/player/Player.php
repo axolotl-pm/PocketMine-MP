@@ -87,6 +87,7 @@ use pocketmine\event\player\PlayerToggleSwimEvent;
 use pocketmine\event\player\PlayerTransferEvent;
 use pocketmine\event\player\PlayerViewDistanceChangeEvent;
 use pocketmine\form\Form;
+use pocketmine\form\FormCloseReason;
 use pocketmine\form\FormValidationException;
 use pocketmine\inventory\CallbackInventoryListener;
 use pocketmine\inventory\CreativeInventory;
@@ -132,6 +133,7 @@ use pocketmine\ServerProperties;
 use pocketmine\timings\Timings;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
 use pocketmine\world\ChunkListener;
 use pocketmine\world\ChunkListenerNoOpTrait;
 use pocketmine\world\ChunkLoader;
@@ -2327,6 +2329,24 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 		return true;
 	}
 
+	public function onFormClose(int $formId, FormCloseReason $reason) : bool{
+		if(!isset($this->forms[$formId])){
+			$this->logger->debug("Got unexpected close for form $formId");
+			return false;
+		}
+
+		try{
+			$this->forms[$formId]->handleClose($this, $reason);
+		}catch(FormValidationException $e){
+			$this->logger->critical("Failed to validate form " . get_class($this->forms[$formId]) . ": " . $e->getMessage());
+			$this->logger->logException($e);
+		}finally{
+			unset($this->forms[$formId]);
+		}
+
+		return true;
+	}
+
 	/**
 	 * @internal
 	 * Returns whether the server is waiting for a response for a form with the given ID.
@@ -2340,6 +2360,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	 */
 	public function closeAllForms() : void{
 		$this->getNetworkSession()->onCloseAllForms();
+		foreach(Utils::promoteKeys($this->forms) as $formId => $form){
+			$form->handleClose($this, FormCloseReason::CLOSED_BY_SERVER);
+			unset($this->forms[$formId]);
+		}
 	}
 
 	/**

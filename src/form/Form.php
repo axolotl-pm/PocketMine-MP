@@ -39,4 +39,9 @@ interface Form extends \JsonSerializable{
 	 * @throws FormValidationException if the data could not be processed
 	 */
 	public function handleResponse(Player $player, $data) : void;
+
+	/**
+	 * Called when a player closes the form.
+	 */
+	public function handleClose(Player $player, FormCloseReason $reason) : void;
 }
