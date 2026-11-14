@@ -28,6 +28,7 @@ use pocketmine\block\Lectern;
 use pocketmine\block\tile\Sign;
 use pocketmine\block\utils\SignText;
 use pocketmine\entity\Attribute;
+use pocketmine\entity\FoodSource;
 use pocketmine\entity\InvalidSkinException;
 use pocketmine\event\player\PlayerEditBookEvent;
 use pocketmine\inventory\transaction\action\DropItemAction;
@@ -479,9 +480,11 @@ class InGamePacketHandler extends PacketHandler{
 
 				$blockPos = $data->getBlockPosition();
 				$vBlockPos = new Vector3($blockPos->getX(), $blockPos->getY(), $blockPos->getZ());
+				$clientPredictedSuccess = $data->getClientInteractPrediction() === PredictedResult::SUCCESS;
+				$clickedBlockWasFoodSource = $clientPredictedSuccess && $this->player->getWorld()->getBlock($vBlockPos) instanceof FoodSource;
 				$interactionSucceeded = $this->player->interactBlock($vBlockPos, $data->getFace(), $clickPos);
-				if($data->getClientInteractPrediction() === PredictedResult::SUCCESS){
-					if(!$interactionSucceeded){
+				if($clientPredictedSuccess){
+					if(!$interactionSucceeded && $clickedBlockWasFoodSource){
 						$hungerAttr = $this->player->getAttributeMap()->get(Attribute::HUNGER) ?? throw new AssumptionFailedError();
 						$hungerAttr->markSynchronized(false);
 					}
