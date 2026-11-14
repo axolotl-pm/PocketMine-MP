@@ -59,6 +59,7 @@ final class VanillaItems{
 	private static Item $_mBLAZE_POWDER;
 	private static BlazeRod $_mBLAZE_ROD;
 	private static Item $_mBLEACH;
+	private static Egg $_mBLUE_EGG;
 	private static Item $_mBONE;
 	private static Fertilizer $_mBONE_MEAL;
 	private static Book $_mBOOK;
@@ -66,6 +67,7 @@ final class VanillaItems{
 	private static Bowl $_mBOWL;
 	private static Bread $_mBREAD;
 	private static Item $_mBRICK;
+	private static Egg $_mBROWN_EGG;
 	private static Bucket $_mBUCKET;
 	private static Carrot $_mCARROT;
 	private static Armor $_mCHAINMAIL_BOOTS;
@@ -417,6 +419,7 @@ final class VanillaItems{
 			"blaze_powder" => fn(Item $v) => self::$_mBLAZE_POWDER = $v,
 			"blaze_rod" => fn(BlazeRod $v) => self::$_mBLAZE_ROD = $v,
 			"bleach" => fn(Item $v) => self::$_mBLEACH = $v,
+			"blue_egg" => fn(Egg $v) => self::$_mBLUE_EGG = $v,
 			"bone" => fn(Item $v) => self::$_mBONE = $v,
 			"bone_meal" => fn(Fertilizer $v) => self::$_mBONE_MEAL = $v,
 			"book" => fn(Book $v) => self::$_mBOOK = $v,
@@ -424,6 +427,7 @@ final class VanillaItems{
 			"bowl" => fn(Bowl $v) => self::$_mBOWL = $v,
 			"bread" => fn(Bread $v) => self::$_mBREAD = $v,
 			"brick" => fn(Item $v) => self::$_mBRICK = $v,
+			"brown_egg" => fn(Egg $v) => self::$_mBROWN_EGG = $v,
 			"bucket" => fn(Bucket $v) => self::$_mBUCKET = $v,
 			"carrot" => fn(Carrot $v) => self::$_mCARROT = $v,
 			"chainmail_boots" => fn(Armor $v) => self::$_mCHAINMAIL_BOOTS = $v,
@@ -863,6 +867,11 @@ final class VanillaItems{
 		return clone self::$_mBLEACH;
 	}
 
+	public static function BLUE_EGG() : Egg{
+		if(!isset(self::$_mBLUE_EGG)){ self::init(); }
+		return clone self::$_mBLUE_EGG;
+	}
+
 	public static function BONE() : Item{
 		if(!isset(self::$_mBONE)){ self::init(); }
 		return clone self::$_mBONE;
@@ -896,6 +905,11 @@ final class VanillaItems{
 	public static function BRICK() : Item{
 		if(!isset(self::$_mBRICK)){ self::init(); }
 		return clone self::$_mBRICK;
+	}
+
+	public static function BROWN_EGG() : Egg{
+		if(!isset(self::$_mBROWN_EGG)){ self::init(); }
+		return clone self::$_mBROWN_EGG;
 	}
 
 	public static function BUCKET() : Bucket{

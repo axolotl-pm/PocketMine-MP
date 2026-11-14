@@ -192,7 +192,6 @@ final class VanillaItemsInputs extends RegistrySource{
 		//TODO: add interface to dye-colour objects
 		self::register("dye", fn(IID $id) => new Dye($id, "Dye"));
 		self::register("echo_shard", fn(IID $id) => new Item($id, "Echo Shard"));
-		self::register("egg", fn(IID $id) => new Egg($id, "Egg"));
 		self::register("emerald", fn(IID $id) => new Item($id, "Emerald"));
 		self::register("enchanted_book", fn(IID $id) => new EnchantedBook($id, "Enchanted Book", [EnchantmentTags::ALL]));
 		self::register("enchanted_golden_apple", fn(IID $id) => new GoldenAppleEnchanted($id, "Enchanted Golden Apple"));
@@ -337,6 +336,11 @@ final class VanillaItemsInputs extends RegistrySource{
 		foreach(BoatType::cases() as $type){
 			//boat type is static, because different types of wood may have different properties
 			self::register(strtolower($type->name) . "_boat", fn(IID $id) => new Boat($id, $type->getDisplayName() . " Boat", $type));
+		}
+
+		foreach(EggType::cases() as $type){
+			$name = $type === EggType::NORMAL ? "egg" : strtolower($type->name) . "_egg";
+			self::register($name, fn(IID $id) => new Egg($id, $type->getDisplayName(), $type));
 		}
 	}
 
