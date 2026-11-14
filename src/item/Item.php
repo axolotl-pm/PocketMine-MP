@@ -42,6 +42,7 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\LittleEndianNbtSerializer;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\NbtException;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
@@ -76,6 +77,8 @@ class Item implements \JsonSerializable{
 	private const TAG_CAN_PLACE_ON = "CanPlaceOn"; //TAG_List<TAG_String>
 	private const TAG_CAN_DESTROY = "CanDestroy"; //TAG_List<TAG_String>
 
+	private const TAG_ITEM_LOCK = "minecraft:item_lock"; //TAG_Byte
+
 	private CompoundTag $nbt;
 
 	protected int $count = 1;
@@ -98,6 +101,8 @@ class Item implements \JsonSerializable{
 	 * @phpstan-var array<string, string>
 	 */
 	protected array $canDestroy = [];
+
+	protected ItemLockMode $lockMode = ItemLockMode::NONE;
 
 	protected bool $keepOnDeath = false;
 
@@ -229,6 +234,20 @@ class Item implements \JsonSerializable{
 	}
 
 	/**
+	 * @return ItemLockMode
+	 */
+	public function getLockMode() : ItemLockMode{
+		return $this->lockMode;
+	}
+
+	/**
+	 * @param ItemLockMode $lockMode
+	 */
+	public function setLockMode(ItemLockMode $lockMode) : void{
+		$this->lockMode = $lockMode;
+	}
+
+	/**
 	 * Returns whether players will retain this item on death. If a non-player dies it will be excluded from the drops.
 	 */
 	public function keepOnDeath() : bool{
@@ -334,6 +353,12 @@ class Item implements \JsonSerializable{
 			}
 		}
 
+		if(($lockValue = $tag->getTag(self::TAG_ITEM_LOCK)) instanceof ByteTag){
+			$this->lockMode = ItemLockMode::tryFrom($lockValue->getValue()) ?? ItemLockMode::NONE;
+		}else{
+			$this->lockMode = ItemLockMode::NONE;
+		}
+
 		$this->keepOnDeath = $tag->getByte(self::TAG_KEEP_ON_DEATH, 0) !== 0;
 	}
 
@@ -396,6 +421,12 @@ class Item implements \JsonSerializable{
 			$tag->setTag(self::TAG_CAN_DESTROY, $canDestroy);
 		}else{
 			$tag->removeTag(self::TAG_CAN_DESTROY);
+		}
+
+		if($this->lockMode !== ItemLockMode::NONE){
+			$tag->setByte(self::TAG_ITEM_LOCK, $this->lockMode->value);
+		}else{
+			$tag->removeTag(self::TAG_ITEM_LOCK);
 		}
 
 		if($this->keepOnDeath){

@@ -25,9 +25,12 @@ namespace pocketmine\inventory\transaction;
 
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\inventory\Inventory;
+use pocketmine\inventory\transaction\action\DestroyItemAction;
+use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Item;
+use pocketmine\item\ItemLockMode;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
 use function array_values;
@@ -257,6 +260,37 @@ class InventoryTransaction{
 		return $this->findResultItem($candidate->getTargetItem(), $newList);
 	}
 
+	protected function validateItemLocks() : void{
+		foreach($this->actions as $action){
+			if($action instanceof DropItemAction || $action instanceof DestroyItemAction){
+				if($action->getTargetItem()->getLockMode() !== ItemLockMode::NONE){
+					throw new TransactionValidationException("Locked items cannot be dropped or destroyed");
+				}
+				continue;
+			}
+			if(!($action instanceof SlotChangeAction)){
+				continue;
+			}
+
+			$sourceItem = $action->getSourceItem();
+			$targetItem = $action->getTargetItem();
+			$lockMode = $sourceItem->getLockMode();
+			if($lockMode === ItemLockMode::LOCK_IN_SLOT && !$sourceItem->equalsExact($targetItem)){
+				throw new TransactionValidationException("Item is locked in slot and cannot be moved or replaced");
+			}
+			if($lockMode === ItemLockMode::LOCK_IN_INVENTORY){
+				foreach($this->actions as $otherAction){
+					if($otherAction === $action || !($otherAction instanceof SlotChangeAction) || $otherAction->getInventory() === $action->getInventory()){
+						continue;
+					}
+					if($otherAction->getTargetItem()->canStackWith($sourceItem)){
+						throw new TransactionValidationException("Item is locked in inventory and cannot be moved between inventories");
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Verifies that the transaction can execute.
 	 *
@@ -264,6 +298,7 @@ class InventoryTransaction{
 	 */
 	public function validate() : void{
 		$this->squashDuplicateSlotChanges();
+		$this->validateItemLocks();
 
 		$haveItems = [];
 		$needItems = [];
