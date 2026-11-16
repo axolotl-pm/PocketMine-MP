@@ -28,6 +28,7 @@ use pocketmine\network\mcpe\ChunkRequestTask;
 use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\compression\Compressor;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
+use pocketmine\Server;
 use pocketmine\world\ChunkListener;
 use pocketmine\world\ChunkListenerNoOpTrait;
 use pocketmine\world\format\Chunk;
@@ -116,7 +117,8 @@ class ChunkCache implements ChunkListener{
 					$this->dimensionId,
 					$chunk,
 					$promise,
-					$this->compressor
+					$this->compressor,
+					Server::getInstance()->useBlockNetworkIdsHashes()
 				)
 			);
 			$this->caches[$chunkHash] = $promise;
