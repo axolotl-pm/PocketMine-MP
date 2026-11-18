@@ -27,7 +27,7 @@ use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 
-class Cobweb extends Flowable{
+class Cobweb extends WaterloggableFlowable{
 
 	public function hasEntityCollision() : bool{
 		return true;

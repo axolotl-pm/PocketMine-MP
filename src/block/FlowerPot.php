@@ -32,7 +32,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use function assert;
 
-class FlowerPot extends Flowable{
+class FlowerPot extends WaterloggableFlowable{
 	use StaticSupportTrait;
 
 	protected ?Block $plant = null;

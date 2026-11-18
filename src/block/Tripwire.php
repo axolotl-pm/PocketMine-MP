@@ -27,7 +27,7 @@ use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 
-class Tripwire extends Flowable{
+class Tripwire extends WaterloggableFlowable{
 	protected bool $triggered = false;
 	protected bool $suspended = false; //unclear usage, makes hitbox bigger if set
 	protected bool $connected = false;

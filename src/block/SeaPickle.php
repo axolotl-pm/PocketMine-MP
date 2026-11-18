@@ -30,7 +30,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class SeaPickle extends Transparent{
+class SeaPickle extends WaterloggableFlowable{
 	public const MIN_COUNT = 1;
 	public const MAX_COUNT = 4;
 
@@ -83,12 +83,12 @@ class SeaPickle extends Transparent{
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
-		$this->underwater = false; //TODO: implement this once we have new water logic in place
 		if($blockReplace instanceof SeaPickle && $blockReplace->count < self::MAX_COUNT){
 			$this->count = $blockReplace->count + 1;
 		}
-
-		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		$placed = parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		$this->underwater = $this->containedWater !== null;
+		return $placed;
 	}
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
