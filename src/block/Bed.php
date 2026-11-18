@@ -33,6 +33,7 @@ use pocketmine\block\utils\SupportType;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
+use pocketmine\entity\object\ItemEntity;
 use pocketmine\item\Item;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\math\AxisAlignedBB;
@@ -165,7 +166,11 @@ class Bed extends Transparent implements Colored, HorizontalFacing{
 	}
 
 	public function onEntityLand(Entity $entity) : ?float{
-		if($entity instanceof Living && $entity->isSneaking()){
+		if($entity instanceof Living){
+			if($entity->isSneaking()){
+				return null;
+			}
+		}elseif(!$entity instanceof ItemEntity){
 			return null;
 		}
 		$entity->fallDistance *= 0.5;

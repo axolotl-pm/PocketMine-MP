@@ -26,7 +26,6 @@ namespace pocketmine\entity;
 use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\block\VanillaBlocks;
-use pocketmine\block\Water;
 use pocketmine\data\bedrock\EffectIdMap;
 use pocketmine\entity\animation\DeathAnimation;
 use pocketmine\entity\animation\HurtAnimation;
@@ -384,25 +383,19 @@ abstract class Living extends Entity{
 	}
 
 	protected function onHitGround() : ?float{
-		$fallBlockPos = $this->location->floor();
-		$fallBlock = $this->getWorld()->getBlock($fallBlockPos);
-		if(count($fallBlock->getCollisionBoxes()) === 0){
-			$fallBlockPos = $fallBlockPos->down();
-			$fallBlock = $this->getWorld()->getBlock($fallBlockPos);
-		}
-		$newVerticalVelocity = $fallBlock->onEntityLand($this);
+		$newVerticalVelocity = parent::onHitGround();
 
 		$damage = $this->calculateFallDamage($this->fallDistance);
 		if($damage > 0){
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_FALL, $damage);
 			$this->attack($ev);
 
-			$this->broadcastSound($damage > 4 ?
-				new EntityLongFallSound($this) :
-				new EntityShortFallSound($this)
-			);
-		}elseif($fallBlock->getTypeId() !== BlockTypeIds::AIR){
-			$this->broadcastSound(new EntityLandSound($this, $fallBlock));
+			$this->broadcastSound($damage > 4 ? new EntityLongFallSound($this) : new EntityShortFallSound($this));
+		}else{
+			$fallBlock = $this->getLandingBlock();
+			if($fallBlock->getTypeId() !== BlockTypeIds::AIR){
+				$this->broadcastSound(new EntityLandSound($this, $fallBlock));
+			}
 		}
 		return $newVerticalVelocity;
 	}
