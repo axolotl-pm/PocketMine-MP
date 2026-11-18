@@ -24,18 +24,21 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe;
 
 use pmmp\encoding\ByteBufferWriter;
+use pmmp\thread\ThreadSafeArray;
 use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\compression\Compressor;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket;
 use pocketmine\network\mcpe\protocol\serializer\PacketBatch;
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
-use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\serializer\ChunkSerializer;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\thread\NonThreadSafeValue;
+use pocketmine\world\Dimension;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\FastChunkSerializer;
+use pocketmine\world\format\SubChunk;
+use function array_values;
 use function chr;
 
 class ChunkRequestTask extends AsyncTask{
@@ -44,22 +47,31 @@ class ChunkRequestTask extends AsyncTask{
 	protected string $chunk;
 	protected int $chunkX;
 	protected int $chunkZ;
-	/** @phpstan-var DimensionIds::* */
 	private int $dimensionId;
+	private int $minSubChunkIndex;
+	private int $maxSubChunkIndex;
+	private int $fallbackBiomeId;
+	/** @phpstan-var ThreadSafeArray<int, int> */
+	private ThreadSafeArray $knownBiomeIds;
 	/** @phpstan-var NonThreadSafeValue<Compressor> */
 	protected NonThreadSafeValue $compressor;
 	private string $tiles;
 
 	/**
-	 * @phpstan-param DimensionIds::* $dimensionId
+	 * @param int[] $knownBiomeIds
+	 * @phpstan-param list<int> $knownBiomeIds
 	 */
-	public function __construct(int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, CompressBatchPromise $promise, Compressor $compressor){
+	public function __construct(int $chunkX, int $chunkZ, Dimension $dimension, array $knownBiomeIds, Chunk $chunk, CompressBatchPromise $promise, Compressor $compressor){
 		$this->compressor = new NonThreadSafeValue($compressor);
+		$this->fallbackBiomeId = $dimension->getDefaultBiome()->getId();
+		$this->knownBiomeIds = ThreadSafeArray::fromArray($knownBiomeIds);
 
 		$this->chunk = FastChunkSerializer::serializeTerrain($chunk);
 		$this->chunkX = $chunkX;
 		$this->chunkZ = $chunkZ;
-		$this->dimensionId = $dimensionId;
+		$this->dimensionId = TypeConverter::getInstance()->getDimensionTranslator()->toNetworkId($dimension);
+		$this->minSubChunkIndex = $dimension->getMinY() >> SubChunk::COORD_BIT_SIZE;
+		$this->maxSubChunkIndex = ($dimension->getMaxY() >> SubChunk::COORD_BIT_SIZE) - 1;
 		$this->tiles = ChunkSerializer::serializeTiles($chunk);
 
 		$this->storeLocal(self::TLS_KEY_PROMISE, $promise);
@@ -69,14 +81,22 @@ class ChunkRequestTask extends AsyncTask{
 		$chunk = FastChunkSerializer::deserializeTerrain($this->chunk);
 		$dimensionId = $this->dimensionId;
 
-		$subCount = ChunkSerializer::getSubChunkCount($chunk, $dimensionId);
+		$subCount = ChunkSerializer::getSubChunkCount($chunk, $this->minSubChunkIndex, $this->maxSubChunkIndex);
 		$converter = TypeConverter::getInstance();
-		$payload = ChunkSerializer::serializeFullChunk($chunk, $dimensionId, $converter->getBlockTranslator(), $this->tiles);
+		$payload = ChunkSerializer::serializeFullChunk(
+			$chunk,
+			$this->minSubChunkIndex,
+			$this->maxSubChunkIndex,
+			$converter->getBlockTranslator(),
+			$this->fallbackBiomeId,
+			array_values((array) $this->knownBiomeIds),
+			$this->tiles
+		);
 
 		$stream = new ByteBufferWriter();
 		PacketBatch::encodePackets($stream, [LevelChunkPacket::create(
 			new ChunkPosition($this->chunkX, $this->chunkZ),
-			$dimensionId,
+			$dimensionId, //@phpstan-ignore-line TODO: change this once we fix phpstan type of LevelChunkPacket
 			$subCount,
 			null,
 			false,

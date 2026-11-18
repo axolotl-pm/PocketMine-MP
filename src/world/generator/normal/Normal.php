@@ -27,13 +27,12 @@ use pocketmine\block\Block;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\data\bedrock\BiomeIds;
 use pocketmine\utils\AssumptionFailedError;
-use pocketmine\world\biome\Biome;
-use pocketmine\world\biome\BiomeRegistry;
 use pocketmine\world\ChunkManager;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\format\PalettedBlockArray;
 use pocketmine\world\format\SubChunk;
 use pocketmine\world\generator\biome\BiomeSelector;
+use pocketmine\world\generator\biome\GeneratorBiome;
 use pocketmine\world\generator\Gaussian;
 use pocketmine\world\generator\Generator;
 use pocketmine\world\generator\InvalidGeneratorOptionsException;
@@ -60,6 +59,11 @@ class Normal extends Generator{
 	private Simplex $noiseBase;
 	private BiomeSelector $selector;
 	private Gaussian $gaussian;
+	/**
+	 * @var GeneratorBiome[]
+	 * @phpstan-var array<int, GeneratorBiome>
+	 */
+	private array $biomes;
 
 	private const NOISE_SAMPLING_RATE_Y = 8;
 
@@ -74,7 +78,9 @@ class Normal extends Generator{
 		$this->noiseBase = new Simplex($this->random, 4, 1 / 4, 1 / 32);
 		$this->random->setSeed($this->seed);
 
-		$this->selector = new class($this->random) extends BiomeSelector{
+		$this->biomes = NormalGeneratorBiomes::create();
+
+		$this->selector = new class($this->random, $this->biomes) extends BiomeSelector{
 			protected function lookup(float $temperature, float $rainfall) : int{
 				if($rainfall < 0.25){
 					if($temperature < 0.7){
@@ -114,7 +120,7 @@ class Normal extends Generator{
 
 		$this->selector->recalculate();
 
-		$cover = new GroundCover();
+		$cover = new GroundCover($this->biomes);
 		$this->generationPopulators[] = $cover;
 
 		$ores = new Ore();
@@ -132,7 +138,7 @@ class Normal extends Generator{
 		$this->populators[] = $ores;
 	}
 
-	private function pickBiome(int $x, int $z) : Biome{
+	private function pickBiome(int $x, int $z) : GeneratorBiome{
 		$hash = $x * 2345803 ^ $z * 9236449 ^ $this->seed;
 		$hash *= $hash + 223;
 		//the above operations may result in a float. This probably wasn't intended, but we need to stick with it to
@@ -242,8 +248,7 @@ class Normal extends Generator{
 		}
 
 		$chunk = $world->getChunk($chunkX, $chunkZ);
-		$biome = BiomeRegistry::getInstance()->getBiome($chunk->getBiomeId(7, 7, 7));
-		$biome->populateChunk($world, $chunkX, $chunkZ, $this->random);
+		($this->biomes[$chunk->getBiomeId(7, 7, 7)] ?? null)?->populateChunk($world, $chunkX, $chunkZ, $this->random);
 	}
 
 	/**
@@ -266,7 +271,7 @@ class Normal extends Generator{
 
 				$columnIndex = World::chunkHash($x, $z);
 				$biome = $biomeCache[$columnIndex] = $this->pickBiome($absoluteX, $absoluteZ);
-				$biomeId = $biome->getId();
+				$biomeId = $biome->getBiome()->getId();
 				$uniform = match ($uniform) {
 					null, $biomeId => $biomeId,
 					default => false
@@ -288,7 +293,7 @@ class Normal extends Generator{
 			if(!is_int($uniform)){
 				throw new AssumptionFailedError();
 			}
-			$biome = BiomeRegistry::getInstance()->getBiome($uniform);
+			$biome = $this->biomes[$uniform] ?? throw new AssumptionFailedError("Selector returned unregistered biome ID $uniform");
 			/** @phpstan-var non-empty-array<int, float> $minHeights */
 			$minHeights = [];
 			/** @phpstan-var non-empty-array<int, float> $maxHeights */
@@ -309,8 +314,8 @@ class Normal extends Generator{
 	}
 
 	/**
-	 * @param Biome[] $biomeCache
-	 * @phpstan-param array<int, Biome> $biomeCache
+	 * @param GeneratorBiome[] $biomeCache
+	 * @phpstan-param array<int, GeneratorBiome> $biomeCache
 	 *
 	 * @return float[][]
 	 * @phpstan-return array{non-empty-array<int, float>, non-empty-array<int, float>}

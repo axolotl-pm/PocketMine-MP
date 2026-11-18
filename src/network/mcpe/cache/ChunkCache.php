@@ -23,11 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\cache;
 
+use pocketmine\data\bedrock\BiomeTypeIdMap;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\ChunkRequestTask;
 use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\compression\Compressor;
-use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\world\ChunkListener;
 use pocketmine\world\ChunkListenerNoOpTrait;
 use pocketmine\world\format\Chunk;
@@ -88,13 +88,9 @@ class ChunkCache implements ChunkListener{
 	private int $hits = 0;
 	private int $misses = 0;
 
-	/**
-	 * @phpstan-param DimensionIds::* $dimensionId
-	 */
 	private function __construct(
 		private World $world,
-		private Compressor $compressor,
-		private int $dimensionId = DimensionIds::OVERWORLD
+		private Compressor $compressor
 	){}
 
 	private function prepareChunkAsync(int $chunkX, int $chunkZ, int $chunkHash) : CompressBatchPromise{
@@ -113,7 +109,8 @@ class ChunkCache implements ChunkListener{
 				new ChunkRequestTask(
 					$chunkX,
 					$chunkZ,
-					$this->dimensionId,
+					$this->world->getDimension(),
+					BiomeTypeIdMap::getInstance()->getIds(),
 					$chunk,
 					$promise,
 					$this->compressor

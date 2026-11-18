@@ -61,6 +61,7 @@ use pocketmine\network\mcpe\handler\ResourcePacksPacketHandler;
 use pocketmine\network\mcpe\handler\SessionStartPacketHandler;
 use pocketmine\network\mcpe\handler\SpawnResponsePacketHandler;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\ChangeDimensionPacket;
 use pocketmine\network\mcpe\protocol\ChunkRadiusUpdatedPacket;
 use pocketmine\network\mcpe\protocol\ClientboundCloseFormPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
@@ -72,6 +73,7 @@ use pocketmine\network\mcpe\protocol\OpenSignPacket;
 use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PacketDecodeException;
 use pocketmine\network\mcpe\protocol\PacketPool;
+use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\PlayerStartItemCooldownPacket;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
@@ -97,7 +99,7 @@ use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\command\CommandPermissions;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
-use pocketmine\network\mcpe\protocol\types\DimensionIds;
+use pocketmine\network\mcpe\protocol\types\PlayerAction;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
@@ -175,6 +177,9 @@ class NetworkSession{
 	private bool $loggedIn = false;
 	private bool $authenticated = false;
 	private int $connectTime;
+	private int $nextLoadingScreenId = 0;
+	private bool $changingDimension = false;
+	private bool $awaitingDimensionTerrain = false;
 	private ?CompoundTag $cachedOfflinePlayerData = null;
 
 	private ?EncryptionContext $cipher = null;
@@ -1138,11 +1143,15 @@ class NetworkSession{
 	public function syncPlayerSpawnPoint(Position $newSpawn) : void{
 		$newSpawnBlockPosition = BlockPosition::fromVector3($newSpawn);
 		//TODO: respawn causing block position (bed, respawn anchor)
-		$this->sendDataPacket(SetSpawnPositionPacket::playerSpawn($newSpawnBlockPosition, DimensionIds::OVERWORLD, $newSpawnBlockPosition));
+		$this->sendDataPacket(SetSpawnPositionPacket::playerSpawn($newSpawnBlockPosition, $this->getNetworkDimensionId($newSpawn->getWorld()), $newSpawnBlockPosition));
 	}
 
 	public function syncWorldSpawnPoint(Position $newSpawn) : void{
-		$this->sendDataPacket(SetSpawnPositionPacket::worldSpawn(BlockPosition::fromVector3($newSpawn), DimensionIds::OVERWORLD));
+		$this->sendDataPacket(SetSpawnPositionPacket::worldSpawn(BlockPosition::fromVector3($newSpawn), $this->getNetworkDimensionId($newSpawn->getWorld())));
+	}
+
+	private function getNetworkDimensionId(World $world) : int{
+		return $this->typeConverter->getDimensionTranslator()->toNetworkId($world->getDimension());
 	}
 
 	public function syncGameMode(GameMode $mode, bool $isRollback = false) : void{
@@ -1361,14 +1370,62 @@ class NetworkSession{
 
 	}
 
-	public function onEnterWorld() : void{
+	public function onEnterWorld(?World $previousWorld = null) : void{
 		if($this->player !== null){
 			$world = $this->player->getWorld();
+			if($previousWorld !== null && $previousWorld->getDimension() !== $world->getDimension()){
+				$this->startDimensionChange($this->player, $world);
+			}
 			$this->syncWorldTime($world->getTime());
 			$this->syncWorldDifficulty($world->getDifficulty());
 			$this->syncWorldSpawnPoint($world->getSpawnLocation());
 			//TODO: weather needs to be synced here (when implemented)
 		}
+	}
+
+	private function startDimensionChange(Player $player, World $world) : void{
+		$respawning = !$player->isAlive();
+		$this->changingDimension = true;
+		$this->sendDataPacket(ChangeDimensionPacket::create(
+			$this->getNetworkDimensionId($world),
+			$player->getOffsetPosition($player->getPosition()),
+			false,
+			$respawning ? null : $this->nextLoadingScreenId++
+		));
+		if($respawning){
+			$this->sendDimensionChangeAck($player);
+		}else{
+			$this->awaitingDimensionTerrain = true;
+		}
+	}
+
+	/**
+	 * @internal
+	 * Called when enough terrain around the player has been sent after a dimension change.
+	 */
+	public function notifyDimensionTerrainReady() : void{
+		if($this->awaitingDimensionTerrain && $this->player !== null){
+			$this->awaitingDimensionTerrain = false;
+			$this->sendDimensionChangeAck($this->player);
+		}
+	}
+
+	private function sendDimensionChangeAck(Player $player) : void{
+		$this->sendDataPacket(PlayerActionPacket::create(
+			$player->getId(),
+			PlayerAction::DIMENSION_CHANGE_ACK,
+			new BlockPosition(0, 0, 0),
+			new BlockPosition(0, 0, 0),
+			0
+		));
+	}
+
+	public function onClientDimensionChangeAck() : void{
+		$this->changingDimension = false;
+	}
+
+	public function isChangingDimension() : bool{
+		return $this->changingDimension;
 	}
 
 	public function syncWorldTime(int $worldTime) : void{

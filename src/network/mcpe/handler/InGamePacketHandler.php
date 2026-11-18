@@ -176,6 +176,9 @@ class InGamePacketHandler extends PacketHandler{
 	}
 
 	public function handlePlayerAuthInput(PlayerAuthInputPacket $packet) : bool{
+		if($this->session->isChangingDimension()){
+			return true;
+		}
 		$rawPos = $packet->getPosition();
 		$rawYaw = $packet->getYaw();
 		$rawPitch = $packet->getPitch();
@@ -727,6 +730,9 @@ class InGamePacketHandler extends PacketHandler{
 			case PlayerAction::START_ITEM_USE_ON:
 			case PlayerAction::STOP_ITEM_USE_ON:
 				//TODO: this has no obvious use and seems only used for analytics in vanilla - ignore it
+				break;
+			case PlayerAction::DIMENSION_CHANGE_ACK:
+				$this->session->onClientDimensionChangeAck();
 				break;
 			default:
 				$this->session->getLogger()->debug("Unhandled/unknown player action type " . $action);

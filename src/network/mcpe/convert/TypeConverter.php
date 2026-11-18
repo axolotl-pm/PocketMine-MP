@@ -57,6 +57,7 @@ use pocketmine\player\GameMode;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Filesystem;
 use pocketmine\utils\SingletonTrait;
+use pocketmine\world\DimensionRegistry;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use function get_class;
@@ -74,6 +75,7 @@ class TypeConverter{
 	private BlockTranslator $blockTranslator;
 	private ItemTranslator $itemTranslator;
 	private ItemTypeDictionary $itemTypeDictionary;
+	private DimensionTranslator $dimensionTranslator;
 	private int $shieldRuntimeId;
 
 	private SkinAdapter $skinAdapter;
@@ -100,10 +102,14 @@ class TypeConverter{
 			$this->blockItemIdMap
 		);
 
+		$this->dimensionTranslator = new DimensionTranslator(DimensionRegistry::getInstance());
+
 		$this->skinAdapter = new LegacySkinAdapter();
 	}
 
 	public function getBlockTranslator() : BlockTranslator{ return $this->blockTranslator; }
+
+	public function getDimensionTranslator() : DimensionTranslator{ return $this->dimensionTranslator; }
 
 	public function getItemTypeDictionary() : ItemTypeDictionary{ return $this->itemTypeDictionary; }
 

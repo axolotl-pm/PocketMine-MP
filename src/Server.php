@@ -1545,7 +1545,9 @@ class Server{
 			if(isset($this->worldManager)){
 				$this->logger->debug("Unloading all worlds");
 				foreach($this->worldManager->getWorlds() as $world){
-					$this->worldManager->unloadWorld($world, true);
+					if($world->isLoaded()){
+						$this->worldManager->unloadWorld($world, true);
+					}
 				}
 			}
 

@@ -269,6 +269,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	protected int $viewDistance = -1;
 	protected int $spawnThreshold;
 	protected int $spawnChunkLoadCount = 0;
+	protected int $dimensionChangeChunkCount = -1;
 	protected int $chunksPerTick;
 	protected ChunkSelector $chunkSelector;
 	protected ChunkLoader $chunkLoader;
@@ -826,7 +827,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 				$this->usedChunks = [];
 				$this->loadQueue = [];
-				$this->getNetworkSession()->onEnterWorld();
+				if($oldWorld !== null && $oldWorld->getDimension() !== $newWorld->getDimension()){
+					$this->dimensionChangeChunkCount = 0;
+				}
+				$this->getNetworkSession()->onEnterWorld($oldWorld);
 			}
 
 			return true;
@@ -931,6 +935,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 							$this->spawnEntitiesOnAllChunks();
 
 							$this->getNetworkSession()->notifyTerrainReady();
+						}
+						if($this->dimensionChangeChunkCount !== -1 && $this->dimensionChangeChunkCount++ === $this->spawnThreshold){
+							$this->dimensionChangeChunkCount = -1;
+							$this->getNetworkSession()->notifyDimensionTerrainReady();
 						}
 						(new PlayerPostChunkSendEvent($this, $X, $Z))->call();
 					});
@@ -2724,8 +2732,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 		if($this->deathPosition !== null && $this->deathPosition->world === $this->location->world){
 			$properties->setBlockPos(EntityMetadataProperties::PLAYER_DEATH_POSITION, BlockPosition::fromVector3($this->deathPosition));
-			//TODO: this should be updated when dimensions are implemented
-			$properties->setInt(EntityMetadataProperties::PLAYER_DEATH_DIMENSION, DimensionIds::OVERWORLD);
+			$properties->setInt(EntityMetadataProperties::PLAYER_DEATH_DIMENSION, $this->getNetworkSession()->getTypeConverter()->getDimensionTranslator()->toNetworkId($this->deathPosition->getWorld()->getDimension()));
 			$properties->setByte(EntityMetadataProperties::PLAYER_HAS_DIED, 1);
 		}else{
 			$properties->setBlockPos(EntityMetadataProperties::PLAYER_DEATH_POSITION, new BlockPosition(0, 0, 0));

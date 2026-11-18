@@ -30,8 +30,11 @@ use pocketmine\event\world\WorldUnloadEvent;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\player\ChunkSelector;
 use pocketmine\Server;
+use pocketmine\utils\AssumptionFailedError;
 use pocketmine\world\format\Chunk;
+use pocketmine\world\format\io\DimensionalWorldProvider;
 use pocketmine\world\format\io\exception\CorruptedWorldException;
+use pocketmine\world\format\io\exception\DimensionHeightMismatchException;
 use pocketmine\world\format\io\exception\UnsupportedWorldFormatException;
 use pocketmine\world\format\io\FormatConverter;
 use pocketmine\world\format\io\WorldProviderManager;
@@ -95,6 +98,9 @@ class WorldManager{
 	 * it only affects the server on runtime
 	 */
 	public function setDefaultWorld(?World $world) : void{
+		if($world !== null && $world->getDimension() !== DefaultDimensions::OVERWORLD()){
+			throw new \InvalidArgumentException("The default world must be an overworld");
+		}
 		if($world === null || ($this->isWorldLoaded($world->getFolderName()) && $world !== $this->defaultWorld)){
 			$this->defaultWorld = $world;
 		}
@@ -110,10 +116,12 @@ class WorldManager{
 
 	/**
 	 * NOTE: This matches worlds based on the FOLDER name, NOT the display name.
+	 * If no dimension is specified, the overworld will be returned by default.
 	 */
-	public function getWorldByName(string $name) : ?World{
+	public function getWorldByName(string $name, ?Dimension $dimension = null) : ?World{
+		$dimension ??= DefaultDimensions::OVERWORLD();
 		foreach($this->worlds as $world){
-			if($world->getFolderName() === $name){
+			if($world->getFolderName() === $name && $world->getDimension() === $dimension){
 				return $world;
 			}
 		}
@@ -122,9 +130,41 @@ class WorldManager{
 	}
 
 	/**
+	 * Returns all worlds stored under the specified folder name.
+	 *
+	 * @return World[]
+	 * @phpstan-return array<string, World>
+	 */
+	public function getWorldsByFolderName(string $name) : array{
+		$result = [];
+		foreach($this->worlds as $world){
+			if($world->getFolderName() === $name){
+				$result[$world->getDimension()->getName()] = $world;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Unloading an overworld also unloads every other dimension stored in its folder. Other dimensions cannot be
+	 * unloaded on their own unless forced.
+	 *
 	 * @throws \InvalidArgumentException
 	 */
 	public function unloadWorld(World $world, bool $forceUnload = false) : bool{
+		$isOverworld = $world->getDimension() === DefaultDimensions::OVERWORLD();
+		if(!$isOverworld && !$forceUnload){
+			throw new \InvalidArgumentException("Cannot unload a non-overworld dimension");
+		}
+		if($isOverworld){
+			if(array_any($this->getWorldsByFolderName($world->getFolderName()), fn($dimensionWorld) => $dimensionWorld !== $world && !$this->doUnloadWorld($dimensionWorld, $forceUnload))){
+				return false;
+			}
+		}
+		return $this->doUnloadWorld($world, $forceUnload);
+	}
+
+	private function doUnloadWorld(World $world, bool $forceUnload) : bool{
 		if($world === $this->getDefaultWorld() && !$forceUnload){
 			throw new \InvalidArgumentException("The default world cannot be unloaded while running, please switch worlds.");
 		}
@@ -246,14 +286,48 @@ class WorldManager{
 			$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_level_conversion_finish($name, $converter->getBackupPath())));
 		}
 
-		$world = new World($this->server, $name, $provider, $this->server->getAsyncPool());
+		$world = new World($this->server, $name, DefaultDimensions::OVERWORLD(), null, $provider, $this->server->getAsyncPool());
 
 		$this->worlds[$world->getId()] = $world;
 		$world->setAutoSave($this->autoSave);
 
-		(new WorldLoadEvent($world))->call();
+		$this->loadWorldDimensions($world, $provider);
 
 		return true;
+	}
+
+	private function loadWorldDimensions(World $overworld, WritableWorldProvider $provider) : void{
+		$event = new WorldLoadEvent($overworld, true);
+		$event->call();
+
+		$registrations = $event->getRegistrations();
+		if(count($registrations) === 0){
+			return;
+		}
+		if(!($provider instanceof DimensionalWorldProvider)){
+			throw new AssumptionFailedError("WorldLoadEvent only accepts dimensions for providers that can store them");
+		}
+		$name = $overworld->getFolderName();
+		foreach($registrations as $registration){
+			$dimensionName = $registration->dimension->getName();
+			try{
+				$dimensionProvider = $provider->openDimension(
+					$registration->dimension,
+					$registration->generatorName,
+					$registration->generatorOptions,
+					new \PrefixedLogger($this->server->getLogger(), "World Provider: $name ($dimensionName)")
+				);
+			}catch(DimensionHeightMismatchException $e){
+				$this->server->getLogger()->critical("Not loading dimension $dimensionName of world \"$name\": " . $e->getMessage());
+				continue;
+			}
+			$world = new World($this->server, $name, $registration->dimension, $overworld, $dimensionProvider, $this->server->getAsyncPool());
+			$this->worlds[$world->getId()] = $world;
+			$world->setAutoSave($this->autoSave);
+
+			$dimensionEvent = new WorldLoadEvent($world, false);
+			$dimensionEvent->call();
+		}
 	}
 
 	/**
@@ -271,14 +345,15 @@ class WorldManager{
 		$path = $this->getWorldPath($name);
 		$providerEntry->generate($path, $name, $options);
 
-		$world = new World($this->server, $name, $providerEntry->fromPath($path, new \PrefixedLogger($this->server->getLogger(), "World Provider: $name")), $this->server->getAsyncPool());
+		$provider = $providerEntry->fromPath($path, new \PrefixedLogger($this->server->getLogger(), "World Provider: $name"));
+		$world = new World($this->server, $name, DefaultDimensions::OVERWORLD(), null, $provider, $this->server->getAsyncPool());
 		$this->worlds[$world->getId()] = $world;
 
 		$world->setAutoSave($this->autoSave);
 
 		(new WorldInitEvent($world))->call();
 
-		(new WorldLoadEvent($world))->call();
+		$this->loadWorldDimensions($world, $provider);
 
 		if($backgroundGeneration){
 			$this->server->getLogger()->notice($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_level_backgroundGeneration($name)));

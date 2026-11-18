@@ -25,7 +25,6 @@ namespace pocketmine\world\generator\hell;
 
 use pocketmine\block\VanillaBlocks;
 use pocketmine\data\bedrock\BiomeIds;
-use pocketmine\world\biome\BiomeRegistry;
 use pocketmine\world\ChunkManager;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\generator\Generator;
@@ -111,9 +110,5 @@ class Nether extends Generator{
 		foreach($this->populators as $populator){
 			$populator->populate($world, $chunkX, $chunkZ, $this->random);
 		}
-
-		$chunk = $world->getChunk($chunkX, $chunkZ);
-		$biome = BiomeRegistry::getInstance()->getBiome($chunk->getBiomeId(7, 7, 7));
-		$biome->populateChunk($world, $chunkX, $chunkZ, $this->random);
 	}
 }

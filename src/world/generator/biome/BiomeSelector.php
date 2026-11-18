@@ -24,9 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\world\generator\biome;
 
 use pocketmine\utils\Random;
-use pocketmine\world\biome\Biome;
-use pocketmine\world\biome\BiomeRegistry;
-use pocketmine\world\biome\UnknownBiome;
 use pocketmine\world\generator\noise\Simplex;
 
 abstract class BiomeSelector{
@@ -34,12 +31,19 @@ abstract class BiomeSelector{
 	private Simplex $rainfall;
 
 	/**
-	 * @var Biome[]|\SplFixedArray
-	 * @phpstan-var \SplFixedArray<Biome>
+	 * @var GeneratorBiome[]|\SplFixedArray
+	 * @phpstan-var \SplFixedArray<GeneratorBiome>
 	 */
 	private \SplFixedArray $map;
 
-	public function __construct(Random $random){
+	/**
+	 * @param GeneratorBiome[] $biomes
+	 * @phpstan-param array<int, GeneratorBiome> $biomes
+	 */
+	public function __construct(
+		Random $random,
+		private readonly array $biomes
+	){
 		$this->temperature = new Simplex($random, 2, 1 / 16, 1 / 512);
 		$this->rainfall = new Simplex($random, 2, 1 / 16, 1 / 512);
 	}
@@ -54,14 +58,10 @@ abstract class BiomeSelector{
 	public function recalculate() : void{
 		$this->map = new \SplFixedArray(64 * 64);
 
-		$biomeRegistry = BiomeRegistry::getInstance();
 		for($i = 0; $i < 64; ++$i){
 			for($j = 0; $j < 64; ++$j){
-				$biome = $biomeRegistry->getBiome($this->lookup($i / 63, $j / 63));
-				if($biome instanceof UnknownBiome){
-					throw new \RuntimeException("Unknown biome returned by selector with ID " . $biome->getId());
-				}
-				$this->map[$i + ($j << 6)] = $biome;
+				$biomeId = $this->lookup($i / 63, $j / 63);
+				$this->map[$i + ($j << 6)] = $this->biomes[$biomeId] ?? throw new \RuntimeException("Unknown biome returned by selector with ID $biomeId");
 			}
 		}
 	}
@@ -74,7 +74,7 @@ abstract class BiomeSelector{
 		return ($this->rainfall->noise2D($x, $z, true) + 1) / 2;
 	}
 
-	public function pickBiome(float $x, float $z) : Biome{
+	public function pickBiome(float $x, float $z) : GeneratorBiome{
 		$temperature = (int) ($this->getTemperature($x, $z) * 63);
 		$rainfall = (int) ($this->getRainfall($x, $z) * 63);
 

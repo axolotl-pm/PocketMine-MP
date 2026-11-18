@@ -36,6 +36,7 @@ use pocketmine\block\tile\TileFactory;
 use pocketmine\block\UnknownBlock;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\data\bedrock\BiomeIds;
+use pocketmine\data\bedrock\BiomeTypeIdMap;
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\BlockStateDeserializeException;
 use pocketmine\data\SavedDataLoadingException;
@@ -86,7 +87,6 @@ use pocketmine\utils\Limits;
 use pocketmine\utils\ReversePriorityQueue;
 use pocketmine\utils\Utils;
 use pocketmine\world\biome\Biome;
-use pocketmine\world\biome\BiomeRegistry;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\ChunkData;
 use pocketmine\world\format\io\exception\CorruptedChunkException;
@@ -144,6 +144,11 @@ use const PHP_INT_MIN;
 #include <rules/World.h>
 
 /**
+ * World class, contains all the data for a world, including chunks, entities, players, and more.
+ *
+ * If this world's dimension is not the overworld, time and difficulty are synced with the overworld,
+ * and any changes to them are applied to the overworld instead.
+ *
  * @phpstan-type ChunkPosHash int
  * @phpstan-type BlockPosHash int
  * @phpstan-type ChunkBlockPosHash int
@@ -490,17 +495,22 @@ class World implements ChunkManager{
 	public function __construct(
 		private Server $server,
 		private string $folderName,
+		private Dimension $dimension,
+		private ?World $overworld,
 		private WritableWorldProvider $provider,
 		private AsyncPool $workerPool
 	){
+		if(($overworld === null) !== ($dimension === DefaultDimensions::OVERWORLD())){
+			throw new \InvalidArgumentException("Overworld must be null for the overworld dimension, and non-null for other dimensions");
+		}
 		$this->worldId = self::$worldIdCounter++;
 
 		$this->displayName = $this->provider->getWorldData()->getName();
 		$this->logger = new \PrefixedLogger($server->getLogger(), "World: $this->displayName");
 
 		$this->blockStateRegistry = RuntimeBlockStateRegistry::getInstance();
-		$this->minY = $this->provider->getWorldMinY();
-		$this->maxY = $this->provider->getWorldMaxY();
+		$this->minY = $this->dimension->getMinY();
+		$this->maxY = $this->dimension->getMaxY();
 
 		$this->server->getLogger()->info($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_level_preparing($this->displayName)));
 		$generator = GeneratorManager::getInstance()->getGenerator($this->provider->getWorldData()->getGenerator()) ??
@@ -543,7 +553,7 @@ class World implements ChunkManager{
 
 		$this->neighbourBlockUpdateQueue = new \SplQueue();
 
-		$this->time = $this->provider->getWorldData()->getTime();
+		$this->time = $overworld === null ? $this->provider->getWorldData()->getTime() : $overworld->getTime();
 
 		$cfg = $this->server->getConfigGroup();
 		$this->chunkTickRadius = min($this->server->getViewDistance(), max(0, $cfg->getPropertyInt(YmlServerProperties::CHUNK_TICKING_TICK_RADIUS, 4)));
@@ -615,6 +625,27 @@ class World implements ChunkManager{
 	 */
 	final public function getId() : int{
 		return $this->worldId;
+	}
+
+	final public function getDimension() : Dimension{
+		return $this->dimension;
+	}
+
+	/**
+	 * Returns the world for the given dimension stored in the same folder as this one, if it is loaded.
+	 */
+	public function getDimensionWorld(Dimension $dimension) : ?World{
+		return $this->server->getWorldManager()->getWorldByName($this->folderName, $dimension);
+	}
+
+	/**
+	 * Returns all loaded worlds stored in the same folder as this one, including this one.
+	 *
+	 * @return World[]
+	 * @phpstan-return array<string, World>
+	 */
+	public function getDimensionWorlds() : array{
+		return $this->server->getWorldManager()->getWorldsByFolderName($this->folderName);
 	}
 
 	public function isLoaded() : bool{
@@ -960,12 +991,17 @@ class World implements ChunkManager{
 	}
 
 	protected function actuallyDoTick(int $currentTick) : void{
-		if(!$this->stopTime){
-			//this simulates an overflow, as would happen in any language which doesn't do stupid things to var types
-			if($this->time === PHP_INT_MAX){
-				$this->time = PHP_INT_MIN;
-			}else{
-				$this->time++;
+		if($this->overworld !== null){
+			//time is tied to the overworld, so we just copy the overworld's time into this world
+			$this->time = $this->overworld->getTime();
+		}else{
+			if(!$this->stopTime){
+				//this simulates an overflow, as would happen in any language which doesn't do stupid things to var types
+				if($this->time === PHP_INT_MAX){
+					$this->time = PHP_INT_MIN;
+				}else{
+					$this->time++;
+				}
 			}
 		}
 
@@ -2517,7 +2553,7 @@ class World implements ChunkManager{
 	}
 
 	public function getBiome(int $x, int $y, int $z) : Biome{
-		return BiomeRegistry::getInstance()->getBiome($this->getBiomeId($x, $y, $z));
+		return BiomeTypeIdMap::getInstance()->fromId($this->getBiomeId($x, $y, $z)) ?? $this->dimension->getDefaultBiome();
 	}
 
 	public function setBiomeId(int $x, int $y, int $z, int $biomeId) : void{
@@ -3264,7 +3300,7 @@ class World implements ChunkManager{
 	 * Gets the current time
 	 */
 	public function getTime() : int{
-		return $this->time;
+		return $this->overworld?->getTime() ?? $this->time;
 	}
 
 	/**
@@ -3293,7 +3329,8 @@ class World implements ChunkManager{
 	}
 
 	/**
-	 * Returns the World folder name. This will not change at runtime and will be unique to a world per runtime.
+	 * Returns the World folder name. This will not change at runtime. Every dimension stored in the same folder
+	 * returns the same name, so use {@link getDimension()} as well to tell them apart.
 	 */
 	public function getFolderName() : string{
 		return $this->folderName;
@@ -3303,24 +3340,43 @@ class World implements ChunkManager{
 	 * Sets the current time on the world
 	 */
 	public function setTime(int $time) : void{
+		if($this->overworld !== null){
+			$this->overworld->setTime($time);
+			return;
+		}
 		$this->time = $time;
-		$this->sendTime();
+		$this->sendTimeToAllDimensions();
+	}
+
+	private function sendTimeToAllDimensions() : void{
+		foreach($this->getDimensionWorlds() as $world){
+			$world->time = $this->time;
+			$world->sendTime();
+		}
 	}
 
 	/**
 	 * Stops the time for the world, will not save the lock state to disk
 	 */
 	public function stopTime() : void{
+		if($this->overworld !== null){
+			$this->overworld->stopTime();
+			return;
+		}
 		$this->stopTime = true;
-		$this->sendTime();
+		$this->sendTimeToAllDimensions();
 	}
 
 	/**
 	 * Start the time again, if it was stopped
 	 */
 	public function startTime() : void{
+		if($this->overworld !== null){
+			$this->overworld->startTime();
+			return;
+		}
 		$this->stopTime = false;
-		$this->sendTime();
+		$this->sendTimeToAllDimensions();
 	}
 
 	/**
@@ -3339,10 +3395,14 @@ class World implements ChunkManager{
 	}
 
 	public function getDifficulty() : int{
-		return $this->provider->getWorldData()->getDifficulty();
+		return $this->overworld !== null ? $this->overworld->getDifficulty() : $this->provider->getWorldData()->getDifficulty();
 	}
 
 	public function setDifficulty(int $difficulty) : void{
+		if($this->overworld !== null){
+			$this->overworld->setDifficulty($difficulty);
+			return;
+		}
 		if($difficulty < 0 || $difficulty > 3){
 			throw new \InvalidArgumentException("Invalid difficulty level $difficulty");
 		}

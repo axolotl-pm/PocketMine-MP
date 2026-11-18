@@ -27,22 +27,28 @@ use pocketmine\block\BlockTypeIds;
 use pocketmine\block\Liquid;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\utils\Random;
-use pocketmine\world\biome\BiomeRegistry;
 use pocketmine\world\ChunkManager;
 use pocketmine\world\format\Chunk;
+use pocketmine\world\generator\biome\GeneratorBiome;
 use function count;
 use function min;
 
 class GroundCover implements Populator{
 
+	/**
+	 * @param GeneratorBiome[] $biomes
+	 * @phpstan-param array<int, GeneratorBiome> $biomes
+	 */
+	public function __construct(
+		private readonly array $biomes
+	){}
+
 	public function populate(ChunkManager $world, int $chunkX, int $chunkZ, Random $random) : void{
 		$chunk = $world->getChunk($chunkX, $chunkZ) ?? throw new \InvalidArgumentException("Chunk $chunkX $chunkZ does not yet exist");
 		$factory = RuntimeBlockStateRegistry::getInstance();
-		$biomeRegistry = BiomeRegistry::getInstance();
 		for($x = 0; $x < Chunk::EDGE_LENGTH; ++$x){
 			for($z = 0; $z < Chunk::EDGE_LENGTH; ++$z){
-				$biome = $biomeRegistry->getBiome($chunk->getBiomeId($x, 0, $z));
-				$cover = $biome->getGroundCover();
+				$cover = ($this->biomes[$chunk->getBiomeId($x, 0, $z)] ?? null)?->getGroundCover() ?? [];
 				if(count($cover) > 0){
 					$diffY = 0;
 					if(!$cover[0]->isSolid()){
