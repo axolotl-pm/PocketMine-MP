@@ -95,7 +95,7 @@ final class BlockStateData{
 			if($pmmpDataVersion <= 1){
 				//see https://github.com/axolotl-pm/PocketMine-MP/issues/86#issuecomment-7064321496
 				if($version === ((1 << 24) | (21 << 16) | (70 << 8) | (1))){
-					$version = (1 << 24) | (21 << 16) | (60 << 8) | (33);
+					$version = ((1 << 24) | (21 << 16) | (60 << 8) | (33));
 				}
 			}
 		}catch(NbtException $e){
