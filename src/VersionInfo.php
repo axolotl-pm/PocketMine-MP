@@ -45,7 +45,7 @@ final class VersionInfo{
 	 * (entities, tiles, blocks, biomes etc.). For example, if PM accidentally saved a block with its facing value
 	 * swapped, we would bump this, but not if Mojang did the same change.
 	 */
-	public const WORLD_DATA_VERSION = 1;
+	public const WORLD_DATA_VERSION = 2;
 	/**
 	 * Name of the NBT tag used to store the world data version.
 	 */
