@@ -245,7 +245,9 @@ abstract class Noise{
 		$noiseArray = new \SplFixedArray($xSize + 1);
 
 		for($xx = 0; $xx <= $xSize; $xx += $samplingRate){
-			$noiseArray[$xx] = new \SplFixedArray($zSize + 1);
+			/** @phpstan-var \SplFixedArray<float> $row */
+			$row = new \SplFixedArray($zSize + 1);
+			$noiseArray[$xx] = $row;
 			for($zz = 0; $zz <= $zSize; $zz += $samplingRate){
 				$noiseArray[$xx][$zz] = $this->noise3D($x + $xx, $y, $z + $zz);
 			}
@@ -253,7 +255,9 @@ abstract class Noise{
 
 		for($xx = 0; $xx < $xSize; ++$xx){
 			if($xx % $samplingRate !== 0){
-				$noiseArray[$xx] = new \SplFixedArray($zSize + 1);
+				/** @phpstan-var \SplFixedArray<float> $row */
+				$row = new \SplFixedArray($zSize + 1);
+				$noiseArray[$xx] = $row;
 			}
 
 			for($zz = 0; $zz < $zSize; ++$zz){

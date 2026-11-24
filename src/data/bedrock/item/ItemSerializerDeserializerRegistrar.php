@@ -613,6 +613,7 @@ final class ItemSerializerDeserializerRegistrar{
 	 * complex to implement in a generic way.
 	 */
 	private function registerMiscBlockMappings() : void{
+		/** @phpstan-var array<int, array<int, string>> $copperDoorStateIdMap */
 		$copperDoorStateIdMap = [];
 		foreach ([
 			[Ids::COPPER_DOOR, CopperOxidation::NONE, false],
