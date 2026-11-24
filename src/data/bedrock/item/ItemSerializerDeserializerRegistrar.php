@@ -186,6 +186,7 @@ final class ItemSerializerDeserializerRegistrar{
 		$this->map1to1Item(Ids::BLAZE_POWDER, Items::BLAZE_POWDER());
 		$this->map1to1Item(Ids::BLAZE_ROD, Items::BLAZE_ROD());
 		$this->map1to1Item(Ids::BLEACH, Items::BLEACH());
+		$this->map1to1Item(Ids::BLUE_EGG, Items::BLUE_EGG());
 		$this->map1to1Item(Ids::BONE, Items::BONE());
 		$this->map1to1Item(Ids::BONE_MEAL, Items::BONE_MEAL());
 		$this->map1to1Item(Ids::BOOK, Items::BOOK());
@@ -193,6 +194,7 @@ final class ItemSerializerDeserializerRegistrar{
 		$this->map1to1Item(Ids::BOWL, Items::BOWL());
 		$this->map1to1Item(Ids::BREAD, Items::BREAD());
 		$this->map1to1Item(Ids::BRICK, Items::BRICK());
+		$this->map1to1Item(Ids::BROWN_EGG, Items::BROWN_EGG());
 		$this->map1to1Item(Ids::BUCKET, Items::BUCKET());
 		$this->map1to1Item(Ids::CARROT, Items::CARROT());
 		$this->map1to1Item(Ids::CHAINMAIL_BOOTS, Items::CHAINMAIL_BOOTS());

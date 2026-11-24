@@ -29,13 +29,23 @@ use pocketmine\entity\projectile\Throwable;
 use pocketmine\player\Player;
 
 class Egg extends ProjectileItem{
+	private EggType $eggType;
+
+	public function __construct(ItemIdentifier $identifier, string $name, EggType $boatType){
+		parent::__construct($identifier, $name);
+		$this->eggType = $boatType;
+	}
+
+	public function getType() : EggType{
+		return $this->eggType;
+	}
 
 	public function getMaxStackSize() : int{
 		return 16;
 	}
 
 	protected function createEntity(Location $location, Player $thrower) : Throwable{
-		return new EggEntity($location, $thrower);
+		return new EggEntity($location, $thrower, $this->eggType);
 	}
 
 	public function getThrowForce() : float{
