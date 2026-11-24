@@ -37,7 +37,6 @@ use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\ItemFrameAddItemSound;
 use pocketmine\world\sound\ItemFrameRemoveItemSound;
 use pocketmine\world\sound\ItemFrameRotateItemSound;
-use function is_infinite;
 use function is_nan;
 
 class ItemFrame extends Flowable implements AnyFacing{
