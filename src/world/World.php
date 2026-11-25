@@ -3428,7 +3428,8 @@ class World implements ChunkManager{
 		$chunkHash = World::chunkHash($chunkX, $chunkZ);
 		$this->addChunkHashToPopulationRequestQueue($chunkHash);
 		/** @phpstan-var PromiseResolver<Chunk> $resolver */
-		$resolver = $this->chunkPopulationRequestMap[$chunkHash] = new PromiseResolver();
+		$resolver = new PromiseResolver();
+		$this->chunkPopulationRequestMap[$chunkHash] = $resolver;
 		if($associatedChunkLoader === null){
 			$temporaryLoader = new ChunkLoader();
 			$this->registerChunkLoader($temporaryLoader, $chunkX, $chunkZ);
@@ -3483,7 +3484,10 @@ class World implements ChunkManager{
 		$this->unregisterChunkLoader($temporaryChunkLoader, $chunkX, $chunkZ);
 		if($chunk !== null && $chunk->isPopulated()){
 			//chunk is already populated; return a pre-resolved promise that will directly fire callbacks assigned
-			$resolver ??= new PromiseResolver();
+			if($resolver === null){
+				/** @phpstan-var PromiseResolver<Chunk> $resolver */
+				$resolver = new PromiseResolver();
+			}
 			unset($this->chunkPopulationRequestMap[$chunkHash]);
 			$resolver->resolve($chunk);
 			return [$resolver, false];
@@ -3556,6 +3560,7 @@ class World implements ChunkManager{
 
 			$this->activeChunkPopulationTasks[$chunkHash] = true;
 			if($resolver === null){
+				/** @phpstan-var PromiseResolver<Chunk> $resolver */
 				$resolver = new PromiseResolver();
 				$this->chunkPopulationRequestMap[$chunkHash] = $resolver;
 			}

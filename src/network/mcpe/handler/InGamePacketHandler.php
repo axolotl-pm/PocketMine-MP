@@ -946,7 +946,6 @@ class InGamePacketHandler extends PacketHandler{
 			BookEditPacket::TYPE_DELETE_PAGE => PlayerEditBookEvent::ACTION_DELETE_PAGE,
 			BookEditPacket::TYPE_SWAP_PAGES => PlayerEditBookEvent::ACTION_SWAP_PAGES,
 			BookEditPacket::TYPE_SIGN_BOOK => PlayerEditBookEvent::ACTION_SIGN_BOOK,
-			default => throw new AssumptionFailedError("We already filtered unknown types in the switch above")
 		};
 
 		/*

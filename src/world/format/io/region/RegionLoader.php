@@ -150,7 +150,7 @@ class RegionLoader{
 		 * doing this in a single call is faster than making two seeks and reads to fetch the chunk.
 		 * this relies on the assumption that the end of the file is always padded to a multiple of 4096 bytes.
 		 */
-		$bytesToRead = $this->locationTable[$index]->getSectorCount() << 12;
+		$bytesToRead = $this->locationTable[$index]->getSectorCount() * 4096;
 		$payload = fread($this->filePointer, $bytesToRead);
 
 		if($payload === false || strlen($payload) !== $bytesToRead){

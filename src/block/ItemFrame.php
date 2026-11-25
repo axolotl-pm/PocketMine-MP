@@ -37,7 +37,6 @@ use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\ItemFrameAddItemSound;
 use pocketmine\world\sound\ItemFrameRemoveItemSound;
 use pocketmine\world\sound\ItemFrameRotateItemSound;
-use function is_infinite;
 use function is_nan;
 
 class ItemFrame extends Flowable implements AnyFacing{
@@ -112,7 +111,7 @@ class ItemFrame extends Flowable implements AnyFacing{
 
 	/** @return $this */
 	public function setItemDropChance(float $itemDropChance) : self{
-		if($itemDropChance < 0.0 || $itemDropChance > 1.0 || is_nan($itemDropChance) || is_infinite($itemDropChance)){
+		if($itemDropChance < 0.0 || $itemDropChance > 1.0 || is_nan($itemDropChance)){
 			throw new \InvalidArgumentException("Drop chance must be in range 0-1");
 		}
 		$this->itemDropChance = $itemDropChance;
