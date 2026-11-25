@@ -162,7 +162,7 @@ class CrashDump{
 		global $argv;
 
 		if($this->server->getConfigGroup()->getPropertyBool(YmlServerProperties::AUTO_REPORT_SEND_SETTINGS, true)){
-			$this->data->parameters = (array) $argv;
+			$this->data->parameters = $argv;
 			if(($serverDotProperties = @file_get_contents(Path::join($this->server->getDataPath(), "server.properties"))) !== false){
 				$this->data->serverDotProperties = preg_replace("#^rcon\\.password=(.*)$#m", "rcon.password=******", $serverDotProperties) ?? throw new AssumptionFailedError("Pattern is valid");
 			}
