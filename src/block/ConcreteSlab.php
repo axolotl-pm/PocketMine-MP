@@ -24,7 +24,8 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\block\utils\ColoredTrait;
+use pocketmine\block\utils\Colored;
 
-final class ConcreteSlab extends Slab implements utils\Colored{
+final class ConcreteSlab extends Slab implements Colored{
 	use ColoredTrait;
 }
