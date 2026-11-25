@@ -310,7 +310,7 @@ class NetworkSession{
 			$effectManager->getEffectRemoveHooks()->remove($effectRemoveHook);
 		});
 
-		$permissionHooks = $this->player->getPermissionRecalculationCallbacks();
+		$permissionHooks = $player->getPermissionRecalculationCallbacks();
 		$permissionHooks->add($permHook = function() : void{
 			$this->logger->debug("Syncing available commands and abilities/permissions due to permission recalculation");
 			$this->syncAbilities($this->player);
