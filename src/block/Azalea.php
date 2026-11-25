@@ -37,7 +37,7 @@ use pocketmine\world\generator\object\TreeFactory;
 use pocketmine\world\generator\object\TreeType;
 use function mt_rand;
 
-class Azalea extends Flowable{
+class Azalea extends WaterloggableFlowable{
 	use StaticSupportTrait;
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{

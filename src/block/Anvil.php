@@ -29,6 +29,8 @@ use pocketmine\block\utils\FallableTrait;
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\entity\object\FallingBlock;
 use pocketmine\item\Item;
@@ -42,9 +44,19 @@ use pocketmine\world\sound\AnvilFallSound;
 use pocketmine\world\sound\Sound;
 use function round;
 
-class Anvil extends Transparent implements Fallable, HorizontalFacing{
-	use FallableTrait;
+class Anvil extends Transparent implements Fallable, HorizontalFacing, Waterloggable{
 	use HorizontalFacingTrait;
+	use FallableTrait, WaterloggableTrait{
+		WaterloggableTrait::onNearbyBlockChange insteadof FallableTrait;
+		FallableTrait::onNearbyBlockChange as onFallableBlockChange;
+		WaterloggableTrait::place as waterPlace;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onFallableBlockChange();
+	}
 
 	public const UNDAMAGED = 0;
 	public const SLIGHTLY_DAMAGED = 1;
@@ -90,6 +102,9 @@ class Anvil extends Transparent implements Fallable, HorizontalFacing{
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		if($player !== null){
 			$this->facing = Facing::rotateY($player->getHorizontalFacing(), false);
+		}
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
 		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}

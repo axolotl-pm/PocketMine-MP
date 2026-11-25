@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\utils\WaterHelper;
 use pocketmine\entity\effect\EffectInstance;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\entity\Living;
@@ -90,12 +91,17 @@ class WetPotentSulfur extends PotentSulfur{
 
 		$block = $this->getSide(Facing::UP);
 		while($block->position->getFloorY() <= $maxY){
-			if($block instanceof Water && $block->isSource()){
+			if(!$this->isGeyserPassable($block)){
+				return null;
+			}
+
+			$water = WaterHelper::getWater($block);
+			if($water !== null && $water->isSource()){
 				$block = $block->getSide(Facing::UP);
 				continue;
 			}
 
-			return $this->isGeyserPassable($block) ? $block : null;
+			return $block;
 		}
 
 		return null;

@@ -26,16 +26,51 @@ namespace pocketmine\block;
 use pocketmine\block\utils\HorizontalConnectable;
 use pocketmine\block\utils\HorizontalConnectableTrait;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
+use pocketmine\item\Item;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use function count;
 
-class Fence extends Transparent implements HorizontalConnectable{
-	use HorizontalConnectableTrait;
+class Fence extends Transparent implements HorizontalConnectable, Waterloggable{
+	use HorizontalConnectableTrait{
+		HorizontalConnectableTrait::onNearbyBlockChange as onConnectionBlockChange;
+	}
+	use WaterloggableTrait{
+		place as waterPlace;
+		readStateFromWorld as readWaterStateFromWorld;
+		WaterloggableTrait::onNearbyBlockChange as onWaterBlockChange;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
+
+	public function onNearbyBlockChange() : void{
+		$this->onWaterBlockChange();
+		$this->onConnectionBlockChange();
+	}
 
 	public function getThickness() : float{
 		return 0.25;
+	}
+
+	public function readStateFromWorld() : Block{
+		parent::readStateFromWorld();
+
+		$this->recalculateConnections();
+		$this->readWaterStateFromWorld();
+		$this->collisionBoxes = null;
+
+		return $this;
 	}
 
 	protected function recalculateConnections() : bool{

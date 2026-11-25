@@ -39,7 +39,7 @@ use pocketmine\world\sound\ItemFrameRemoveItemSound;
 use pocketmine\world\sound\ItemFrameRotateItemSound;
 use function is_nan;
 
-class ItemFrame extends Flowable implements AnyFacing{
+class ItemFrame extends WaterloggableFlowable implements AnyFacing{
 	use AnyFacingTrait;
 
 	public const ROTATIONS = 8;
@@ -168,6 +168,8 @@ class ItemFrame extends Flowable implements AnyFacing{
 	}
 
 	public function onNearbyBlockChange() : void{
+		parent::onNearbyBlockChange();
+
 		if(!$this->canBeSupportedAt($this, Facing::opposite($this->facing))){
 			$this->position->getWorld()->useBreakOn($this->position);
 		}

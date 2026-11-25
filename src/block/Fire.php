@@ -28,6 +28,7 @@ use pocketmine\block\utils\AgeableTrait;
 use pocketmine\block\utils\BlockEventHelper;
 use pocketmine\block\utils\HorizontalConnectable;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\WaterHelper;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\event\block\BlockBurnEvent;
 use pocketmine\math\Facing;
@@ -105,7 +106,10 @@ class Fire extends BaseFire implements Ageable, HorizontalConnectable{
 		$down = $this->getSide(Facing::DOWN);
 		if(SoulFire::canBeSupportedBy($down)){
 			$world->setBlock($this->position, VanillaBlocks::SOUL_FIRE());
-		}elseif(!$this->canBeSupportedBy($this->getSide(Facing::DOWN)) && !$this->hasAdjacentFlammableBlocks()){
+		}elseif(
+			WaterHelper::isWater($down) ||
+			!$this->canBeSupportedBy($this->getSide(Facing::DOWN)) && !$this->hasAdjacentFlammableBlocks()
+		){
 			$world->setBlock($this->position, VanillaBlocks::AIR());
 		}else{
 			if($this->recalculateConnections()){

@@ -38,10 +38,12 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-class RedstoneRepeater extends Flowable implements PoweredByRedstone, HorizontalFacing, RedstoneSignalEmitter{
+class RedstoneRepeater extends WaterloggableFlowable implements RedstoneSignalEmitter, PoweredByRedstone, HorizontalFacing{
 	use HorizontalFacingTrait;
 	use PoweredByRedstoneTrait;
-	use StaticSupportTrait;
+	use StaticSupportTrait{
+		StaticSupportTrait::onNearbyBlockChange as onSupportBlockChange;
+	}
 
 	public const MIN_DELAY = 1;
 	public const MAX_DELAY = 4;
@@ -73,7 +75,6 @@ class RedstoneRepeater extends Flowable implements PoweredByRedstone, Horizontal
 		if($player !== null){
 			$this->facing = Facing::opposite($player->getHorizontalFacing());
 		}
-
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
@@ -83,6 +84,11 @@ class RedstoneRepeater extends Flowable implements PoweredByRedstone, Horizontal
 		}
 		$this->position->getWorld()->setBlock($this->position, $this);
 		return true;
+	}
+
+	public function onNearbyBlockChange() : void{
+		parent::onNearbyBlockChange();
+		$this->onSupportBlockChange();
 	}
 
 	private function canBeSupportedAt(Block $block) : bool{

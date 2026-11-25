@@ -29,7 +29,7 @@ use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 
-class Carpet extends Flowable implements Colored{
+class Carpet extends WaterloggableFlowable implements Colored{
 	use ColoredTrait;
 	use StaticSupportTrait;
 

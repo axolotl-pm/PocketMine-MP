@@ -28,6 +28,8 @@ use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\HorizontalFacing;
 use pocketmine\block\utils\RedstoneSignalEmitter;
 use pocketmine\block\utils\SupportType;
+use pocketmine\block\utils\Waterloggable;
+use pocketmine\block\utils\WaterloggableTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\item\WritableBookBase;
@@ -35,11 +37,16 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
+use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\LecternPlaceBookSound;
 use function count;
 
-class Lectern extends Transparent implements HorizontalFacing, RedstoneSignalEmitter{
-	use FacesOppositePlacingPlayerTrait;
+class Lectern extends Transparent implements HorizontalFacing, RedstoneSignalEmitter, Waterloggable{
+	use FacesOppositePlacingPlayerTrait, WaterloggableTrait{
+		WaterloggableTrait::place insteadof FacesOppositePlacingPlayerTrait;
+		WaterloggableTrait::place as waterPlace;
+		WaterloggableTrait::readStateFromWorld as readWaterStateFromWorld;
+	}
 
 	protected int $viewedPage = 0;
 	protected ?WritableBookBase $book = null;
@@ -53,6 +60,8 @@ class Lectern extends Transparent implements HorizontalFacing, RedstoneSignalEmi
 
 	public function readStateFromWorld() : Block{
 		parent::readStateFromWorld();
+		$this->readWaterStateFromWorld();
+
 		$tile = $this->position->getWorld()->getTile($this->position);
 		if($tile instanceof TileLectern){
 			$this->viewedPage = $tile->getViewedPage();
@@ -60,6 +69,16 @@ class Lectern extends Transparent implements HorizontalFacing, RedstoneSignalEmi
 		}
 
 		return $this;
+	}
+
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
+		if($player !== null){
+			$this->facing = Facing::opposite($player->getHorizontalFacing());
+		}
+		if(!$this->waterPlace($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player)){
+			return false;
+		}
+		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
 	public function writeStateToWorld() : void{

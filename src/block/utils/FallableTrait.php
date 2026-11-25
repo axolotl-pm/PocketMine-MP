@@ -46,10 +46,13 @@ trait FallableTrait{
 		$world = $pos->getWorld();
 		$down = $world->getBlock($pos->getSide(Facing::DOWN));
 		if($down->canBeReplaced()){
-			$world->setBlock($pos, VanillaBlocks::AIR());
-
 			$block = $this;
 			if(!($block instanceof Block)) throw new AssumptionFailedError(__TRAIT__ . " should only be used by Blocks");
+			$displacedBlock = $block->getDisplacedBlock();
+			if($block instanceof Waterloggable){
+				$block->setContainedWater(null);
+			}
+			$world->setBlock($pos, $displacedBlock ?? VanillaBlocks::AIR());
 
 			$fall = new FallingBlock(Location::fromObject($pos->add(0.5, 0, 0.5), $world), $block);
 			$fall->spawnToAll();
