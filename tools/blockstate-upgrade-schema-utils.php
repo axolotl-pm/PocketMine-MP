@@ -302,10 +302,6 @@ function processStateGroup(string $oldName, array $upgradeTable, BlockStateUpgra
 				}
 			}
 
-			if($flattenedProperty !== null){
-				//found multiple candidates for flattening - fallback to remappedStates
-				return false;
-			}
 			//we found a suitable candidate
 			$flattenedProperty = $removedProperty;
 			$flattenedPropertyMap = $valueMap;

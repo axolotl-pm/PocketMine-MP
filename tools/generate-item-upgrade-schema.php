@@ -60,7 +60,7 @@ if(!isset($argv) || count($argv) !== 4){
 
 [, $mappingTableFile, $upgradeSchemasDir, $outputFile] = $argv;
 
-$target = json_decode(Filesystem::fileGetContents($mappingTableFile), true, JSON_THROW_ON_ERROR);
+$target = json_decode(Filesystem::fileGetContents($mappingTableFile), true, flags: JSON_THROW_ON_ERROR);
 if(!is_array($target) || !isset($target["simple"]) || !is_array($target["simple"]) || !isset($target["complex"]) || !is_array($target["complex"])){
 	\GlobalLogger::get()->error("Invalid mapping table file");
 	exit(1);
