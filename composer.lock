@@ -1346,7 +1346,7 @@
                 }
             ],
             "time": "2026-11-19T10:31:11+00:00",
-            "published-time": "2026-04-01T09:25:26+00:00"
+            "published-time": "2026-11-19T10:31:27+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
