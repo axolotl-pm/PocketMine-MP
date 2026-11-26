@@ -56,6 +56,7 @@ use pocketmine\network\mcpe\compression\CompressBatchTask;
 use pocketmine\network\mcpe\compression\Compressor;
 use pocketmine\network\mcpe\compression\ZlibCompressor;
 use pocketmine\network\mcpe\convert\TypeConverter;
+use pocketmine\network\mcpe\convert\TypeConverterSetupTask;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\nethernet\NetherNetTransport;
 use pocketmine\network\mcpe\NetworkSession;
@@ -361,6 +362,10 @@ class Server{
 	 */
 	public function getOnlineMode() : bool{
 		return $this->onlineMode;
+	}
+
+	public function useBlockNetworkIdsHashes() : bool{
+		return $this->configGroup->getPropertyBool(Yml::NETWORK_BLOCK_NETWORK_IDS_ARE_HASHES, false);
 	}
 
 	/**
@@ -851,6 +856,7 @@ class Server{
 					ServerProperties::LANGUAGE => "eng"
 				])
 			);
+			TypeConverter::setInstance(new TypeConverter($this->useBlockNetworkIdsHashes()));
 
 			$debugLogLevel = $this->configGroup->getPropertyInt(Yml::DEBUG_LEVEL, 1);
 			if($this->logger instanceof MainLogger){
@@ -916,6 +922,11 @@ class Server{
 					$this->asyncPool->submitTaskToWorker(TimingsControlTask::setEnabled(true), $i);
 				}
 			});
+			if($this->useBlockNetworkIdsHashes()){
+				$this->asyncPool->addWorkerStartHook(function(int $i) : void{
+					$this->asyncPool->submitTaskToWorker(new TypeConverterSetupTask(true), $i);
+				});
+			}
 			TimingsHandler::getToggleCallbacks()->add(function(bool $enable) : void{
 				foreach($this->asyncPool->getRunningWorkers() as $workerId){
 					$this->asyncPool->submitTaskToWorker(TimingsControlTask::setEnabled($enable), $workerId);
