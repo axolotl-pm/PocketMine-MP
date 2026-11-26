@@ -82,7 +82,9 @@ class ThreadSafeClassLoader extends ThreadSafe{
 			$this->psr4Lookup->synchronized(function() use ($namespacePrefix, $path, $prepend) : void{
 				$list = $this->psr4Lookup[$namespacePrefix] ?? null;
 				if($list === null){
-					$list = $this->psr4Lookup[$namespacePrefix] = new ThreadSafeArray();
+					/** @phpstan-var ThreadSafeArray<int, string> $list */
+					$list = new ThreadSafeArray();
+					$this->psr4Lookup[$namespacePrefix] = $list;
 				}
 				$this->appendOrPrependLookupEntry($list, $path, $prepend);
 			});
