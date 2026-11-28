@@ -25,6 +25,7 @@ namespace pocketmine\inventory\transaction\action;
 
 use pocketmine\inventory\transaction\TransactionValidationException;
 use pocketmine\item\Item;
+use pocketmine\item\ItemLockMode;
 use pocketmine\item\VanillaItems;
 use pocketmine\player\Player;
 
@@ -41,6 +42,9 @@ class DestroyItemAction extends InventoryAction{
 	public function validate(Player $source) : void{
 		if($source->hasFiniteResources()){
 			throw new TransactionValidationException("Player has finite resources, cannot destroy items");
+		}
+		if($this->targetItem->getLockMode() !== ItemLockMode::NONE){
+			throw new TransactionValidationException("Locked items cannot be destroyed");
 		}
 	}
 

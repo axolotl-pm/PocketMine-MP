@@ -25,8 +25,6 @@ namespace pocketmine\inventory\transaction;
 
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\inventory\Inventory;
-use pocketmine\inventory\transaction\action\DestroyItemAction;
-use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Item;
@@ -262,25 +260,15 @@ class InventoryTransaction{
 
 	protected function validateItemLocks() : void{
 		foreach($this->actions as $action){
-			if($action instanceof DropItemAction || $action instanceof DestroyItemAction){
-				if($action->getTargetItem()->getLockMode() !== ItemLockMode::NONE){
-					throw new TransactionValidationException("Locked items cannot be dropped or destroyed");
-				}
-				continue;
-			}
 			if(!($action instanceof SlotChangeAction)){
 				continue;
 			}
 
 			$sourceItem = $action->getSourceItem();
-			$targetItem = $action->getTargetItem();
 			$lockMode = $sourceItem->getLockMode();
-			if($lockMode === ItemLockMode::LOCK_IN_SLOT && !$sourceItem->equalsExact($targetItem)){
-				throw new TransactionValidationException("Item is locked in slot and cannot be moved or replaced");
-			}
-			if($lockMode === ItemLockMode::LOCK_IN_INVENTORY){
+			if($lockMode === ItemLockMode::LOCK_IN_INVENTORY && $this->isPlayerInventory($action->getInventory())){
 				foreach($this->actions as $otherAction){
-					if($otherAction === $action || !($otherAction instanceof SlotChangeAction) || $otherAction->getInventory() === $action->getInventory()){
+					if($otherAction === $action || !($otherAction instanceof SlotChangeAction) || $this->isPlayerInventory($otherAction->getInventory())){
 						continue;
 					}
 					if($otherAction->getTargetItem()->canStackWith($sourceItem)){
@@ -289,6 +277,14 @@ class InventoryTransaction{
 				}
 			}
 		}
+	}
+
+	protected function isPlayerInventory(Inventory $inventory) : bool{
+		return $inventory === $this->source->getInventory() ||
+			$inventory === $this->source->getArmorInventory() ||
+			$inventory === $this->source->getOffHandInventory() ||
+			$inventory === $this->source->getCursorInventory() ||
+			$inventory === $this->source->getCraftingGrid();
 	}
 
 	/**

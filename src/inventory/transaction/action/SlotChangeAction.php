@@ -27,6 +27,7 @@ use pocketmine\inventory\Inventory;
 use pocketmine\inventory\SlotValidatedInventory;
 use pocketmine\inventory\transaction\TransactionValidationException;
 use pocketmine\item\Item;
+use pocketmine\item\ItemLockMode;
 use pocketmine\player\Player;
 
 /**
@@ -67,6 +68,9 @@ class SlotChangeAction extends InventoryAction{
 		}
 		if(!$this->inventory->getItem($this->inventorySlot)->equalsExact($this->sourceItem)){
 			throw new TransactionValidationException("Slot does not contain expected original item");
+		}
+		if($this->sourceItem->getLockMode() === ItemLockMode::LOCK_IN_SLOT && !$this->sourceItem->equalsExact($this->targetItem)){
+			throw new TransactionValidationException("Item is locked in slot and cannot be moved or replaced");
 		}
 		if($this->targetItem->getCount() > $this->targetItem->getMaxStackSize()){
 			throw new TransactionValidationException("Target item exceeds item type max stack size");
