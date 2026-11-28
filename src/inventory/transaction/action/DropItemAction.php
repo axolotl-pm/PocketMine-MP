@@ -26,6 +26,7 @@ namespace pocketmine\inventory\transaction\action;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\inventory\transaction\TransactionValidationException;
 use pocketmine\item\Item;
+use pocketmine\item\ItemLockMode;
 use pocketmine\item\VanillaItems;
 use pocketmine\player\Player;
 
@@ -41,6 +42,9 @@ class DropItemAction extends InventoryAction{
 	public function validate(Player $source) : void{
 		if($this->targetItem->isNull()){
 			throw new TransactionValidationException("Cannot drop an empty itemstack");
+		}
+		if($this->targetItem->getLockMode() !== ItemLockMode::NONE){
+			throw new TransactionValidationException("Locked items cannot be dropped");
 		}
 		if($this->targetItem->getCount() > $this->targetItem->getMaxStackSize()){
 			throw new TransactionValidationException("Target item exceeds item type max stack size");

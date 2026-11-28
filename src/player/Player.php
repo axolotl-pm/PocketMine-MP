@@ -2884,6 +2884,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 		}
 	}
 
+	public function isPermanentInventory(Inventory $inventory) : bool{
+		return isset($this->permanentWindows[spl_object_id($inventory)]);
+	}
+
 	protected function removePermanentInventories() : void{
 		foreach($this->permanentWindows as $inventory){
 			$inventory->onClose($this);

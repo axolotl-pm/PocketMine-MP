@@ -28,6 +28,7 @@ use pocketmine\inventory\Inventory;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Item;
+use pocketmine\item\ItemLockMode;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
 use function array_values;
@@ -257,6 +258,31 @@ class InventoryTransaction{
 		return $this->findResultItem($candidate->getTargetItem(), $newList);
 	}
 
+	protected function validateItemLocks() : void{
+		foreach($this->actions as $action){
+			if(!($action instanceof SlotChangeAction)){
+				continue;
+			}
+
+			$sourceItem = $action->getSourceItem();
+			$lockMode = $sourceItem->getLockMode();
+			if($lockMode === ItemLockMode::LOCK_IN_INVENTORY && $this->isPlayerInventory($action->getInventory())){
+				foreach($this->actions as $otherAction){
+					if($otherAction === $action || !($otherAction instanceof SlotChangeAction) || $this->isPlayerInventory($otherAction->getInventory())){
+						continue;
+					}
+					if($otherAction->getTargetItem()->canStackWith($sourceItem)){
+						throw new TransactionValidationException("Item is locked in inventory and cannot be moved between inventories");
+					}
+				}
+			}
+		}
+	}
+
+	protected function isPlayerInventory(Inventory $inventory) : bool{
+		return $this->source->isPermanentInventory($inventory);
+	}
+
 	/**
 	 * Verifies that the transaction can execute.
 	 *
@@ -264,6 +290,7 @@ class InventoryTransaction{
 	 */
 	public function validate() : void{
 		$this->squashDuplicateSlotChanges();
+		$this->validateItemLocks();
 
 		$haveItems = [];
 		$needItems = [];
