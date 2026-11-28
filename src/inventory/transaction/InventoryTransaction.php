@@ -280,11 +280,7 @@ class InventoryTransaction{
 	}
 
 	protected function isPlayerInventory(Inventory $inventory) : bool{
-		return $inventory === $this->source->getInventory() ||
-			$inventory === $this->source->getArmorInventory() ||
-			$inventory === $this->source->getOffHandInventory() ||
-			$inventory === $this->source->getCursorInventory() ||
-			$inventory === $this->source->getCraftingGrid();
+		return $this->source->isPermanentInventory($inventory);
 	}
 
 	/**
