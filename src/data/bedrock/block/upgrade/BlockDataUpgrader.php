@@ -25,9 +25,13 @@ namespace pocketmine\data\bedrock\block\upgrade;
 
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\BlockStateDeserializeException;
+use pocketmine\nbt\NbtException;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\VersionInfo;
 
 final class BlockDataUpgrader{
+	private const PM_5_27_INCORRECT_BLOCKSTATE_VERSION = (1 << 24) | (21 << 16) | (70 << 8) | 1;
+	private const PM_5_27_ACTUAL_BLOCKSTATE_VERSION = (1 << 24) | (21 << 16) | (60 << 8) | 33;
 
 	public function __construct(
 		private BlockIdMetaUpgrader $blockIdMetaUpgrader,
@@ -61,9 +65,30 @@ final class BlockDataUpgrader{
 		}else{
 			//Modern (post-1.13) blockstate
 			$blockStateData = BlockStateData::fromNbt($tag);
+			try{
+				$pmDataVersion = $tag->getLong(VersionInfo::TAG_WORLD_DATA_VERSION, 0);
+			}catch(NbtException $e){
+				throw new BlockStateDeserializeException($e->getMessage(), 0, $e);
+			}
+			$blockStateData = $this->fixupPMBugs($pmDataVersion, $blockStateData);
 		}
 
 		return $this->blockStateUpgrader->upgrade($blockStateData);
+	}
+
+	/**
+	 * Fixes known bugs in PM world data that were introduced in specific versions of PM.
+	 */
+	private function fixupPMBugs(int $pmDataVersion, BlockStateData $blockStateData) : BlockStateData{
+		switch($pmDataVersion){
+			case 1:
+				//PM 5.27.x saved 1.21.70.1 as the blockstate version, but the blockstate data is 1.21.60.33 (fixed in pmmp/PocketMine-MP@5e830c732)
+				if($blockStateData->getVersion() === self::PM_5_27_INCORRECT_BLOCKSTATE_VERSION){
+					return new BlockStateData($blockStateData->getName(), $blockStateData->getStates(), self::PM_5_27_ACTUAL_BLOCKSTATE_VERSION);
+				}
+				break;
+		}
+		return $blockStateData;
 	}
 
 	public function getBlockStateUpgrader() : BlockStateUpgrader{ return $this->blockStateUpgrader; }
