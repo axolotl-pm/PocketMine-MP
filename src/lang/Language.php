@@ -26,23 +26,30 @@ namespace pocketmine\lang;
 use pocketmine\utils\Utils;
 use Symfony\Component\Filesystem\Path;
 use function array_filter;
-use function array_map;
 use function count;
 use function explode;
+use function file;
 use function file_exists;
+use function is_array;
 use function is_dir;
+use function is_string;
 use function max;
 use function ord;
 use function parse_ini_file;
+use function restore_error_handler;
 use function scandir;
+use function set_error_handler;
 use function str_contains;
 use function str_ends_with;
 use function str_replace;
 use function str_starts_with;
+use function stripcslashes;
 use function strlen;
 use function strpos;
 use function strtolower;
 use function substr;
+use function trim;
+use const FILE_IGNORE_NEW_LINES;
 use const INI_SCANNER_RAW;
 use const SCANDIR_SORT_NONE;
 
@@ -101,6 +108,21 @@ class Language{
 	 * @phpstan-var array<string, string>
 	 */
 	protected array $fallbackLang = [];
+	/**
+	 * @var string[]
+	 * @phpstan-var array<string, string>
+	 */
+	private array $serverLanguageOverrides = [];
+	/**
+	 * @var string[]
+	 * @phpstan-var array<string, string>
+	 */
+	private array $fallbackLanguageOverrides = [];
+	/**
+	 * @var string[]
+	 * @phpstan-var array<string, string>
+	 */
+	private array $registeredTranslationOverrides = [];
 
 	/**
 	 * @throws LanguageNotFoundException
@@ -125,19 +147,94 @@ class Language{
 	}
 
 	/**
+	 * Registers an override for this language instance.
+	 * Overrides registered here take precedence over server and bundled translations.
+	 *
+	 * @param string $id Translation key
+	 */
+	public function registerTranslationOverride(string $id, string $translation) : void{
+		$this->registeredTranslationOverrides[$id] = $translation;
+	}
+
+	/**
+	 * @internal
+	 * @phpstan-param array<string, string> $languageOverrides
+	 * @phpstan-param array<string, string> $fallbackOverrides
+	 */
+	public function setServerTranslationOverrides(array $languageOverrides, array $fallbackOverrides) : void{
+		$this->serverLanguageOverrides = $languageOverrides;
+		$this->fallbackLanguageOverrides = $fallbackOverrides;
+	}
+
+	/**
 	 * @return string[]
 	 * @phpstan-return array<string, string>
 	 */
 	protected static function loadLang(string $path, string $languageCode) : array{
 		$file = Path::join($path, $languageCode . ".ini");
 		if(file_exists($file)){
-			$strings = array_map('stripcslashes', Utils::assumeNotFalse(parse_ini_file($file, false, INI_SCANNER_RAW), "Missing or inaccessible required resource files"));
+			$strings = self::normalizeTranslationStrings(Utils::assumeNotFalse(parse_ini_file($file, false, INI_SCANNER_RAW), "Missing or inaccessible required resource files"));
 			if(count($strings) > 0){
 				return $strings;
 			}
 		}
 
 		throw new LanguageNotFoundException("Language \"$languageCode\" not found");
+	}
+
+	/**
+	 * @param mixed[] $strings
+	 * @phpstan-param array<array-key, mixed> $strings
+	 * @return string[]
+	 * @phpstan-return array<string, string>
+	 */
+	private static function normalizeTranslationStrings(array $strings) : array{
+		$result = [];
+		foreach(Utils::promoteKeys($strings) as $key => $string){
+			if(!is_string($key) || !is_string($string)){
+				throw new \RuntimeException("Translation entries must have string keys and values");
+			}
+			$result[$key] = stripcslashes($string);
+		}
+		return $result;
+	}
+
+	/**
+	 * @internal
+	 * @return string[]
+	 * @phpstan-return array<string, string>
+	 */
+	public static function loadOverrideFile(string $path) : array{
+		if(!file_exists($path)){
+			return [];
+		}
+
+		set_error_handler(static function(int $severity, string $message, string $file, int $line) : bool{
+			throw new \ErrorException($message, 0, $severity, $file, $line);
+		});
+		try{
+			$strings = parse_ini_file($path, false, INI_SCANNER_RAW);
+			$lines = file($path, FILE_IGNORE_NEW_LINES);
+			if($lines === false){
+				throw new \RuntimeException("Failed to read translation override file");
+			}
+			foreach($lines as $lineNumber => $line){
+				$line = trim($line);
+				if($line === "" || str_starts_with($line, ";") || str_starts_with($line, "#")){
+					continue;
+				}
+				if(!str_contains($line, "=")){
+					throw new \RuntimeException("Invalid translation override entry on line " . ($lineNumber + 1) . ". Expected key=value.");
+				}
+			}
+		}finally{
+			restore_error_handler();
+		}
+		if(!is_array($strings)){
+			throw new \RuntimeException("Failed to parse translation override file");
+		}
+
+		return self::normalizeTranslationStrings($strings);
 	}
 
 	private function getUsedParameterCount(string $rawString, int $given) : int{
@@ -189,7 +286,12 @@ class Language{
 	}
 
 	protected function internalGet(string $id) : ?string{
-		return $this->lang[$id] ?? $this->fallbackLang[$id] ?? null;
+		return $this->registeredTranslationOverrides[$id]
+			?? $this->serverLanguageOverrides[$id]
+			?? $this->lang[$id]
+			?? $this->fallbackLanguageOverrides[$id]
+			?? $this->fallbackLang[$id]
+			?? null;
 	}
 
 	public function get(string $id) : string{
