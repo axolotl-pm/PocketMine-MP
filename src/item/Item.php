@@ -233,18 +233,13 @@ class Item implements \JsonSerializable{
 		}
 	}
 
-	/**
-	 * @return ItemLockMode
-	 */
 	public function getLockMode() : ItemLockMode{
 		return $this->lockMode;
 	}
 
-	/**
-	 * @param ItemLockMode $lockMode
-	 */
-	public function setLockMode(ItemLockMode $lockMode) : void{
+	public function setLockMode(ItemLockMode $lockMode) : self{
 		$this->lockMode = $lockMode;
+		return $this;
 	}
 
 	/**

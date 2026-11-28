@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
-enum ItemLockMode : int{
+enum ItemLockMode: int{
 	case NONE = 0;
 	case LOCK_IN_SLOT = 1;
 	case LOCK_IN_INVENTORY = 2;
