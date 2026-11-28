@@ -347,6 +347,26 @@ class Server{
 		return $this->dataPath;
 	}
 
+	private function loadTranslationOverrides(Language $language) : void{
+		$directory = Path::join($this->dataPath, "language_overrides");
+		$languageOverrides = $this->loadTranslationOverrideFile(Path::join($directory, $language->getLang() . ".ini"));
+		$fallbackOverrides = $language->getLang() === Language::FALLBACK_LANGUAGE ? [] : $this->loadTranslationOverrideFile(Path::join($directory, Language::FALLBACK_LANGUAGE . ".ini"));
+		$language->setServerTranslationOverrides($languageOverrides, $fallbackOverrides);
+	}
+
+	/**
+	 * @return string[]
+	 * @phpstan-return array<string, string>
+	 */
+	private function loadTranslationOverrideFile(string $path) : array{
+		try{
+			return Language::loadOverrideFile($path);
+		}catch(\Throwable $e){
+			$this->logger->warning("Failed to load translation overrides from \"$path\": " . $e->getMessage());
+			return [];
+		}
+	}
+
 	public function getPluginPath() : string{
 		return $this->pluginPath;
 	}
@@ -870,6 +890,7 @@ class Server{
 					return;
 				}
 			}
+			$this->loadTranslationOverrides($this->language);
 
 			$this->logger->info($this->language->translate(KnownTranslationFactory::language_selected($this->language->getName(), $this->language->getLang())));
 

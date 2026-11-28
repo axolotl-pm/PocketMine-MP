@@ -26,5 +26,20 @@ This will generate a function that you can use to create a parameterised `Transl
 
 Crowdin will synchronize `eng.ini` every time it's updated on `stable`, `minor-next` and `major-next` to put up new strings for translation.
 
+## Server translation overrides
+To override selected translations for one server, put sparse `.ini` files in the server data directory's `language_overrides` folder. Name each file with its language code, such as `eng.ini` or `fra.ini`, and use translation keys as entries.
+
+For example, `vie.ini` can contain:
+
+```ini
+pocketmine.player.logIn="{%0} joined the server."
+```
+
+For a selected language, overrides are checked before its bundled translations. The bundled selected language is checked before `eng.ini` overrides, and bundled English is the final fallback. Missing files are ignored. Invalid files produce a warning and are ignored.
+
+Plugins can register an override for the active language in `onEnable()` with `$this->getServer()->getLanguage()->registerTranslationOverride($key, $translation)`. Overrides registered by plugins take precedence over file and bundled translations.
+
+When `settings.force-language` is disabled, vanilla translations sent to the client are still translated by each player's client language.
+
 ### Pitfalls
 - If you have issues with translation files being deleted, add a language mapping in the Crowdin config. Some issues arose with Chinese due to Chinese Simplified and Chinese Traditional both mapping to `zho`, requiring a mapping to `zho-cn` for simplified.
